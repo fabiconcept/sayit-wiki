@@ -1,0 +1,87 @@
+import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { useMemo } from "react";
+
+interface NeoButtonBaseProps {
+    children: React.ReactNode;
+    className?: string;
+    element?: "button" | "a" | "div";
+}
+
+interface ButtonProps extends NeoButtonBaseProps {
+    onClick?: () => void;
+    element: "button";
+    disabled?: boolean;
+}
+
+interface LinkProps extends NeoButtonBaseProps {
+    element: "a";
+    href: string;
+    disabled?: boolean;
+}
+
+interface DivProps extends NeoButtonBaseProps {
+    onClick?: () => void;
+    element: "div";
+}
+
+type NeoButtonProps = ButtonProps | LinkProps | DivProps;
+
+
+export default function NeoButton({ children, ...props }: NeoButtonProps) {
+    const content = (
+        <>
+            <div className="absolute top-0 left-0 h-full w-full overflow-hidden z-0 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-[120%] object-contain">
+                    <filter id="filter">
+                        <feTurbulence baseFrequency=".002 .02" numOctaves="9" result="n" />
+                        <feDiffuseLighting surfaceScale="9" lightingColor="#BA8C63">
+                            <feDistantLight elevation="60" azimuth="-90" />
+                        </feDiffuseLighting>
+                        <feDisplacementMap in2="n" scale="10" />
+                    </filter>
+                    <rect width="100%" height="100%" filter="url(#filter)" />
+                </svg>
+            </div>
+            <div className={cn("platform absolute top-0 left-0 z-10", props.className?.includes("no-hover") ? "no-hover" : "")}>
+                <div className="platform-outer border-4 border-foreground/5 relative h-full w-full">
+                    <div className={cn("platform-inner relative h-full w-full", props.className)}>
+                        {children}
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+
+    const baseClassName = cn(
+        "min-w-16 h-fit relative rounded-full z-50 cursor-pointer",
+        props.className?.includes("cursor-default") ? "" : "focus:outline-4 focus:outline-background/25 focus:outline-offset-1 focus:outline-dotted focus:brightness-125 dark:focus:brightness-110 select-none hover:brightness-125 transition-all duration-300",
+        props.className?.includes("selected") ? "outline-4 outline-background/25 outline-offset-1 outline-dotted brightness-125 select-none brightness-125 transition-all duration-300" : "",
+    );
+
+    if (props.element === "button") {
+        return (
+            <button
+                onClick={props.onClick}
+                disabled={props.disabled}
+                className={baseClassName}
+            >
+                {content}
+            </button>
+        );
+    }
+
+    if (props.element === "a") {
+        return (
+            <Link href={props.href} className={baseClassName}>
+                {content}
+            </Link>
+        );
+    }
+
+    return (
+        <div onClick={props.onClick} className={baseClassName}>
+            {content}
+        </div>
+    );
+}
