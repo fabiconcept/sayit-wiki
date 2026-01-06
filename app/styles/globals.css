@@ -1,8 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 * {
   transition: background-color 0.15s ease-in-out, opacity 0.3s ease;
+  font-family: "Finger Paint", sans-serif;
+  font-style: normal;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -10,8 +13,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-finger-paint);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,6 +53,9 @@
 }
 
 :root {
+  --animation-duration: 0.8s;
+  --circle-diameter: 50px;
+  --circle-scale-percent: 0.2;
   --radius: 0.625rem;
   --wooden-color: rgba(166, 87, 12, 0.75);
   --background: oklch(95.64% 0.003 48.72);
@@ -143,9 +148,88 @@
 }
 
 .wooden {
-  /* background-color: rgba(166, 87, 12, 0.75); */
   background-color: var(--wooden-color);
   background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
   background-size: 400px 100px;
   background-position: -6rem 0;
+}
+
+.loader {
+  position: relative;
+  width: 108px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.loader::after,
+.loader::before {
+  content: '';
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background-color: #FFF;
+  background-image: radial-gradient(circle 14px, #000 100%, transparent 0);
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  animation: eyeMove 10s infinite;
+  box-shadow: inset 0 0px 4px rgba(27, 18, 5, 0.75),inset 0 4px 2px rgba(27, 18, 5, 0.75);
+}
+
+@keyframes eyeMove {
+
+  0%,
+  10% {
+    background-position: 0px 0px
+  }
+
+  13%,
+  40% {
+    background-position: -15px 0px
+  }
+
+  43%,
+  70% {
+    background-position: 15px 0px
+  }
+
+  73%,
+  90% {
+    background-position: 0px 15px
+  }
+
+  93%,
+  100% {
+    background-position: 0px 0px
+  }
+}
+
+@keyframes blink {
+
+  0%,
+  10%,
+  12%,
+  20%,
+  22%,
+  40%,
+  42%,
+  60%,
+  62%,
+  70%,
+  72%,
+  90%,
+  92%,
+  98%,
+  100% {
+    height: 48px
+  }
+
+  11%,
+  21%,
+  41%,
+  61%,
+  71%,
+  91%,
+  99% {
+    height: 18px
+  }
 }

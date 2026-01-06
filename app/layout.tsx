@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Finger_Paint } from "next/font/google";
 import "./styles/globals.css";
 import "./styles/neomorphs.css";
 import Header from "@/components/header";
 import ThemeProvider from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const fingerPaint = Finger_Paint({
+    variable: "--font-finger-paint",
     subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
+    weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +25,7 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen dotted wooden`}
+                className={`${fingerPaint.variable} antialiased min-h-screen dotted wooden`}
             >
                 <ThemeProvider>
                     <Header />

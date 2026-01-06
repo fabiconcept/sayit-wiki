@@ -8,11 +8,12 @@ import WoodenPlatform from "./WoodenPlatform";
 
 export default function Header() {
     return (
-        <header className="w-full relative p-5 flex flex-row gap-5 justify-between drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)]">
+        <header className="w-full p-5 flex flex-row gap-5 justify-between drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)] sticky top-0 z-50">
             <WoodenPlatform className="w-fit h-full relative rounded-3xl">
 
                 <AnimateIcon animateOnHover="wiggle" loop={true}>
                     <div className="md:px-5 px-3 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                        <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                         <NeoButton element="div" className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3 cursor-default no-hover">
                             <div className="flex items-center gap-2">
                                 <MessageSquareQuote strokeWidth={2.5} className="md:w-6 text-black sm:h-6 w-5 h-5 max-sm:hidden scale-125" />
@@ -25,7 +26,7 @@ export default function Header() {
             </WoodenPlatform>
 
             <WoodenPlatform className="w-fit h-full relative rounded-3xl">
-
+                <div className="absolute wooden inset-0 rounded-full m-2 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                 <nav className="md:px-5 px-3 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                     {Object.values(PageNames).map((PageName) => (
                         <AnimateIcon key={PageName.name} animateOnHover="wiggle" loop={true} >

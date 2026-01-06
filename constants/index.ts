@@ -15,7 +15,7 @@ export const PageNames: Record<string, Page> = {
         icon: PinIcon,
     },
     globalWiki: {
-        name: "Global Wiki",
+        name: "Globe Wall",
         description: "Global Wiki is a place where you can share your knowledge with the world.",
         icon: RadioIcon,
     },
