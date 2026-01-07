@@ -2,7 +2,9 @@
 import { useResized } from "@/hooks/use-resized";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
-import NoteCard, { NoteCardProps } from "./NoteCard";
+import NoteCard from "./NoteCard";
+import { NoteCardProps } from "@/types/note";
+import { AnimatePresence } from "framer-motion";
 
 interface MasonaryProps {
     items: NoteCardProps[];
@@ -15,7 +17,7 @@ export default function Masonary({ items }: MasonaryProps) {
         if (!width) return null;
         if (items.length === 0) return null;
 
-        const columnsToRender = Math.floor(((width-100) / 250) * 0.9);
+        const columnsToRender = Math.floor(((width - 100) / 250) * 0.9);
 
         // Create array of empty arrays for each column
         const columnItems: NoteCardProps[][] = Array.from(
@@ -31,15 +33,17 @@ export default function Masonary({ items }: MasonaryProps) {
 
         return columnItems.map((columnData, index) => (
             <MasonaryColumn key={index}>
-                {columnData.map((item, itemIndex) => (
-                    <NoteCard key={item.id || itemIndex} {...item} />
-                ))}
+                <AnimatePresence mode="wait">
+                    {columnData.map((item, itemIndex) => (
+                        <NoteCard key={item.id || itemIndex} {...item} editable={false} />
+                    ))}
+                </AnimatePresence>
             </MasonaryColumn>
         ));
     }, [width, items]);
 
     return (
-        <div className={cn("flex gap-7 mx-auto p-5 px-10 w-full")}>
+        <div className={cn("flex gap-8 mx-auto p-5 px-10 w-full")}>
             {columns}
         </div>
     )
@@ -47,7 +51,7 @@ export default function Masonary({ items }: MasonaryProps) {
 
 function MasonaryColumn({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex flex-col gap-5 flex-1">
+        <div className="flex flex-col gap-8 flex-1">
             {children}
         </div>
     )

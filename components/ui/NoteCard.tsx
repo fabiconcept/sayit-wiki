@@ -1,140 +1,412 @@
 "use client";
-import React, { useRef } from 'react';
-import Clip from "./Clip";
-import { cn } from '@/lib/utils';
-
-export enum ClipType {
-    PIN = "pin",
-    CLIP = "clip",
-    TAPE = "tape",
-    NAIL = "nail",
-}
-
-export interface NoteCardProps {
-    id: string;
-    clipType: ClipType;
-    backgroundColor: string;
-    timestamp: string;
-    content: string;
-    likesCount: number;
-    commentsCount: number;
-    viewsCount: number;
-    isLiked: boolean;
-    isCommented: boolean;
-    isViewed: boolean;
-    showRedLine?: boolean;
-    selectedFont: string;
-    onContentChange?: (id: string, content: string) => void;
-}
-
+import React, { useEffect, useRef } from 'react';
+import Clip, { ClipType } from "./Clip";
+import { cn, countTextLines, darkenHex, intensifyHex } from '@/lib/utils';
+import '@/app/styles/notes.css';
+import { NoteCardProps, NoteStyle } from '@/types/note';
+import WoodenPlatform from '../WoodenPlatform';
+import { useTheme } from 'next-themes';
 
 const NotebookPaper: React.FC<NoteCardProps> = ({
     id,
     clipType,
+    editable = true,
+    noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
     timestamp,
     content,
     likesCount,
     commentsCount,
     viewsCount,
+    tilt,
     isLiked,
     isCommented,
     isViewed,
-    showRedLine = !false,
+    showRedLine = true,
+    showLines = true,
     onContentChange,
     selectedFont
 }) => {
+    const { theme } = useTheme();
+    const isDark = theme === "dark";
     const textRef = useRef<HTMLDivElement>(null);
-
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const maxWidth = "450px";
     const minHeight = "50px";
+    const maxLines = 10;
 
-    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-        const newText = e.currentTarget.textContent || '';
+    // Function to limit word length to 20 characters
+    const limitWordLength = (text: string): string => {
+        return text.split(/(\s+)/).map(word => {
+            // Preserve whitespace
+            if (/^\s+$/.test(word)) return word;
+
+            // If word is longer than 20 chars, insert hyphens
+            if (word.length > 20) {
+                const chunks = [];
+                for (let i = 0; i < word.length; i += 20) {
+                    chunks.push(word.slice(i, i + 20));
+                }
+                return chunks.join('-');
+            }
+            return word;
+        }).join('');
+    };
+
+    // Function to limit number of lines
+    const limitLines = (text: string, element: HTMLTextAreaElement | null): string => {
+        if (!element) return text;
+
+        // Temporarily set the value to count lines
+        const originalValue = element.value;
+        element.value = text;
+        const lines = countTextLines(element);
+        element.value = originalValue;
+
+        if (lines > maxLines) {
+            const splitTextLines = text.split('\n');
+            return splitTextLines.slice(0, maxLines).join('\n');
+        }
+        return text;
+    };
+
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        let newText = e.target.value;
+
+        // Apply word length limiting
+        newText = limitWordLength(newText);
+
+        // Apply line limiting - pass the textarea element
+        newText = limitLines(newText, textAreaRef.current);
+
+        // Only update if the text changed after limiting
+        if (newText !== e.target.value) {
+            e.target.value = newText;
+            // Restore cursor position to end
+            e.target.selectionStart = e.target.selectionEnd = newText.length;
+        }
+
         if (onContentChange) {
             onContentChange(id, newText);
         }
     };
 
-    const handlePaste = (e: React.ClipboardEvent) => {
+    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
-        document.execCommand('insertText', false, text);
+        let text = e.clipboardData.getData('text/plain');
+
+        // Apply word length limiting
+        text = limitWordLength(text);
+
+        // Get current cursor position and existing text
+        const target = e.currentTarget;
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+        const currentText = target.value;
+
+        // Construct new text with paste
+        const beforeCursor = currentText.substring(0, start);
+        const afterCursor = currentText.substring(end);
+        let newText = beforeCursor + text + afterCursor;
+
+        // Apply line limiting
+        newText = limitLines(newText, textAreaRef.current);
+
+        // Use modern approach instead of deprecated execCommand
+        target.value = newText;
+
+        // Set cursor position after pasted content
+        const newCursorPos = Math.min(beforeCursor.length + text.length, newText.length);
+        target.selectionStart = target.selectionEnd = newCursorPos;
+
+        // Trigger change event
+        if (onContentChange) {
+            onContentChange(id, newText);
+        }
     };
 
+    const getClipPathStyle = () => {
+        switch (noteStyle) {
+            case NoteStyle.SPIRAL_TOP:
+                return {
+                    clipPath: `polygon(
+                        0 0,
+                        0 8px, 5% 8px, 5% 0,
+                        10% 0, 10% 8px, 15% 8px, 15% 0,
+                        20% 0, 20% 8px, 25% 8px, 25% 0,
+                        30% 0, 30% 8px, 35% 8px, 35% 0,
+                        40% 0, 40% 8px, 45% 8px, 45% 0,
+                        50% 0, 50% 8px, 55% 8px, 55% 0,
+                        60% 0, 60% 8px, 65% 8px, 65% 0,
+                        70% 0, 70% 8px, 75% 8px, 75% 0,
+                        80% 0, 80% 8px, 85% 8px, 85% 0,
+                        90% 0, 90% 8px, 95% 8px, 95% 0,
+                        100% 0, 100% 100%, 0 100%
+                    )`
+                };
+
+            case NoteStyle.SPIRAL_BOTTOM:
+                return {
+                    clipPath: `polygon(
+                        0 0, 100% 0, 100% 100%,
+                        100% calc(100% - 8px), 95% calc(100% - 8px), 95% 100%,
+                        90% 100%, 90% calc(100% - 8px), 85% calc(100% - 8px), 85% 100%,
+                        80% 100%, 80% calc(100% - 8px), 75% calc(100% - 8px), 75% 100%,
+                        70% 100%, 70% calc(100% - 8px), 65% calc(100% - 8px), 65% 100%,
+                        60% 100%, 60% calc(100% - 8px), 55% calc(100% - 8px), 55% 100%,
+                        50% 100%, 50% calc(100% - 8px), 45% calc(100% - 8px), 45% 100%,
+                        40% 100%, 40% calc(100% - 8px), 35% calc(100% - 8px), 35% 100%,
+                        30% 100%, 30% calc(100% - 8px), 25% calc(100% - 8px), 25% 100%,
+                        20% 100%, 20% calc(100% - 8px), 15% calc(100% - 8px), 15% 100%,
+                        10% 100%, 10% calc(100% - 8px), 5% calc(100% - 8px), 5% 100%,
+                        0 100%
+                    )`
+                };
+
+            case NoteStyle.SPIRAL_LEFT:
+                return {
+                    clipPath: `polygon(
+                        0 0, 8px 0, 8px 5%, 0 5%,
+                        0 10%, 8px 10%, 8px 15%, 0 15%,
+                        0 20%, 8px 20%, 8px 25%, 0 25%,
+                        0 30%, 8px 30%, 8px 35%, 0 35%,
+                        0 40%, 8px 40%, 8px 45%, 0 45%,
+                        0 50%, 8px 50%, 8px 55%, 0 55%,
+                        0 60%, 8px 60%, 8px 65%, 0 65%,
+                        0 70%, 8px 70%, 8px 75%, 0 75%,
+                        0 80%, 8px 80%, 8px 85%, 0 85%,
+                        0 90%, 8px 90%, 8px 95%, 0 95%,
+                        0 100%, 100% 100%, 100% 0
+                    )`
+                };
+
+            case NoteStyle.SPIRAL_RIGHT:
+                return {
+                    clipPath: `polygon(
+                        0 0, 100% 0,
+                        100% 5%, calc(100% - 8px) 5%, calc(100% - 8px) 0,
+                        100% 10%, calc(100% - 8px) 10%, calc(100% - 8px) 15%, 100% 15%,
+                        100% 20%, calc(100% - 8px) 20%, calc(100% - 8px) 25%, 100% 25%,
+                        100% 30%, calc(100% - 8px) 30%, calc(100% - 8px) 35%, 100% 35%,
+                        100% 40%, calc(100% - 8px) 40%, calc(100% - 8px) 45%, 100% 45%,
+                        100% 50%, calc(100% - 8px) 50%, calc(100% - 8px) 55%, 100% 55%,
+                        100% 60%, calc(100% - 8px) 60%, calc(100% - 8px) 65%, 100% 65%,
+                        100% 70%, calc(100% - 8px) 70%, calc(100% - 8px) 75%, 100% 75%,
+                        100% 80%, calc(100% - 8px) 80%, calc(100% - 8px) 85%, 100% 85%,
+                        100% 90%, calc(100% - 8px) 90%, calc(100% - 8px) 95%, 100% 95%,
+                        100% 100%, 0 100%
+                    )`
+                };
+
+            case NoteStyle.TORN_TOP:
+                return {
+                    clipPath: `polygon(
+                        0 0, 2% 1.5%, 5% 0.5%, 8% 2%, 12% 1%, 15% 2.5%, 18% 1.5%, 22% 3%, 
+                        25% 2%, 28% 3.5%, 32% 2.5%, 35% 4%, 38% 3%, 42% 4.5%, 45% 3.5%, 
+                        48% 5%, 52% 4%, 55% 5.5%, 58% 4.5%, 62% 6%, 65% 5%, 68% 6.5%, 
+                        72% 5.5%, 75% 7%, 78% 6%, 82% 7.5%, 85% 6.5%, 88% 8%, 92% 7%, 
+                        95% 8.5%, 98% 7.5%, 100% 9%, 100% 100%, 0 100%
+                    )`
+                };
+
+            case NoteStyle.TORN_BOTTOM:
+                return {
+                    clipPath: `polygon(
+                        0 0, 100% 0, 100% 91%, 98% 92.5%, 95% 91.5%, 92% 93%, 88% 92%, 
+                        85% 93.5%, 82% 92.5%, 78% 94%, 75% 93%, 72% 94.5%, 68% 93.5%, 
+                        65% 95%, 62% 94%, 58% 95.5%, 55% 94.5%, 52% 96%, 48% 95%, 
+                        45% 96.5%, 42% 95.5%, 38% 97%, 35% 96%, 32% 97.5%, 28% 96.5%, 
+                        25% 98%, 22% 97%, 18% 98.5%, 15% 97.5%, 12% 99%, 8% 98%, 
+                        5% 99.5%, 2% 98.5%, 0 100%
+                    )`
+                };
+
+            case NoteStyle.TORN_LEFT:
+                return {
+                    clipPath: `polygon(
+                        0 0, 1.5% 2%, 0.5% 5%, 2% 8%, 1% 12%, 2.5% 15%, 1.5% 18%, 3% 22%, 
+                        2% 25%, 3.5% 28%, 2.5% 32%, 4% 35%, 3% 38%, 4.5% 42%, 3.5% 45%, 
+                        5% 48%, 4% 52%, 5.5% 55%, 4.5% 58%, 6% 62%, 5% 65%, 6.5% 68%, 
+                        5.5% 72%, 7% 75%, 6% 78%, 7.5% 82%, 6.5% 85%, 8% 88%, 7% 92%, 
+                        8.5% 95%, 7.5% 98%, 9% 100%, 100% 100%, 100% 0
+                    )`
+                };
+
+            case NoteStyle.TORN_RIGHT:
+                return {
+                    clipPath: `polygon(
+                        0 0, 100% 0, 98.5% 2%, 99.5% 5%, 98% 8%, 99% 12%, 97.5% 15%, 
+                        98.5% 18%, 97% 22%, 98% 25%, 96.5% 28%, 97.5% 32%, 96% 35%, 
+                        97% 38%, 95.5% 42%, 96.5% 45%, 95% 48%, 96% 52%, 94.5% 55%, 
+                        95.5% 58%, 94% 62%, 95% 65%, 93.5% 68%, 94.5% 72%, 93% 75%, 
+                        94% 78%, 92.5% 82%, 93.5% 85%, 92% 88%, 93% 92%, 91.5% 95%, 
+                        92.5% 98%, 91% 100%, 0 100%
+                    )`
+                };
+
+            case NoteStyle.STICKY_NOTE:
+                return {
+                    borderRadius: '0px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1), inset 0 -40px 40px -40px rgba(0,0,0,0.1)',
+                };
+
+            case NoteStyle.POLAROID:
+                return {
+                    padding: '15px',
+                    paddingTop: '0px',
+                    paddingBottom: '40px',
+                };
+
+            case NoteStyle.CURVED_BOTTOM:
+                return {
+                    clipPath: 'ellipse(100% 100% at 50% 0%)',
+                    borderRadius: '8px 8px 0 0',
+                };
+
+            case NoteStyle.CURVED_TOP:
+                return {
+                    clipPath: 'ellipse(100% 100% at 50% 100%)',
+                    borderRadius: '0 0 8px 8px',
+                };
+
+            case NoteStyle.FOLDED_CORNER_TR:
+                return {
+                    clipPath: 'polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 0 100%)',
+                };
+
+            case NoteStyle.FOLDED_CORNER_TL:
+                return {
+                    clipPath: 'polygon(40px 0, 100% 0, 100% 100%, 0 100%, 0 40px)',
+                };
+
+            case NoteStyle.FOLDED_CORNER_BR:
+                return {
+                    clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%)',
+                };
+
+            case NoteStyle.FOLDED_CORNER_BL:
+                return {
+                    clipPath: 'polygon(0 0, 100% 0, 100% 100%, 40px 100%, 0 calc(100% - 40px))',
+                };
+            default:
+                return {};
+        }
+    };
+
+    const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
+
     return (
-        <div className={cn("relative", selectedFont)}>
-            <div style={{
-                ...styles.paper,
-                maxWidth,
-                minHeight,
-                backgroundColor,
-                borderColor: backgroundColor,
-            }}>
-                {showRedLine && <div style={styles.redMargin} />}
-                <div style={styles.lines}>
-                    <div
-                        ref={textRef}
-                        contentEditable={true}
-                        suppressContentEditableWarning
-                        spellCheck={false}
-                        style={{
-                            marginLeft: showRedLine ? '55px' : '20px',
-                            ...styles.text,
-                        }}
-                        onInput={handleInput}
-                        onPaste={handlePaste}
-                    >
-                        {content}
-                    </div>
+        <div
+            className={cn("relative group cursor-text", selectedFont)}
+            onClick={() => {
+                if (!textAreaRef.current) return;
+                textAreaRef.current.focus();
+            }}
+        >
+            <div
+                className={cn(
+                    "transform-gpu paper origin-top relative",
+                    noteStyle === NoteStyle.FOLDED_CORNER_TR ? `
+                        after:content-[''] after:z-30 after:absolute after:top-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
+                    ` : "",
+                    noteStyle === NoteStyle.FOLDED_CORNER_BR ? `
+                        after:content-[''] after:z-30 after:absolute after:bottom-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[5px_-5px_10px_rgba(0,0,0,0.05),2px_-2px_5px_rgba(0,0,0,0.2)]
+                    ` : "",
+                    noteStyle === NoteStyle.FOLDED_CORNER_TL ? `
+                        after:content-[''] after:z-30 after:absolute after:top-0 after:left-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
+                    ` : "",
+                    noteStyle === NoteStyle.FOLDED_CORNER_BL ? `
+                        after:content-[''] after:z-30 after:absolute after:bottom-0 after:left-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[5px_-5px_10px_rgba(0,0,0,0.05),2px_-2px_5px_rgba(0,0,0,0.2)]
+                    ` : "",
+                )}
+                style={{
+                    maxWidth,
+                    minHeight,
+                    backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
+                    borderColor: isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
+                    '--rotater': !editable ? `${tilt * 0.8}deg` : '0deg',
+                    '--selected-bg': isDark ? darkenHex(backgroundColor as `#${string}`, 30) : darkenHex(backgroundColor as `#${string}`, 50),
+                    ...getClipPathStyle() as unknown as React.CSSProperties,
+                } as React.CSSProperties}
+            >
+                {noteStyle === NoteStyle.POLAROID && <div
+                    className="absolute top-0 left-0 h-full w-full z-20 wooden-heavy brightness-90"
+                    style={{
+                        clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
+                    }}
+                />}
+                {noteStyle === NoteStyle.POLAROID && <div className={cn(
+                    "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
+                    `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
+                )} />}
+                {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
+                    <div className='redMargin' />
+                )}
+                <div
+                    className={cn('lines')}
+                    style={noteStyle === NoteStyle.STICKY_NOTE ? {
+                        backgroundImage: 'none',
+                    } : {
+                        backgroundImage: showLines
+                            ? 'repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px)'
+                            : 'none',
+                    }}
+                >
+                    {editable ?
+                        <textarea
+                            defaultValue={content}
+                            ref={textAreaRef}
+                            className='text resize-none field-sizing-content'
+                            style={{
+                                marginLeft,
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                            }}
+                            rows={10}
+                            onChange={handleTextareaChange}
+                            onPaste={handlePaste}
+                            aria-label="Editable note content"
+                            aria-multiline="true"
+                        />
+                        :
+                        <article
+                            ref={textRef}
+                            contentEditable={false}
+                            suppressContentEditableWarning
+                            spellCheck={false}
+                            className='text'
+                            style={{
+                                marginLeft,
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                            }}
+                            role="article"
+                            aria-label="Note content"
+                            aria-readonly="true"
+                        >
+                            {content}
+                        </article>
+                    }
+                    {!editable && clipType !== ClipType.PIN && <Clip
+                        type={clipType}
+                        init={tilt < 0 ? 1 : 0}
+                        noteStyle={noteStyle}
+                        className={cn(
+                            "pointer-events-none",
+                            noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
+                        )}
+                    />}
                 </div>
             </div>
-            <Clip />
+            {!editable && clipType === ClipType.PIN && <Clip
+                type={ClipType.PIN}
+                className={cn(
+                    "pointer-events-none",
+                    noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
+                )}
+            />}
         </div>
     );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-    paper: {
-        position: 'relative',
-        width: '100%',
-        background: 'rgba(255, 255, 255, 0.95)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
-        borderRadius: '2px',
-        overflow: 'hidden',
-        transition: 'transform 0.3s ease',
-        fontFamily: "'Indie Flower', cursive"
-    },
-    redMargin: {
-        position: 'absolute',
-        left: '45px',
-        top: 0,
-        height: '100%',
-        width: '2px',
-        background: 'rgba(255, 0, 0, 0.35)',
-        pointerEvents: 'none',
-        zIndex: 2
-    },
-    lines: {
-        marginTop: '40px',
-        minHeight: 'calc(100% - 40px)',
-        width: '100%',
-        backgroundImage: 'repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px)',
-        paddingBottom: '40px'
-    },
-    text: {
-        marginTop: '25px',
-        marginRight: '20px',
-        marginBottom: '20px',
-        lineHeight: '25px',
-        fontSize: '1rem',
-        color: '#2c3e50',
-        outline: 'none',
-        minHeight: '200px',
-        wordWrap: 'break-word',
-        cursor: 'text',
-        whiteSpace: 'pre-wrap'
-    }
 };
 
 export default NotebookPaper;

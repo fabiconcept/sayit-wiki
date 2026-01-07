@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
-export default function WoodenPlatform({ children, className }: { children: React.ReactNode, className?: string }) {
+export default function WoodenPlatform({ children, className, style }: { children: React.ReactNode, className?: string, style?: React.CSSProperties }) {
     return (
-        <div className={cn("w-fit h-full relative rounded-full overflow-hidden group", className)}>
+        <div className={cn("w-fit h-full relative rounded-full overflow-hidden group", className)} style={style}>
             <div className="absolute top-0 left-0 h-full w-full z-0">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-[120%] object-contain">
                     <filter id="filter">
