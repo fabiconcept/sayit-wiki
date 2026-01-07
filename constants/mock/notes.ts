@@ -13,6 +13,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-002",
@@ -26,6 +27,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-003",
@@ -39,6 +41,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-004",
@@ -52,6 +55,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-005",
@@ -65,6 +69,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-006",
@@ -78,6 +83,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-007",
@@ -91,6 +97,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-008",
@@ -104,6 +111,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-009",
@@ -117,6 +125,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "codystar",
     },
     {
         id: "note-010",
@@ -130,6 +139,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-011",
@@ -143,6 +153,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-012",
@@ -156,6 +167,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "matemasie",
     },
     {
         id: "note-013",
@@ -169,6 +181,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-014",
@@ -182,6 +195,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-015",
@@ -195,6 +209,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-016",
@@ -208,6 +223,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-017",
@@ -221,6 +237,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-018",
@@ -234,6 +251,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-019",
@@ -247,6 +265,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "monoton",
     },
     {
         id: "note-020",
@@ -260,6 +279,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-021",
@@ -273,6 +293,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "kablammo",
     },
     {
         id: "note-022",
@@ -286,6 +307,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-023",
@@ -299,6 +321,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-024",
@@ -312,6 +335,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-025",
@@ -325,6 +349,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-026",
@@ -338,6 +363,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-027",
@@ -351,6 +377,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "codystar",
     },
     {
         id: "note-028",
@@ -364,6 +391,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-029",
@@ -377,6 +405,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-030",
@@ -390,6 +419,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-031",
@@ -403,6 +433,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-032",
@@ -416,6 +447,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-033",
@@ -429,6 +461,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "bokor",
     },
     {
         id: "note-034",
@@ -442,6 +475,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-035",
@@ -455,6 +489,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-036",
@@ -468,6 +503,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-037",
@@ -481,6 +517,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "codystar",
     },
     {
         id: "note-038",
@@ -494,6 +531,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-039",
@@ -507,6 +545,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "kablammo",
     },
     {
         id: "note-040",
@@ -520,6 +559,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-041",
@@ -533,6 +573,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-042",
@@ -546,6 +587,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-043",
@@ -559,6 +601,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-044",
@@ -572,6 +615,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-045",
@@ -585,6 +629,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-046",
@@ -598,6 +643,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-047",
@@ -611,6 +657,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "kablammo",
     },
     {
         id: "note-048",
@@ -624,6 +671,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-049",
@@ -637,6 +685,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "unifrakturMaguntia",
     },
     {
         id: "note-050",
@@ -650,6 +699,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-051",
@@ -663,6 +713,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-052",
@@ -676,6 +727,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-053",
@@ -689,6 +741,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-054",
@@ -702,6 +755,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-055",
@@ -715,6 +769,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-056",
@@ -728,6 +783,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-057",
@@ -741,6 +797,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-058",
@@ -754,6 +811,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-059",
@@ -767,6 +825,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "codystar",
     },
     {
         id: "note-060",
@@ -780,6 +839,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-061",
@@ -793,6 +853,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-062",
@@ -806,6 +867,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-063",
@@ -819,6 +881,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "kablammo",
     },
     {
         id: "note-064",
@@ -832,6 +895,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-065",
@@ -845,6 +909,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-066",
@@ -858,6 +923,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-067",
@@ -871,6 +937,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-068",
@@ -884,6 +951,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-069",
@@ -897,6 +965,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-070",
@@ -910,6 +979,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-071",
@@ -923,6 +993,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "monoton",
     },
     {
         id: "note-072",
@@ -936,6 +1007,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-073",
@@ -949,6 +1021,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-074",
@@ -962,6 +1035,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "matemasie",
     },
     {
         id: "note-075",
@@ -975,6 +1049,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-076",
@@ -988,6 +1063,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-077",
@@ -1001,6 +1077,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "kablammo",
     },
     {
         id: "note-078",
@@ -1014,6 +1091,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-079",
@@ -1027,6 +1105,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "codystar",
     },
     {
         id: "note-080",
@@ -1040,6 +1119,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-081",
@@ -1053,6 +1133,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-082",
@@ -1066,6 +1147,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-083",
@@ -1079,6 +1161,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-084",
@@ -1092,6 +1175,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-085",
@@ -1105,6 +1189,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-086",
@@ -1118,6 +1203,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-087",
@@ -1131,6 +1217,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "sueEllenFrancisco",
     },
     {
         id: "note-088",
@@ -1144,6 +1231,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-089",
@@ -1157,6 +1245,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
     {
         id: "note-090",
@@ -1170,6 +1259,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "kablammo",
     },
     {
         id: "note-091",
@@ -1183,6 +1273,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-092",
@@ -1196,6 +1287,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "codystar",
     },
     {
         id: "note-093",
@@ -1209,6 +1301,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "ole",
     },
     {
         id: "note-094",
@@ -1222,6 +1315,7 @@ export default [
         isLiked: false,
         isCommented: false,
         isViewed: true,
+        selectedFont: "darkerGrotesque",
     },
     {
         id: "note-095",
@@ -1235,6 +1329,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "mochiyPopOne",
     },
     {
         id: "note-096",
@@ -1248,6 +1343,7 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "brunoAceSC",
     },
     {
         id: "note-097",
@@ -1261,6 +1357,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "imperialScript",
     },
     {
         id: "note-098",
@@ -1274,6 +1371,7 @@ export default [
         isLiked: false,
         isCommented: true,
         isViewed: true,
+        selectedFont: "montserratAlternates",
     },
     {
         id: "note-099",
@@ -1287,6 +1385,7 @@ export default [
         isLiked: true,
         isCommented: true,
         isViewed: true,
+        selectedFont: "overtheRainbow",
     },
     {
         id: "note-100",
@@ -1300,5 +1399,6 @@ export default [
         isLiked: true,
         isCommented: false,
         isViewed: true,
+        selectedFont: "schoolbell",
     },
 ] as NoteCardProps[];

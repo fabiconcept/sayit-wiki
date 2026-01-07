@@ -8,7 +8,7 @@ import WoodenPlatform from "./WoodenPlatform";
 
 export default function Header() {
     return (
-        <header className="w-full p-5 flex flex-row gap-5 justify-between drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)] sticky top-0 z-50">
+        <header className="w-full p-10 px-10 flex flex-row gap-5 justify-between drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)] sticky top-0 z-50">
             <WoodenPlatform className="w-fit h-full relative rounded-3xl">
 
                 <AnimateIcon animateOnHover="wiggle" loop={true}>

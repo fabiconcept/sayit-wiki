@@ -14,8 +14,8 @@ export default function Masonary({ items }: MasonaryProps) {
     const columns = useMemo(() => {
         if (!width) return null;
         if (items.length === 0) return null;
-        
-        const columnsToRender = Math.floor((width / 250) * 0.9);
+
+        const columnsToRender = Math.floor(((width-100) / 250) * 0.9);
 
         // Create array of empty arrays for each column
         const columnItems: NoteCardProps[][] = Array.from(
@@ -39,7 +39,7 @@ export default function Masonary({ items }: MasonaryProps) {
     }, [width, items]);
 
     return (
-        <div className={cn("grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5 mx-auto p-5 w-full")}>
+        <div className={cn("flex gap-7 mx-auto p-5 px-10 w-full")}>
             {columns}
         </div>
     )
@@ -47,7 +47,7 @@ export default function Masonary({ items }: MasonaryProps) {
 
 function MasonaryColumn({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex flex-col gap-5 w-full">
+        <div className="flex flex-col gap-5 flex-1">
             {children}
         </div>
     )
