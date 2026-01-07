@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Finger_Paint } from "next/font/google";
 import "./styles/globals.css";
+import "./styles/fonts.css";
 import "./styles/neomorphs.css";
 import Header from "@/components/header";
 import ThemeProvider from "@/components/theme-provider";

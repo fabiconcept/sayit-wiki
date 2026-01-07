@@ -1,0 +1,287 @@
+@font-face {
+    font-family: 'Bokor';
+    src: 
+        url('/fonts/Bokor-Regular.woff2') format('woff2'),
+        url('/fonts/Bokor-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'BrunoAceSC';
+    src: 
+        url('/fonts/BrunoAceSC-Regular.woff2') format('woff2'),
+        url('/fonts/BrunoAceSC-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Codystar';
+    src: 
+        url('/fonts/Codystar-Regular.woff2') format('woff2'),
+        url('/fonts/Codystar-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DarkerGrotesque';
+    src: 
+        url('/fonts/DarkerGrotesque-VariableFont_wght.woff2') format('woff2'),
+        url('/fonts/DarkerGrotesque-VariableFont_wght.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'ImperialScript';
+    src: 
+        url('/fonts/ImperialScript-Regular.woff2') format('woff2'),
+        url('/fonts/ImperialScript-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kablammo';
+    src: 
+        url('/fonts/Kablammo-Regular-VariableFont_MORF.woff2') format('woff2'),
+        url('/fonts/Kablammo-Regular-VariableFont_MORF.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Matemasie';
+    src: 
+        url('/fonts/Matemasie-Regular.woff2') format('woff2'),
+        url('/fonts/Matemasie-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MochiyPopOne';
+    src: 
+        url('/fonts/MochiyPopOne-Regular.woff2') format('woff2'),
+        url('/fonts/MochiyPopOne-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Monoton';
+    src: 
+        url('/fonts/Monoton-Regular.woff2') format('woff2'),
+        url('/fonts/Monoton-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MontserratAlternates';
+    src: 
+        url('/fonts/MontserratAlternates-Bold.woff2') format('woff2'),
+        url('/fonts/MontserratAlternates-Bold.woff') format('woff')
+    ;
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MontserratAlternates';
+    src: 
+        url('/fonts/MontserratAlternates-BoldItalic.woff2') format('woff2'),
+        url('/fonts/MontserratAlternates-BoldItalic.woff') format('woff')
+    ;
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MontserratAlternates';
+    src: 
+        url('/fonts/MontserratAlternates-Medium.woff2') format('woff2'),
+        url('/fonts/MontserratAlternates-Medium.woff') format('woff')
+    ;
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MontserratAlternates';
+    src: 
+        url('/fonts/MontserratAlternates-MediumItalic.woff2') format('woff2'),
+        url('/fonts/MontserratAlternates-MediumItalic.woff') format('woff')
+    ;
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MontserratAlternates';
+    src: 
+        url('/fonts/MontserratAlternates-Regular.woff2') format('woff2'),
+        url('/fonts/MontserratAlternates-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'MontserratAlternates';
+    src: 
+        url('/fonts/MontserratAlternates-SemiBold.woff2') format('woff2'),
+        url('/fonts/MontserratAlternates-SemiBold.woff') format('woff')
+    ;
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ole';
+    src: 
+        url('/fonts/Ole-Regular.woff2') format('woff2'),
+        url('/fonts/Ole-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'OvertheRainbow';
+    src: 
+        url('/fonts/OvertheRainbow-Regular.woff2') format('woff2'),
+        url('/fonts/OvertheRainbow-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Schoolbell';
+    src: 
+        url('/fonts/Schoolbell-Regular.woff2') format('woff2'),
+        url('/fonts/Schoolbell-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SueEllenFrancisco';
+    src: 
+        url('/fonts/SueEllenFrancisco-Regular.woff2') format('woff2'),
+        url('/fonts/SueEllenFrancisco-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'UnifrakturMaguntia';
+    src: 
+        url('/fonts/UnifrakturMaguntia-Regular.woff2') format('woff2'),
+        url('/fonts/UnifrakturMaguntia-Regular.woff') format('woff')
+    ;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.bokor {
+    font-family: 'Bokor', "Finger Paint", sans-serif;
+}
+
+.brunoAceSC {
+    font-family: 'BrunoAceSC', "Finger Paint", sans-serif;
+}
+
+.codystar {
+    font-family: 'Codystar', "Finger Paint", sans-serif;
+    font-weight: bolder;
+}
+
+.darkerGrotesque {
+    font-family: 'DarkerGrotesque', sans-serif;
+    font-weight: bolder;
+}
+
+.imperialScript {
+    font-family: 'ImperialScript', cursive;
+    font-weight: bolder;
+    word-spacing: 0.25em;
+    font-size: 1.5rem;
+}
+
+.kablammo {
+    font-family: 'Kablammo', "Finger Paint", sans-serif;
+    font-weight: bolder;
+    word-spacing: 0.25em;
+}
+
+.matemasie {
+    font-family: 'Matemasie', sans-serif;
+}
+
+.mochiyPopOne {
+    font-family: 'MochiyPopOne', sans-serif;
+}
+
+.monoton {
+    font-family: 'Monoton', cursive;
+    word-spacing: 0.25em;
+}
+
+.montserratAlternates {
+    font-family: 'MontserratAlternates', sans-serif;
+}
+
+.ole {
+    font-family: 'Ole', cursive;
+}
+
+.overtheRainbow {
+    font-family: 'OvertheRainbow', cursive;
+}
+
+.schoolbell {
+    font-family: 'Schoolbell', cursive;
+}
+
+.sueEllenFrancisco {
+    font-family: 'SueEllenFrancisco', cursive;
+}
+
+.unifrakturMaguntia {
+    font-family: 'UnifrakturMaguntia', serif;
+}
