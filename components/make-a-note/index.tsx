@@ -16,7 +16,6 @@ import { cn, darkenHex, generateNoteId, HexColor, luckyPick } from "@/lib/utils"
 import { PopoverClose } from "@radix-ui/react-popover";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import { backgroundColors } from "@/constants/notes";
-import { SendIcon } from "../animate-ui/icons/send";
 import { XIcon } from "../animate-ui/icons/x";
 import { PinIcon } from "../animate-ui/icons/pin";
 
@@ -97,8 +96,8 @@ export default function MakeANote() {
             >
                 <div className="flex flex-col gap-5 mt-5 text-white">
                     <div className="grid gap-2">
-                        <h2 className="text-center text-lg font-bold drop-shadow-[0_0_10px_rgba(0,0,0,0.0.5),0_0_2px_rgba(0,0,0,0.0.75)]"><span className="bg-[var(--wooden-color)]/50 px-3">Pin a New Note to the Wall</span></h2>
-                        <p className="text-center text-sm drop-shadow-[0_0_10px_rgba(0,0,0,0.0.5),0_0_2px_rgba(0,0,0,0.0.75)]"><span className="bg-[var(--wooden-color)]/20 px-3">Your note will be visible to everyone on the community wall</span></p>
+                        <h2 className="text-center text-lg font-bold drop-shadow-[0_0_10px_rgba(0,0,0,0.25),0_0_1px_rgba(0,0,0,0.9)]"><span className="px-3">Pin a New Note to the Wall</span></h2>
+                        <p className="text-center text-sm drop-shadow-[0_0_10px_rgba(0,0,0,0.25),0_0_1px_rgba(0,0,0,0.9)]"><span className="bg-[var(--wooden-color)]/20 px-3">Your note will be visible to everyone on the community wall</span></p>
                     </div>
 
                     <div className="h-3" />
