@@ -433,6 +433,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
                         className={cn(
                             "w-full px-6 translate-y-2",
                             showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
+                            noteStyle === NoteStyle.FOLDED_CORNER_BR ? "pr-10" : "",
                         )}
                     />
                     {!editable && clipType !== ClipType.PIN && <Clip

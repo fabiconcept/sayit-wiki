@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { EllipsisVerticalIcon } from "@/components/animate-ui/icons/ellipsis-vertical";
 import { UserRoundIcon } from "@/components/animate-ui/icons/user-round";
 import { motion, inView, useTransform, useMotionValue, animate } from "framer-motion";
+import { DropdownMenu, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "../dropdown-menu";
 
 interface ReactionStatistics {
     likes: number;
@@ -110,20 +111,29 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                         </AnimateIcon>
                     </TooltipTrigger>
                     <TooltipContent>
-                        View this note
+                        Viewed by {numberShortForm(views)} people
                     </TooltipContent>
                 </Tooltip>
             </div>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <AnimateIcon animateOnTap="default" animateOnHover="horizontal" className="flex items-center gap-2 cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out">
-                        <EllipsisVerticalIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
-                    </AnimateIcon>
-                </TooltipTrigger>
-                <TooltipContent>
-                    Like this note
-                </TooltipContent>
-            </Tooltip>
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <AnimateIcon animateOnTap="default" animateOnHover="horizontal" className="flex items-center gap-2 cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out">
+                                <EllipsisVerticalIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                            </AnimateIcon>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            More options
+                        </TooltipContent>
+                    </Tooltip>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Copy</DropdownMenuItem>
+                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive hover:text-destructive border border-destructive/50 bg-destructive/5">Report</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </motion.div>
     )
 }
