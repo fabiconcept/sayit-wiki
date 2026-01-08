@@ -4,8 +4,11 @@
 
 * {
   transition: background-color 0.15s ease-in-out, opacity 0.3s ease;
-  font-family: "Finger Paint", sans-serif;
   font-style: normal;
+}
+
+body {
+  font-family: "Finger Paint", sans-serif;
 }
 
 *::selection {

@@ -1,5 +1,5 @@
 import Loader from "@/components/Loader";
-import MakeANote from "@/components/make-a-note/Index";
+import MakeANote from "@/components/make-a-note";
 import Masonary from "@/components/ui/Masonary";
 import notes from "@/constants/mock/notes";
 

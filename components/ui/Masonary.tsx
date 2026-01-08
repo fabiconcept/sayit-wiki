@@ -2,9 +2,9 @@
 import { useResized } from "@/hooks/use-resized";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
-import NoteCard from "./NoteCard";
 import { NoteCardProps } from "@/types/note";
 import { AnimatePresence } from "framer-motion";
+import NoteCard from "./NoteCard";
 
 interface MasonaryProps {
     items: NoteCardProps[];

@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
-import Clip, { ClipType } from "./Clip";
-import { cn, countTextLines, darkenHex, intensifyHex } from '@/lib/utils';
+import React, { useRef } from 'react';
+import Clip, { ClipType } from "../Clip";
+import { cn, countTextLines, darkenHex, formatSocialTime } from '@/lib/utils';
 import '@/app/styles/notes.css';
 import { NoteCardProps, NoteStyle } from '@/types/note';
-import WoodenPlatform from '../WoodenPlatform';
 import { useTheme } from 'next-themes';
+import ReactionCard from './Reaction';
+import { FontFamily } from '@/constants/fonts';
 
-const NotebookPaper: React.FC<NoteCardProps> = ({
+const NoteCard: React.FC<NoteCardProps> = ({
     id,
     clipType,
     editable = true,
@@ -33,7 +34,11 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const maxWidth = "450px";
     const minHeight = "50px";
-    const maxLines = 10;
+    const maxLines = 8;
+
+    const date = new Date(timestamp);
+
+    const timestampText = formatSocialTime(date, true);
 
     // Function to limit word length to 20 characters
     const limitWordLength = (text: string): string => {
@@ -297,7 +302,11 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
 
     return (
         <div
-            className={cn("relative group cursor-text", selectedFont)}
+            className={cn(
+                "relative group cursor-text",
+                selectedFont,
+                selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
+            )}
             onClick={() => {
                 if (!textAreaRef.current) return;
                 textAreaRef.current.focus();
@@ -329,6 +338,30 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
                     ...getClipPathStyle() as unknown as React.CSSProperties,
                 } as React.CSSProperties}
             >
+                {noteStyle !== NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
+                    <filter id='roughpaper'>
+                        <feTurbulence type="fractalNoise" baseFrequency='0.04' result='noise' numOctaves="5" />
+
+                        <feDiffuseLighting in='noise' lightingColor='#fff' surfaceScale='2'>
+                            <feDistantLight azimuth='45' elevation='60' />
+                        </feDiffuseLighting>
+                    </filter>
+                    <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
+                </svg>}
+                {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
+                    <defs>
+
+                        <filter id="stick-note-texture">
+                            <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="10" result="noise" />
+                            <feDiffuseLighting lightingColor="white" diffuseConstant="1" surfaceScale=".5" result="diffLight">
+                                <feDistantLight azimuth="100" elevation="55" />
+                            </feDiffuseLighting>
+                        </filter>
+                    </defs>
+
+                    <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
+                </svg>}
+
                 {noteStyle === NoteStyle.POLAROID && <div
                     className="absolute top-0 left-0 h-full w-full z-20 wooden-heavy brightness-90"
                     style={{
@@ -342,6 +375,7 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
+
                 <div
                     className={cn('lines')}
                     style={noteStyle === NoteStyle.STICKY_NOTE ? {
@@ -352,6 +386,13 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
                             : 'none',
                     }}
                 >
+                    <p className={cn(
+                        "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl not-dark:shadow-[inset_0px_5px_10px_rgba(0,0,0,0.5)] dark:shadow-[inset_0px_5px_10px_rgba(255,255,255,0.5)]",
+                        showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
+                        selectedFont === FontFamily.Ole ? "schoolbell" : ""
+                    )}>
+                        {timestampText}
+                    </p>
                     {editable ?
                         <textarea
                             defaultValue={content}
@@ -387,12 +428,19 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
                             {content}
                         </article>
                     }
+                    <ReactionCard
+                        statistics={{ likes: likesCount, comments: commentsCount, views: viewsCount, isLiked, isCommented, isViewed }}
+                        className={cn(
+                            "w-full px-6 translate-y-2",
+                            showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
+                        )}
+                    />
                     {!editable && clipType !== ClipType.PIN && <Clip
                         type={clipType}
                         init={tilt < 0 ? 1 : 0}
                         noteStyle={noteStyle}
                         className={cn(
-                            "pointer-events-none",
+                            // "pointer-events-none",
                             noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
                         )}
                     />}
@@ -409,4 +457,4 @@ const NotebookPaper: React.FC<NoteCardProps> = ({
     );
 };
 
-export default NotebookPaper;
+export default NoteCard;

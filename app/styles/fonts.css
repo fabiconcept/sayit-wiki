@@ -43,10 +43,10 @@
 }
 
 @font-face {
-    font-family: 'ImperialScript';
+    font-family: 'Ole';
     src: 
-        url('/fonts/ImperialScript-Regular.woff2') format('woff2'),
-        url('/fonts/ImperialScript-Regular.woff') format('woff')
+        url('/fonts/Ole-Regular.woff2') format('woff2'),
+        url('/fonts/Ole-Regular.woff') format('woff')
     ;
     font-weight: normal;
     font-style: normal;
@@ -164,23 +164,21 @@
 }
 
 @font-face {
-    font-family: 'Ole';
+    font-family: 'ZCOOL QingKe HuangYou';
     src: 
-        url('/fonts/Ole-Regular.woff2') format('woff2'),
-        url('/fonts/Ole-Regular.woff') format('woff')
-    ;
+        url('/fonts/ZCOOLQingKeHuangYou-Regular.woff2') format('woff2'),
+        url('/fonts/ZCOOLQingKeHuangYou-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'OvertheRainbow';
+    font-family: 'Over-the-Rainbow';
     src: 
         url('/fonts/OvertheRainbow-Regular.woff2') format('woff2'),
         url('/fonts/OvertheRainbow-Regular.woff') format('woff')
     ;
-    font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
@@ -228,7 +226,7 @@
 
 .codystar {
     font-family: 'Codystar', "Finger Paint", sans-serif;
-    font-weight: bolder;
+    font-weight: 900;
 }
 
 .darkerGrotesque {
@@ -236,8 +234,8 @@
     font-weight: bolder;
 }
 
-.imperialScript {
-    font-family: 'ImperialScript', cursive;
+.ole {
+    font-family: 'Ole', cursive;
     font-weight: bolder;
     word-spacing: 0.25em;
     font-size: 1.5rem;
@@ -264,14 +262,17 @@
 
 .montserratAlternates {
     font-family: 'MontserratAlternates', sans-serif;
+    font-weight: 600;
 }
 
-.ole {
-    font-family: 'Ole', cursive;
+.zcoolQingKeHuangYou {
+    font-family: 'ZCOOL QingKe HuangYou', cursive;
+    font-weight: 400;
 }
 
 .overtheRainbow {
-    font-family: 'OvertheRainbow', cursive;
+    font-family: 'Over-the-Rainbow', cursive;
+    font-weight: 700;
 }
 
 .schoolbell {
@@ -280,6 +281,8 @@
 
 .sueEllenFrancisco {
     font-family: 'SueEllenFrancisco', cursive;
+    font-weight: 600;
+    font-size: 1.5rem;
 }
 
 .unifrakturMaguntia {

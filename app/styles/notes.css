@@ -6,7 +6,6 @@
   border-radius: 2px;
   overflow: hidden;
   transition: transform 0.3s ease;
-  font-family: "'Indie Flower', cursive";
   transform: rotate(var(--rotater));
 
   &:hover {
@@ -38,7 +37,6 @@
   margin-right: 20px;
   margin-bottom: 20px;
   line-height: 25px;
-  font-size: 1rem;
   color: #2c3e50;
   outline: none;
   min-height: 200px;
@@ -52,10 +50,10 @@
     content: "";
     position: absolute;
     border-radius: 50px;
-    border: 0.5px solid #aeaeae;
-    background: linear-gradient(145deg, #cacaca, #aeaeae);
+    border: 0.5px solid #969696;
+    background: linear-gradient(145deg, #f4f4f4, #ffffff);
     box-shadow: 2px 2px 60px #bebebe,
-      -2px -2px 60px #ffffff, 0 0 4px rgba(0, 0, 0, 0.25);
+      -2px -2px 60px #ffffff, 0 0 5px rgba(0, 0, 0, 0.5);
     top: 0;
     left: 0;
     width: 15px;
@@ -66,46 +64,13 @@
     content: "";
     position: absolute;
     border-radius: 50px;
-    border: 0.5px solid #aeaeae;
-    background: linear-gradient(145deg, #cacaca, #aeaeae);
+    border: 0.5px solid #969696;
+    background: linear-gradient(145deg, #f4f4f4, #ffffff);
     box-shadow: 2px 2px 60px #bebebe,
-      -2px -2px 60px #ffffff, 0 0 4px rgba(0, 0, 0, 0.25);
-    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.1));
+      -2px -2px 60px #ffffff, 0 0 5px rgba(0, 0, 0, 0.5);
     top: 0;
     left: 18px;
     width: 15px;
     height: 3px;
-  }
-}
-
-.dark {
-  .staple {
-    &::after {
-      content: "";
-      position: absolute;
-      border-radius: 50px;
-      border: 0.5px solid #ffffff;
-      background: linear-gradient(145deg, #f4f4f4, #ffffff);
-      box-shadow: 2px 2px 60px #bebebe,
-        -2px -2px 60px #ffffff, 0 0 4px rgba(0, 0, 0, 0.25);
-      top: 0;
-      left: 0;
-      width: 15px;
-      height: 3px;
-    }
-
-    &::before {
-      content: "";
-      position: absolute;
-      border-radius: 50px;
-      border: 0.5px solid #ffffff;
-      background: linear-gradient(145deg, #f4f4f4, #ffffff);
-      box-shadow: 2px 2px 60px #bebebe,
-        -2px -2px 60px #ffffff, 0 0 4px rgba(0, 0, 0, 0.25);
-      top: 0;
-      left: 18px;
-      width: 15px;
-      height: 3px;
-    }
   }
 }

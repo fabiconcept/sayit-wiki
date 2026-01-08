@@ -3,13 +3,13 @@ enum FontFamily {
     BrunoAceSC = 'brunoAceSC',
     Codystar = 'codystar',
     DarkerGrotesque = 'darkerGrotesque',
-    ImperialScript = 'imperialScript',
+    Ole = 'ole',
     Kablammo = 'kablammo',
     Matemasie = 'matemasie',
     MochiyPopOne = 'mochiyPopOne',
     Monoton = 'monoton',
     MontserratAlternates = 'montserratAlternates',
-    Ole = 'ole',
+    ZCOOLQingKeHuangYou = 'zcoolQingKeHuangYou',
     OvertheRainbow = 'overtheRainbow',
     Schoolbell = 'schoolbell',
     SueEllenFrancisco = 'sueEllenFrancisco',
@@ -38,9 +38,9 @@ const fontConfig: Record<FontFamily, FontData> = {
         name: 'DarkerGrotesque',
         isCursive: false
     },
-    [FontFamily.ImperialScript]: {
-        name: 'ImperialScript',
-        isCursive: true
+    [FontFamily.Ole]: {
+        name: 'Ole',
+        isCursive: false
     },
     [FontFamily.Kablammo]: {
         name: 'Kablammo',
@@ -62,9 +62,9 @@ const fontConfig: Record<FontFamily, FontData> = {
         name: 'MontserratAlternates',
         isCursive: false
     },
-    [FontFamily.Ole]: {
-        name: 'Ole',
-        isCursive: true
+    [FontFamily.ZCOOLQingKeHuangYou]: {
+        name: 'ZCOOL QingKe HuangYou',
+        isCursive: false
     },
     [FontFamily.OvertheRainbow]: {
         name: 'OvertheRainbow',

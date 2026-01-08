@@ -1,0 +1,129 @@
+"use client";
+import { Heart } from "@/components/animate-ui/icons/heart";
+import { AnimateIcon } from "@/components/animate-ui/icons/icon";
+import { cn, numberShortForm } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
+import { MessageCircleMoreIcon } from "@/components/animate-ui/icons/message-circle-more";
+import { useEffect, useRef, useState } from "react";
+import { EllipsisVerticalIcon } from "@/components/animate-ui/icons/ellipsis-vertical";
+import { UserRoundIcon } from "@/components/animate-ui/icons/user-round";
+import { motion, inView, useTransform, useMotionValue, animate } from "framer-motion";
+
+interface ReactionStatistics {
+    likes: number;
+    comments: number;
+    views: number;
+    isLiked: boolean;
+    isCommented: boolean;
+    isViewed: boolean;
+}
+
+export default function ReactionCard({ statistics, className }: { statistics: ReactionStatistics, className: string }) {
+    const [likes, setLikes] = useState(statistics.likes);
+    const [comments, setComments] = useState(statistics.comments);
+    const [views, setViews] = useState(statistics.views);
+    const [isLiked, setIsLiked] = useState(statistics.isLiked);
+    const [isCommented, setIsCommented] = useState(statistics.isCommented);
+    const [isViewed, setIsViewed] = useState(statistics.isViewed);
+
+    const ref = useRef<HTMLDivElement>(null);
+
+    const handleLike = () => {
+        setLikes(likes + 1);
+        setIsLiked(!isLiked);
+    }
+
+    const handleComment = () => {
+        setComments(comments + 1);
+        setIsCommented(!isCommented);
+    }
+
+    const handleView = () => {
+        setViews(views + 1);
+        setIsViewed(true);
+    }
+
+    useEffect(() => {
+        if (!ref.current) return;
+        inView(ref.current, handleView);
+    }, [ref, inView]);
+    return (
+        <motion.div
+            className={cn("flex items-center gap-5", className)}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            ref={ref}
+            transition={{ duration: 0.3 }}
+        >
+            <div className="flex items-center gap-5 flex-1">
+                <div className="flex items-center gap-2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <AnimateIcon
+                                animateOnTap={isLiked ? undefined : "fill"}
+                                animateOnHover={isLiked ? undefined : "path"}
+                                animate={isLiked ? "fill" : undefined}
+                                persistOnAnimateEnd={isLiked ? true : false}
+                                className="cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
+                                onClick={handleLike}
+                            >
+                                <Heart
+                                    strokeWidth={2}
+                                    className={cn("sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125", isLiked ? "stroke-destructive" : "stroke-black")}
+                                    animate={isLiked ? "fill" : undefined}
+                                />
+                            </AnimateIcon>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            Like this note
+                        </TooltipContent>
+                    </Tooltip>
+                    <span className="text-sm font-semibold text-black">{numberShortForm(likes)}</span>
+                </div>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <AnimateIcon
+                            animateOnTap="fill"
+                            animateOnHover="path"
+                            className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
+                            onClick={handleComment}
+                        >
+                            <MessageCircleMoreIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                            <span className="text-sm font-semibold text-black">{numberShortForm(comments)}</span>
+                        </AnimateIcon>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Comment on this note
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <AnimateIcon
+                            animateOnTap="fill"
+                            animateOnHover="path"
+                            className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
+                            onClick={handleView}
+                        >
+                            <UserRoundIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                            <span className="text-sm font-semibold text-black">{numberShortForm(views)}</span>
+                        </AnimateIcon>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        View this note
+                    </TooltipContent>
+                </Tooltip>
+            </div>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <AnimateIcon animateOnTap="default" animateOnHover="horizontal" className="flex items-center gap-2 cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out">
+                        <EllipsisVerticalIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                    </AnimateIcon>
+                </TooltipTrigger>
+                <TooltipContent>
+                    Like this note
+                </TooltipContent>
+            </Tooltip>
+        </motion.div>
+    )
+}
