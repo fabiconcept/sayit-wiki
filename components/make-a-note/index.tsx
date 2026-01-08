@@ -16,6 +16,9 @@ import { cn, darkenHex, generateNoteId, HexColor, luckyPick } from "@/lib/utils"
 import { PopoverClose } from "@radix-ui/react-popover";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import { backgroundColors } from "@/constants/notes";
+import { SendIcon } from "../animate-ui/icons/send";
+import { XIcon } from "../animate-ui/icons/x";
+import { PinIcon } from "../animate-ui/icons/pin";
 
 export default function MakeANote() {
     const noteId = useMemo(() => generateNoteId(), []);
@@ -53,11 +56,11 @@ export default function MakeANote() {
         setOpen(open);
     }
 
-    const handleContentChange = ( id: string, content: string) => {
+    const handleContentChange = (id: string, content: string) => {
 
         setContent(content);
     }
-    
+
     return (
         <>
             <WoodenPlatform className="w-fit h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)] fixed bottom-10 right-10 z-50">
@@ -154,7 +157,7 @@ export default function MakeANote() {
                                 </div>
                             </PopoverTrigger>
                             <PopoverContent className="min-w-full drop-shadow-[0_0_30px_rgba(0,0,0,0.0.25),0_0_5px_rgba(0,0,0,0.0.5)] overflow-y-auto bg-transparent p-0 border-none">
-                                <NoteItemHolder 
+                                <NoteItemHolder
                                     backgroundColor={selectedPaperColor || "#FFF"}
                                     noteStyle={NoteStyle.SPIRAL_BOTTOM}
                                 >
@@ -187,10 +190,10 @@ export default function MakeANote() {
                             </PopoverContent>
                         </Popover>
                     </div>
-                    
+
                     <div className="h-2" />
 
-                    <div className="relative px-2">
+                    {selectedNoteStyle && selectedNoteStyle !== NoteStyle.POLAROID && <div className="relative px-2">
                         <WoodenPlatform
                             className="absolute -top-3 left-6 z-20 h-fit w-fit rounded-lg cursor-pointer drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
                             noScrews
@@ -245,6 +248,55 @@ export default function MakeANote() {
                                         </Tooltip>
                                     ))}
                                 </div>
+                            </div>
+                        </WoodenPlatform>
+                    </div>}
+
+                    <div className="h-2" />
+
+                    <div className="w-full px-2">
+                        <WoodenPlatform noScrews className="w-full h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)]">
+                            <div className="px-2 py-2 flex items-center border-8 border-background/0 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                                <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <AnimateIcon animateOnHover="wiggle" loop={true}>
+                                            <NeoButton
+                                                element="div"
+                                                className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
+                                                onClick={() => setOpen(true)}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <XIcon
+                                                        strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                                                </div>
+                                            </NeoButton>
+                                        </AnimateIcon>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Cancel</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger className="flex-1" asChild>
+                                        <AnimateIcon animateOnHover="wiggle" loop={true}>
+                                            <NeoButton
+                                                element="div"
+                                                className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
+                                                onClick={() => setOpen(true)}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <PinIcon
+                                                        strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                                                        <p className="font-semibold text-black">Pin to wall</p>
+                                                </div>
+                                            </NeoButton>
+                                        </AnimateIcon>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Pin to wall</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </div>
                         </WoodenPlatform>
                     </div>

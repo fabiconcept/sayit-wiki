@@ -391,13 +391,14 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     <textarea
                         defaultValue={content}
                         ref={textAreaRef}
-                        className='text resize-none field-sizing-content'
+                        className='text resize-none field-sizing-content overflow-hidden'
                         style={{
                             marginLeft,
                             wordBreak: 'break-word',
                             overflowWrap: 'break-word',
                         }}
                         rows={10}
+                        autoFocus={true}
                         onChange={handleTextareaChange}
                         onPaste={handlePaste}
                         placeholder="Start writing..."
@@ -407,12 +408,14 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
 
                     <span className={cn(
                         "text-sm text-black absolute bottom-4 right-4",
-                        content.length === maxChars ? "text-red-500" : "text-black",
                         noteStyle === NoteStyle.TORN_BOTTOM ? "top-4" : "",
                         noteStyle === NoteStyle.CURVED_BOTTOM ? "top-4" : "",
+                        noteStyle === NoteStyle.TORN_RIGHT ? "right-10" : "",
+                        noteStyle === NoteStyle.POLAROID ? "top-8 right-8" : "",
+                        noteStyle === NoteStyle.SPIRAL_BOTTOM ? "bottom-6" : "",
                         noteStyle === NoteStyle.FOLDED_CORNER_TR ? "bottom-4" : "",
                         noteStyle === NoteStyle.FOLDED_CORNER_TL ? "bottom-4" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_BR ? "bottom-4 left-4 right-[unset]" : "",
+                        noteStyle === NoteStyle.FOLDED_CORNER_BR ? "top-4" : "",
                         noteStyle === NoteStyle.FOLDED_CORNER_BL ? "bottom-4" : "",
                     )}>
                         {content.length} / {maxChars}
