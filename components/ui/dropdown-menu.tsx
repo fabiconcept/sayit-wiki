@@ -51,7 +51,7 @@ function DropdownMenuContent({
         children={
           <>
             <WoodenPlatform className="w-full h-full rounded-lg" noScrews={true}>
-              <div className="p-1 flex border-2 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+              <div className="p-1 flex border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                 <div className="wooden inset-0 rounded-lg h-full w-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]">
                   {props.children}
                 </div>
