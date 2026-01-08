@@ -17,7 +17,7 @@ export default function Masonary({ items }: MasonaryProps) {
         if (!width) return null;
         if (items.length === 0) return null;
 
-        const columnsToRender = Math.floor(((width - 105) / 250) * 0.8);
+        const columnsToRender = Math.floor(((width - 105) / 250) * 0.8) || 1;
 
         // Create array of empty arrays for each column
         const columnItems: NoteCardProps[][] = Array.from(

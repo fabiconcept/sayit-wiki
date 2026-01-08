@@ -44,15 +44,19 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto drop-shadow-[0_0_20px_rgba(0,0,0,0.0.25),0_0_3px_rgba(0,0,0,0.0.75)]",
-          className
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto drop-shadow-[0_0_20px_rgba(0,0,0,0.0.25),0_0_3px_rgba(0,0,0,0.0.75)]"
         )}
         {...props}
         children={
           <>
             <WoodenPlatform className="w-full h-full rounded-lg" noScrews={true}>
-              <div className="p-1 flex border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
-                <div className="wooden inset-0 rounded-lg h-full w-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]">
+              <div className="wooden p-1 flex border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                <div 
+                  className={cn(
+                    "rounded-sm p-1 h-full w-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)] flex flex-col gap-1",
+                    className
+                  )}
+                >
                   {props.children}
                 </div>
               </div>
@@ -91,7 +95,7 @@ function DropdownMenuItem({
       )}
       {...props}
       children={
-        <NeoButton element="div" className={cn("flex items-center text-black gap-2 px-2 py-1", className)}>
+        <NeoButton element="div" className={cn("flex wooden items-center text-black gap-2 px-2 py-1 relative h-10 w-32", className)}>
           {props.children}
         </NeoButton>
       }

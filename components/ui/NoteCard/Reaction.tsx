@@ -128,7 +128,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                         </TooltipContent>
                     </Tooltip>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="gap-1">
                     <DropdownMenuItem>Copy</DropdownMenuItem>
                     <DropdownMenuItem>Share</DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive hover:text-destructive border border-destructive/50 bg-destructive/5">Report</DropdownMenuItem>

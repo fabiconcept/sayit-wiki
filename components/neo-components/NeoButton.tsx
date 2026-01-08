@@ -31,7 +31,7 @@ type NeoButtonProps = ButtonProps | LinkProps | DivProps;
 export default function NeoButton({ children, ...props }: NeoButtonProps) {
     const content = (
         <>
-            <div className="absolute top-0 left-0 h-full w-full overflow-hidden z-0 rounded-full">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-full overflow-hidden z-0 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-[120%] object-contain">
                     <filter id="filter">
                         <feTurbulence baseFrequency=".002 .02" numOctaves="9" result="n" />
@@ -54,7 +54,7 @@ export default function NeoButton({ children, ...props }: NeoButtonProps) {
     );
 
     const baseClassName = cn(
-        "min-w-16 h-fit relative rounded-full z-50 cursor-pointer",
+        "min-w-16 w-full h-fit relative rounded-full z-50 cursor-pointer",
         props.className?.includes("cursor-default") ? "" : "focus:outline-4 focus:outline-background/25 focus:outline-offset-1 focus:outline-dotted focus:brightness-125 dark:focus:brightness-110 select-none hover:brightness-125 transition-all duration-300",
         props.className?.includes("selected") ? "outline-4 outline-background/25 outline-offset-1 outline-dotted brightness-125 select-none brightness-125 transition-all duration-300" : "",
     );

@@ -55,7 +55,7 @@ const Pin = ({ className }: { className?: string }) => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <div className={cn("pin -top-5 right-1/3 translate-x-5 h-16 w-14 scale-75", className)}>
+                <div className={cn("pin -top-5 right-1/3 -translate-x-1 h-16 w-14 scale-75", className)}>
                     <div className="shadow"></div>
                     <div className="metal"></div>
                     <div className="bottom-circle"></div>
@@ -295,10 +295,10 @@ const Staple = ({ className, noteStyle }: { className?: string, noteStyle: NoteS
         return (
             <div className={cn("", className)}>
                 <Tooltip>
-                    <TooltipTrigger asChild>
+                    <TooltipTrigger className="-translate-x-3.5" asChild>
                         <div className="staple absolute top-4 left-1/2 -translate-x-1/2 z-20 flex z-30"></div>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="translate-x-4">
                         <p>📎 Stapled!</p>
                     </TooltipContent>
                 </Tooltip>

@@ -330,3 +330,13 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return false
   }
 }
+
+export function luckyPick(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export function generateNoteId(): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `note_${timestamp}_${random}`;
+}
