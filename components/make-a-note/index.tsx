@@ -90,7 +90,6 @@ export default function MakeANote() {
         setSelectedFont(font);
     }
 
-
     const handleContentChange = (id: string, content: string) => {
         setContent(content);
     }

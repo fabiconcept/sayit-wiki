@@ -1,7 +1,7 @@
 "use client";
 import { Heart } from "@/components/animate-ui/icons/heart";
 import { AnimateIcon } from "@/components/animate-ui/icons/icon";
-import { cn, numberShortForm } from "@/lib/utils";
+import { cn, numberShortForm, updateSearchParam } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { MessageCircleMoreIcon } from "@/components/animate-ui/icons/message-circle-more";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ interface ReactionStatistics {
     isLiked: boolean;
     isCommented: boolean;
     isViewed: boolean;
+    noteId: string;
 }
 
 export default function ReactionCard({ statistics, className }: { statistics: ReactionStatistics, className: string }) {
@@ -35,10 +36,12 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     }
 
     const handleComment = () => {
-        setIsCommented(!isCommented);
+        if (!statistics.noteId) return;
+        updateSearchParam("note", statistics.noteId);
     }
 
     const handleView = () => {
+        if (!statistics.noteId) return;
         setViews(views + 1);
         setIsViewed(true);
     }

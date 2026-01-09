@@ -10,6 +10,7 @@ import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
 
 const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, transformOrigin: string }> = ({
+    id,
     clipType,
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
@@ -407,7 +408,7 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
                         {content}
                     </article>
                     <ReactionCard
-                        statistics={{ likes: likesCount, comments: commentsCount, views: viewsCount, isLiked, isCommented, isViewed }}
+                        statistics={{ likes: likesCount, comments: commentsCount, views: viewsCount, isLiked, isCommented, isViewed, noteId: id || '' }}
                         className={cn(
                             "w-full px-6 translate-y-2",
                             showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
