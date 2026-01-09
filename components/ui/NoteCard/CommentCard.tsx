@@ -1,136 +1,107 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { motion, useInView, Variants } from 'framer-motion';
 import Clip, { ClipType } from "../Clip";
-import { cn, countTextLines, darkenHex } from '@/lib/utils';
+import { cn, darkenHex, formatSocialTime } from '@/lib/utils';
 import '@/app/styles/notes.css';
-import { NoteStyle } from '@/types/note';
+import { NoteCardProps, NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
 
-interface CommentNoteCardProps {
-    id: string;
-    clipType: ClipType;
-    noteStyle?: NoteStyle;
-    backgroundColor: string;
-    content: string;
-    showRedLine?: boolean;
-    showLines?: boolean;
-    onContentChange?: (id: string, content: string) => void;
-    selectedFont?: FontFamily;
-    tilt?: number;
-}
-
-const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
-    id,
+const CommentNoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean }> = ({
     clipType,
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
+    timestamp,
     content,
-    showRedLine = false,
-    showLines = false,
-    onContentChange,
+    tilt,
+    showRedLine = true,
+    showLines = true,
     selectedFont,
-    tilt = 0,
+    index = 0,
+    isNew = false,
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
-    const maxWidth = "350px";
-    const minHeight = "40px";
-    const maxChars = 200; // Reduced character limit for comments
+    const textRef = useRef<HTMLDivElement>(null);
+    const noteRef = useRef<HTMLDivElement>(null);
+    const isInView = useInView(noteRef, {
+        once: true,
+        margin: "-50px",
+        amount: 0.25
+    });
 
-    // Function to limit word length to 20 characters
-    const limitWordLength = (text: string): string => {
-        return text.split(/(\s+)/).map(word => {
-            // Preserve whitespace
-            if (/^\s+$/.test(word)) return word;
+    const minHeight = "40px"; // Reduced from 50px
 
-            // Split by existing hyphens to preserve them
-            const segments = word.split('-');
+    const date = new Date(timestamp);
+    const timestampText = formatSocialTime(date, true);
 
-            // Process each segment independently
-            const processedSegments = segments.map(segment => {
-                // Only break segments that are longer than 20 chars
-                if (segment.length > 20) {
-                    const chunks = [];
-                    for (let i = 0; i < segment.length; i += 20) {
-                        chunks.push(segment.slice(i, i + 20));
+    // Smart delay calculation - stagger based on position
+    // Add some randomness to avoid rigid patterns
+    const baseDelay = (index % 10) * 0.03;
+    const randomOffset = Math.random() * 0.05;
+    const staggerDelay = baseDelay + randomOffset;
+
+    // Reduce tilt by 70%
+    const adjustedTilt = tilt * 0.3;
+
+    // Animation variants for existing notes (in-view)
+    const existingNoteVariants: Variants = useMemo(() => (
+        {
+            hidden: {
+                opacity: 0,
+                y: 30,
+                scale: 0.95,
+                rotate: 0,
+            },
+            visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotate: adjustedTilt * 0.8,
+                transition: {
+                    type: "spring",
+                    damping: 15,
+                    stiffness: 150,
+                    mass: 0.6,
+                    delay: staggerDelay,
+                    opacity: {
+                        duration: 0.15,
+                        ease: "easeOut",
+                        delay: staggerDelay
                     }
-                    return chunks.join('-');
                 }
-                return segment;
-            });
-
-            // Rejoin with original hyphens
-            return processedSegments.join('-');
-        }).join('');
-    };
-
-    // Function to limit character count
-    const limitChars = (text: string): string => {
-        if (text.length > maxChars) {
-            return text.substring(0, maxChars);
+            }
         }
-        return text;
-    };
+    ), [adjustedTilt, staggerDelay]);
 
-    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const target = e.target;
-        const cursorPosition = target.selectionStart;
-        let newText = target.value;
-
-        // Apply word length limiting
-        newText = limitWordLength(newText);
-
-        // Apply character limiting
-        newText = limitChars(newText);
-
-        // Only update if the text changed after limiting
-        if (newText !== target.value) {
-            target.value = newText;
-            // Try to restore cursor position, but cap at text length
-            const newCursorPos = Math.min(cursorPosition, newText.length);
-            target.selectionStart = target.selectionEnd = newCursorPos;
+    // Animation variants for new notes (bubble/spring effect)
+    const newNoteVariants: Variants = useMemo(() => (
+        {
+            hidden: {
+                opacity: 0,
+                scale: 0,
+                y: -100,
+                rotate: adjustedTilt * 2
+            },
+            visible: {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                rotate: adjustedTilt * 0.8,
+                transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 200,
+                    mass: 0.8,
+                    opacity: {
+                        duration: 0.3,
+                        ease: "easeOut"
+                    }
+                }
+            }
         }
-
-        if (onContentChange) {
-            onContentChange(id, newText);
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-        e.preventDefault();
-        let text = e.clipboardData.getData('text/plain');
-
-        // Apply word length limiting
-        text = limitWordLength(text);
-
-        // Get current cursor position and existing text
-        const target = e.currentTarget;
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-        const currentText = target.value;
-
-        // Construct new text with paste
-        const beforeCursor = currentText.substring(0, start);
-        const afterCursor = currentText.substring(end);
-        let newText = beforeCursor + text + afterCursor;
-
-        // Apply character limiting
-        newText = limitChars(newText);
-
-        // Set value
-        target.value = newText;
-
-        // Set cursor position after pasted content
-        const newCursorPos = Math.min(beforeCursor.length + text.length, newText.length);
-        target.selectionStart = target.selectionEnd = newCursorPos;
-
-        // Trigger change event
-        if (onContentChange) {
-            onContentChange(id, newText);
-        }
-    };
+    ), [adjustedTilt]);
 
     const getClipPathStyle = () => {
         switch (noteStyle) {
@@ -301,23 +272,24 @@ const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
     };
 
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
-    const adjustedTilt = tilt * 0.3; // Reduce tilt significantly
 
     return (
-        <div
+        <motion.div
+            ref={noteRef}
+            layout
             className={cn(
-                "relative cursor-text",
+                "relative",
                 selectedFont,
                 selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
             )}
-            onClick={() => {
-                if (!textAreaRef.current) return;
-                textAreaRef.current.focus();
-            }}
+            variants={isNew ? newNoteVariants : existingNoteVariants}
+            initial="hidden"
+            animate={isInView || isNew ? "visible" : "hidden"}
         >
-            <div
+            <motion.div
+                layout="position"
                 className={cn(
-                    "transform-gpu paper origin-top relative",
+                    "transform-gpu paper relative",
                     noteStyle === NoteStyle.FOLDED_CORNER_TR ? `
                         after:content-[''] after:z-30 after:absolute after:top-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
                     ` : "",
@@ -332,11 +304,10 @@ const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
                     ` : "",
                 )}
                 style={{
-                    maxWidth,
                     minHeight,
-                    backgroundColor: isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
+                    height: "100%",
+                    backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
                     borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
-                    transform: `rotate(${adjustedTilt}deg)`,
                     '--selected-bg': darkenHex(backgroundColor as `#${string}`, 30),
                     ...getClipPathStyle() as unknown as React.CSSProperties,
                 } as React.CSSProperties}
@@ -344,15 +315,16 @@ const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
                 {noteStyle !== NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <filter id='roughpaper'>
                         <feTurbulence type="fractalNoise" baseFrequency='0.04' result='noise' numOctaves="5" />
+
                         <feDiffuseLighting in='noise' lightingColor='#fff' surfaceScale='2'>
                             <feDistantLight azimuth='45' elevation='60' />
                         </feDiffuseLighting>
                     </filter>
                     <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
                 </svg>}
-
-                {/* {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
+                {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <defs>
+
                         <filter id="stick-note-texture">
                             <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="10" result="noise" />
                             <feDiffuseLighting lightingColor="white" diffuseConstant="1" surfaceScale=".5" result="diffLight">
@@ -360,56 +332,66 @@ const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
                             </feDiffuseLighting>
                         </filter>
                     </defs>
-                    <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
-                </svg>} */}
 
+                    <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
+                </svg>}
+
+                {noteStyle === NoteStyle.POLAROID && <div
+                    className="absolute top-0 left-0 h-full w-full z-20 wooden-heavy brightness-90"
+                    style={{
+                        clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
+                    }}
+                />}
+                {noteStyle === NoteStyle.POLAROID && <div className={cn(
+                    "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
+                    `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
+                )} />}
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
 
                 <div
                     className={cn('lines')}
-                    style={noteStyle === NoteStyle.STICKY_NOTE ? {
-                        backgroundImage: 'none',
-                    } : {
-                        backgroundImage: showLines
-                            ? 'repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px)'
-                            : 'none',
+                    style={{
+                        ...(noteStyle === NoteStyle.STICKY_NOTE ? {
+                            backgroundImage: 'none',
+                        } : {
+                            backgroundImage: showLines
+                                ? 'repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px)'
+                                : 'none',
+                        }),
+                        marginTop: 20
                     }}
                 >
-                    <textarea
-                        defaultValue={content}
-                        ref={textAreaRef}
-                        className='text resize-none field-sizing-content overflow-hidden'
+                    <p 
+                        style={{
+                            backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
+                        } as React.CSSProperties}
+                        className={cn(
+                        "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
+                        showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
+                        selectedFont === FontFamily.Ole ? "schoolbell" : ""
+                    )}>
+                        {timestampText}
+                    </p>
+                    <article
+                        ref={textRef}
+                        contentEditable={false}
+                        suppressContentEditableWarning
+                        spellCheck={false}
+                        className='text -translate-y-5'
                         style={{
                             marginLeft,
                             wordBreak: 'break-word',
                             overflowWrap: 'break-word',
                         }}
-                        rows={3}
-                        autoFocus={true}
-                        onChange={handleTextareaChange}
-                        onPaste={handlePaste}
-                        placeholder="Add a comment..."
+                        role="article"
                         aria-label="Comment content"
-                        aria-multiline="true"
-                    />
-
-                    <span className={cn(
-                        "text-sm text-black absolute bottom-4 right-4",
-                        noteStyle === NoteStyle.TORN_BOTTOM ? "top-4" : "",
-                        noteStyle === NoteStyle.CURVED_BOTTOM ? "top-4" : "",
-                        noteStyle === NoteStyle.TORN_RIGHT ? "right-10" : "",
-                        noteStyle === NoteStyle.POLAROID ? "top-8 right-8" : "",
-                        noteStyle === NoteStyle.SPIRAL_BOTTOM ? "bottom-6" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_TR ? "bottom-4" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_TL ? "bottom-4" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_BR ? "top-4" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_BL ? "bottom-4" : "",
-                    )}>
-                        {content.length} / {maxChars}
-                    </span>
-
+                        aria-readonly="true"
+                    >
+                        {content}
+                        {content.length}
+                    </article>
                     {clipType !== ClipType.PIN && <Clip
                         type={clipType}
                         init={adjustedTilt < 0 ? 1 : 0}
@@ -419,16 +401,17 @@ const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
                         )}
                     />}
                 </div>
-            </div>
-
+            </motion.div>
             {clipType === ClipType.PIN && <Clip
                 type={ClipType.PIN}
                 className={cn(
                     "pointer-events-none",
+                    "relative z-20",
                     noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
+                    noteStyle === NoteStyle.TORN_TOP ? `-top-4 left-2` : "",
                 )}
             />}
-        </div>
+        </motion.div>
     );
 };
 

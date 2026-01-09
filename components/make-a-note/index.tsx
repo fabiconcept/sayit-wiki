@@ -141,7 +141,7 @@ export default function MakeANote() {
                     <div className="grid gap-2">
                         <div className="relative w-fit mx-auto">
                             <WoodenPlatform
-                                className="h-fit w-fit mx-auto rounded-lg cursor-pointer drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
+                                className="h-fit w-fit mx-auto rounded-lg drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
                                 noScrews="two"
                             >
                                 <div className="wooden p-0.5 flex border-2 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">

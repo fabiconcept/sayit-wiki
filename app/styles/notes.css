@@ -39,7 +39,7 @@
   line-height: 25px;
   color: #2c3e50;
   outline: none;
-  min-height: 200px;
+  /* min-height: 200px; */
   word-wrap: break-word;
   cursor: text;
   white-space: pre-wrap;

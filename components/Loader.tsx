@@ -1,8 +1,10 @@
-export default function Loader() {
+import { cn } from "@/lib/utils";
+
+export default function Loader({ children, className }: { children?: React.ReactNode, className?: string }) {
     return (
-        <div className="flex flex-col gap-2 mix-blend-screen items-center py-10">
+        <div className={cn("flex flex-col gap-2 mix-blend-screen items-center py-10", className)}>
             <div id="loader" className="loader" />
-            <h1 className="md:text-2xl sm:text-lg text-base dark:text-slate-400 font-bold animate-bounce">Digging through notes...</h1>
+            {children}
         </div>
     )
 }
