@@ -1,17 +1,16 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { motion, useInView, Variants } from 'framer-motion';
 import Clip, { ClipType } from "../Clip";
-import { cn, countTextLines, darkenHex, formatSocialTime } from '@/lib/utils';
+import { cn, darkenHex, formatSocialTime } from '@/lib/utils';
 import '@/app/styles/notes.css';
 import { NoteCardProps, NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
 
-const NoteCard: React.FC<NoteCardProps> = ({
-    id,
+const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, transformOrigin: string }> = ({
     clipType,
-    editable = true,
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
     timestamp,
@@ -25,110 +24,95 @@ const NoteCard: React.FC<NoteCardProps> = ({
     isViewed,
     showRedLine = true,
     showLines = true,
-    onContentChange,
-    selectedFont
+    selectedFont,
+    index = 0,
+    isNew = false,
+    transformOrigin = "top right"
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
     const textRef = useRef<HTMLDivElement>(null);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+    const noteRef = useRef<HTMLDivElement>(null);
+    const isInView = useInView(noteRef, {
+        once: true,
+        margin: "-50px",
+        amount: 0.25
+    });
+
     const maxWidth = "450px";
     const minHeight = "50px";
-    const maxLines = 8;
 
     const date = new Date(timestamp);
-
     const timestampText = formatSocialTime(date, true);
 
-    // Function to limit word length to 20 characters
-    const limitWordLength = (text: string): string => {
-        return text.split(/(\s+)/).map(word => {
-            // Preserve whitespace
-            if (/^\s+$/.test(word)) return word;
+    // Smart delay calculation - stagger based on position
+    // Add some randomness to avoid rigid patterns
+    const baseDelay = (index % 10) * 0.03;
+    const randomOffset = Math.random() * 0.05;
+    const staggerDelay = baseDelay + randomOffset;
 
-            // If word is longer than 20 chars, insert hyphens
-            if (word.length > 20) {
-                const chunks = [];
-                for (let i = 0; i < word.length; i += 20) {
-                    chunks.push(word.slice(i, i + 20));
+
+    // Animation variants for existing notes (in-view)
+    const existingNoteVariants: Variants = useMemo(() => (
+        {
+            hidden: {
+                opacity: 0,
+                y: 30,
+                scale: 0.95,
+                rotate: 0,
+                transformOrigin: transformOrigin,
+            },
+            visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotate: tilt * 0.8,
+                transformOrigin: transformOrigin,
+                transition: {
+                    type: "spring",
+                    damping: 15,
+                    stiffness: 150,
+                    mass: 0.6,
+                    delay: staggerDelay,
+                    opacity: {
+                        duration: 0.15,
+                        ease: "easeOut",
+                        delay: staggerDelay
+                    }
                 }
-                return chunks.join('-');
             }
-            return word;
-        }).join('');
-    };
-
-    // Function to limit number of lines
-    const limitLines = (text: string, element: HTMLTextAreaElement | null): string => {
-        if (!element) return text;
-
-        // Temporarily set the value to count lines
-        const originalValue = element.value;
-        element.value = text;
-        const lines = countTextLines(element);
-        element.value = originalValue;
-
-        if (lines > maxLines) {
-            const splitTextLines = text.split('\n');
-            return splitTextLines.slice(0, maxLines).join('\n');
         }
-        return text;
-    };
+    ), [tilt, staggerDelay, transformOrigin]);
 
-    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        let newText = e.target.value;
-
-        // Apply word length limiting
-        newText = limitWordLength(newText);
-
-        // Apply line limiting - pass the textarea element
-        newText = limitLines(newText, textAreaRef.current);
-
-        // Only update if the text changed after limiting
-        if (newText !== e.target.value) {
-            e.target.value = newText;
-            // Restore cursor position to end
-            e.target.selectionStart = e.target.selectionEnd = newText.length;
+    // Animation variants for new notes (bubble/spring effect)
+    const newNoteVariants: Variants = useMemo(() => (
+        {
+            hidden: {
+                opacity: 0,
+                transformOrigin: transformOrigin,
+                scale: 0,
+                y: -100,
+                rotate: tilt * 2
+            },
+            visible: {
+                opacity: 1,
+                transformOrigin: transformOrigin,
+                scale: 1,
+                y: 0,
+                rotate: tilt * 0.8,
+                transition: {
+                    type: "spring",
+                    damping: 12,
+                    stiffness: 200,
+                    mass: 0.8,
+                    opacity: {
+                        duration: 0.3,
+                        ease: "easeOut"
+                    }
+                }
+            }
         }
-
-        if (onContentChange) {
-            onContentChange(id, newText);
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-        e.preventDefault();
-        let text = e.clipboardData.getData('text/plain');
-
-        // Apply word length limiting
-        text = limitWordLength(text);
-
-        // Get current cursor position and existing text
-        const target = e.currentTarget;
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-        const currentText = target.value;
-
-        // Construct new text with paste
-        const beforeCursor = currentText.substring(0, start);
-        const afterCursor = currentText.substring(end);
-        let newText = beforeCursor + text + afterCursor;
-
-        // Apply line limiting
-        newText = limitLines(newText, textAreaRef.current);
-
-        // Use modern approach instead of deprecated execCommand
-        target.value = newText;
-
-        // Set cursor position after pasted content
-        const newCursorPos = Math.min(beforeCursor.length + text.length, newText.length);
-        target.selectionStart = target.selectionEnd = newCursorPos;
-
-        // Trigger change event
-        if (onContentChange) {
-            onContentChange(id, newText);
-        }
-    };
+    ), [tilt, transformOrigin]);
 
     const getClipPathStyle = () => {
         switch (noteStyle) {
@@ -301,20 +285,29 @@ const NoteCard: React.FC<NoteCardProps> = ({
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
 
     return (
-        <div
+        <motion.div
+            ref={noteRef}
+            layout
             className={cn(
-                "relative group cursor-text",
+                "relative group",
                 selectedFont,
                 selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
             )}
-            onClick={() => {
-                if (!textAreaRef.current) return;
-                textAreaRef.current.focus();
+            variants={isNew ? newNoteVariants : existingNoteVariants}
+            whileHover={{
+                rotate: 0,
+                transformOrigin: transformOrigin,
+            }}
+            initial="hidden"
+            animate={isInView || isNew ? "visible" : "hidden"}
+            style={{
+                transformOrigin: transformOrigin,
             }}
         >
-            <div
+            <motion.div
+                layout="position"
                 className={cn(
-                    "transform-gpu paper origin-top relative",
+                    "transform-gpu paper relative",
                     noteStyle === NoteStyle.FOLDED_CORNER_TR ? `
                         after:content-[''] after:z-30 after:absolute after:top-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
                     ` : "",
@@ -333,7 +326,6 @@ const NoteCard: React.FC<NoteCardProps> = ({
                     minHeight,
                     backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
                     borderColor: isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
-                    '--rotater': !editable ? `${tilt * 0.8}deg` : '0deg',
                     '--selected-bg': isDark ? darkenHex(backgroundColor as `#${string}`, 30) : darkenHex(backgroundColor as `#${string}`, 50),
                     ...getClipPathStyle() as unknown as React.CSSProperties,
                 } as React.CSSProperties}
@@ -392,42 +384,25 @@ const NoteCard: React.FC<NoteCardProps> = ({
                         selectedFont === FontFamily.Ole ? "schoolbell" : ""
                     )}>
                         {timestampText}
+                        {transformOrigin}
                     </p>
-                    {editable ?
-                        <textarea
-                            defaultValue={content}
-                            ref={textAreaRef}
-                            className='text resize-none field-sizing-content'
-                            style={{
-                                marginLeft,
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
-                            }}
-                            rows={10}
-                            onChange={handleTextareaChange}
-                            onPaste={handlePaste}
-                            aria-label="Editable note content"
-                            aria-multiline="true"
-                        />
-                        :
-                        <article
-                            ref={textRef}
-                            contentEditable={false}
-                            suppressContentEditableWarning
-                            spellCheck={false}
-                            className='text'
-                            style={{
-                                marginLeft,
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
-                            }}
-                            role="article"
-                            aria-label="Note content"
-                            aria-readonly="true"
-                        >
-                            {content}
-                        </article>
-                    }
+                    <article
+                        ref={textRef}
+                        contentEditable={false}
+                        suppressContentEditableWarning
+                        spellCheck={false}
+                        className='text'
+                        style={{
+                            marginLeft,
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                        }}
+                        role="article"
+                        aria-label="Note content"
+                        aria-readonly="true"
+                    >
+                        {content}
+                    </article>
                     <ReactionCard
                         statistics={{ likes: likesCount, comments: commentsCount, views: viewsCount, isLiked, isCommented, isViewed }}
                         className={cn(
@@ -436,25 +411,26 @@ const NoteCard: React.FC<NoteCardProps> = ({
                             noteStyle === NoteStyle.FOLDED_CORNER_BR ? "pr-10" : "",
                         )}
                     />
-                    {!editable && clipType !== ClipType.PIN && <Clip
+                    {clipType !== ClipType.PIN && <Clip
                         type={clipType}
                         init={tilt < 0 ? 1 : 0}
                         noteStyle={noteStyle}
                         className={cn(
-                            // "pointer-events-none",
                             noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
                         )}
                     />}
                 </div>
-            </div>
-            {!editable && clipType === ClipType.PIN && <Clip
+            </motion.div>
+            {clipType === ClipType.PIN && <Clip
                 type={ClipType.PIN}
                 className={cn(
                     "pointer-events-none",
+                    "relative z-20",
                     noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
+                    noteStyle === NoteStyle.TORN_TOP ? `-top-4 left-2` : "",
                 )}
             />}
-        </div>
+        </motion.div>
     );
 };
 

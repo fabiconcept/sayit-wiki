@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap'); */
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -167,14 +167,14 @@ body {
 
 .wooden {
   background-color: var(--wooden-color);
-  background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+  background-image: url("/wooden-pattern.png");
   background-size: 400px 100px;
   background-position: -6rem 0;
 }
 
 .wooden-heavy {
   background-color: var(--wooden-color-heavy);
-  background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+  background-image: url("/wooden-pattern.png");
   background-size: 400px 100px;
   background-position: -6rem 0;
 }

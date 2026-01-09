@@ -485,7 +485,7 @@ export default [
     },
     {
         id: "note-031",
-        clipType: ClipType.Screw4,
+        clipType: ClipType.PIN,
         backgroundColor: "#FFF0FA",
         timestamp: "2026-01-02T10:30:00Z",
         content: "Self-care Sunday: Face mask, bubble bath, favorite playlist, no screens after 8 PM. Mental health is just as important as physical health!",

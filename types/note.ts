@@ -37,6 +37,4 @@ export interface NoteCardProps {
     showRedLine?: boolean;
     showLines?: boolean;
     selectedFont: string;
-    editable?: boolean;
-    onContentChange?: (id: string, content: string) => void;
 }
