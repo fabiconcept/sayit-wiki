@@ -136,7 +136,7 @@ export default function Masonary({ items, enableNewNoteDemo = false }: MasonaryP
                                 {...item} 
                                 index={item.globalIndex}
                                 isNew={isNew}
-                                transformOrigin={transformOrigin()}
+                                transformOrigin={"top right"}
                             />
                         );
                     })}

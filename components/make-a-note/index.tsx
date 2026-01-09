@@ -12,14 +12,45 @@ import { ClipType } from "../ui/Clip";
 import { FontFamily, Fonts } from "@/constants/fonts";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import NoteItemHolder from "../ui/NoteCard/NoteItemHolder";
-import { cn, darkenHex, generateNoteId, HexColor, luckyPick } from "@/lib/utils";
+import { cn, darkenHex, generateNoteId, HexColor, luckyPick, removeSearchParam, updateSearchParam } from "@/lib/utils";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import { backgroundColors } from "@/constants/notes";
 import { XIcon } from "../animate-ui/icons/x";
 import { PinIcon } from "../animate-ui/icons/pin";
+import { useSearchParams } from "next/navigation";
+import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 
 export default function MakeANote() {
+    const searchParams = useSearchParams();
+
+    const isCreatingNote = searchParams.get("createNote") === "true";
+
+    const handleOpenChange = (open: boolean) => {
+        if (open) {
+            updateSearchParam("createNote", "true");
+        } else {
+            removeSearchParam("createNote");
+        }
+    }
+
+    useShortcuts({
+        shortcuts: [
+            {
+                key: KeyboardKey.KeyN,
+                ctrlKey: true,
+                enabled: true,
+            }
+        ],
+        onTrigger: (key) => {
+            switch (key.key) {
+                case KeyboardKey.KeyN:
+                    handleOpenChange(true);
+                    break;
+            }
+        }
+    }, [isCreatingNote])
+
     const noteId = useMemo(() => generateNoteId(), []);
     const [open, setOpen] = useState(false);
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
@@ -44,6 +75,14 @@ export default function MakeANote() {
         setSelectedNoteStyle(randomNoteStyle);
     }, []);
 
+    useEffect(() => {
+        if (isCreatingNote) {
+            setOpen(true);
+            return;
+        }
+        setOpen(false);
+    }, [isCreatingNote]);
+
     const handlePaperColorChange = (color: string) => {
         setSelectedPaperColor(color);
     }
@@ -51,12 +90,8 @@ export default function MakeANote() {
         setSelectedFont(font);
     }
 
-    const handleOpenChange = (open: boolean) => {
-        setOpen(open);
-    }
 
     const handleContentChange = (id: string, content: string) => {
-
         setContent(content);
     }
 
@@ -66,7 +101,10 @@ export default function MakeANote() {
                 <div className="md:px-5 px-3 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                     <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                     <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger 
+                        asChild
+                        onClick={() => handleOpenChange(true)}
+                        >
                             <AnimateIcon animateOnHover="wiggle" loop={true}>
                                 <NeoButton
                                     element="div"
@@ -89,7 +127,13 @@ export default function MakeANote() {
             <ResponsiveModal
                 open={open}
                 className="p-2"
-                onOpenChange={handleOpenChange}
+                onOpenChange={(open) => {
+                    if (open) {
+                        updateSearchParam("createNote", "true");
+                    } else {
+                        removeSearchParam("createNote");
+                    }
+                }}
                 description="Use the 'cmd + n' shortcut to open this modal."
                 title="Make a note"
 
@@ -263,7 +307,7 @@ export default function MakeANote() {
                                             <NeoButton
                                                 element="div"
                                                 className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                onClick={() => setOpen(true)}
+                                                onClick={() => handleOpenChange(false)}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <XIcon
@@ -299,7 +343,7 @@ export default function MakeANote() {
                             </div>
                         </WoodenPlatform>
                     </div>
-
+                    <div className="h-2" />
                 </div>
             </ResponsiveModal >
         </>
