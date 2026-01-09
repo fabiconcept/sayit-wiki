@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 import Link from "next/link";
-import { useMemo } from "react";
+import { motion } from "framer-motion";
 
 interface NeoButtonBaseProps {
     children: React.ReactNode;
@@ -50,13 +50,35 @@ export default function NeoButton({ children, ...props }: NeoButtonProps) {
                     </div>
                 </div>
             </div>
+            {props.className?.includes("selected active") && (
+                <motion.div
+                    className={cn("pin -top-5 -right-5 -translate-x-1 h-16 w-14 scale-75")}
+                    initial={{ opacity: 0, scale: 0.75, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ 
+                        duration: 0.3, 
+                        ease: "easeInOut",
+                        delay: 0.3,
+                        type: "spring",
+                        stiffness: 100,
+                        mass: 1,
+                        damping: 10,
+                        restDelta: 0.01,
+                        restSpeed: 10
+                    }}
+                >
+                    <div className="shadow"></div>
+                    <div className="metal"></div>
+                    <div className="bottom-circle"></div>
+                </motion.div>
+            )}
         </>
     );
 
     const baseClassName = cn(
         "min-w-16 w-full h-fit relative rounded-full z-50 cursor-pointer",
         props.className?.includes("cursor-default") ? "" : "focus:outline-4 focus:outline-background/25 focus:outline-offset-1 focus:outline-dotted focus:brightness-125 dark:focus:brightness-110 select-none hover:brightness-125 transition-all duration-300",
-        props.className?.includes("selected") ? "outline-4 outline-background/25 outline-offset-1 outline-dotted brightness-125 select-none brightness-125 transition-all duration-300" : "",
+        props.className?.includes("selected") ? "outline-4 outline-background/50 outline-offset-1 outline-dotted brightness-125 select-none brightness-125 transition-all duration-300" : "",
     );
 
     if (props.element === "button") {

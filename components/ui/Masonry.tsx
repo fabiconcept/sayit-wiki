@@ -8,12 +8,12 @@ import NoteCard from "./NoteCard";
 import { ClipType } from "./Clip";
 import { FontFamily } from "@/constants/fonts";
 
-interface MasonaryProps {
+interface MasonryProps {
     items: NoteCardProps[];
     enableNewNoteDemo?: boolean; // Set to true to demo new note animation
 }
 
-export default function Masonary({ items, enableNewNoteDemo = false }: MasonaryProps) {
+export default function Masonry({ items, enableNewNoteDemo = false }: MasonryProps) {
     const { width } = useResized();
     const prevItemsLength = useRef(items.length);
     const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
@@ -92,13 +92,13 @@ export default function Masonary({ items, enableNewNoteDemo = false }: MasonaryP
         });
 
         return columnItems.map((columnData, columnIndex) => (
-            <MasonaryColumn key={`column-${columnIndex}`}>
+            <MasonryColumn key={`column-${columnIndex}`}>
                 <AnimatePresence mode="popLayout" initial={false}>
                     {columnData.map((item) => {
                         const itemId = item.id || item.globalIndex;
                         const isNew = newItemIds.has(item.id || '');
 
-                        const transformOrigin = () => {
+                        const transformOrigin = (() => {
                             // Handle PIN clip type (consistent across most styles)
                             if (item.clipType === ClipType.PIN && item.noteStyle !== NoteStyle.TORN_TOP) {
                                 return "top";
@@ -128,7 +128,7 @@ export default function Masonary({ items, enableNewNoteDemo = false }: MasonaryP
                                 default:
                                     return item.tilt < 0 ? "top right" : "top left";
                             }
-                        };
+                        })();
                         
                         return (
                             <NoteCard 
@@ -136,12 +136,12 @@ export default function Masonary({ items, enableNewNoteDemo = false }: MasonaryP
                                 {...item} 
                                 index={item.globalIndex}
                                 isNew={isNew}
-                                transformOrigin={"top right"}
+                                transformOrigin={transformOrigin}
                             />
                         );
                     })}
                 </AnimatePresence>
-            </MasonaryColumn>
+            </MasonryColumn>
         ));
     }, [width, itemsToDisplay, newItemIds]);
 
@@ -152,7 +152,7 @@ export default function Masonary({ items, enableNewNoteDemo = false }: MasonaryP
     )
 }
 
-function MasonaryColumn({ children }: { children: React.ReactNode }) {
+function MasonryColumn({ children }: { children: React.ReactNode }) {
     return (
         <motion.div 
             className="flex flex-col gap-8 flex-1"

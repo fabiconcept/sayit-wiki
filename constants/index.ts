@@ -5,22 +5,26 @@ import { SettingsIcon } from "@/components/animate-ui/icons/settings";
 interface Page {
     name: string;
     description: string;
+    path: string;
     icon: React.ComponentType<{ className?: string, strokeWidth?: number }>;
 }
 
 export const PageNames: Record<string, Page> = {
     theWall: {
         name: "The Wall",
+        path: "/",
         description: "The Wall is a place where you can share your thoughts and ideas with the world.",
         icon: PinIcon,
     },
     globalWiki: {
         name: "Globe Wall",
+        path: "/globe",
         description: "Global Wiki is a place where you can share your knowledge with the world.",
         icon: RadioIcon,
     },
     privacySettings: {
         name: "Privacy Settings",
+        path: "/settings",
         description: "Privacy Settings is a place where you can manage your privacy settings.",
         icon: SettingsIcon,
     },

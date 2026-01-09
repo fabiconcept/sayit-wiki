@@ -60,14 +60,14 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
                 y: 30,
                 scale: 0.95,
                 rotate: 0,
-                transformOrigin: "top right",
+                transformOrigin: transformOrigin,
             },
             visible: {
                 opacity: 1,
                 y: 0,
                 scale: 1,
                 rotate: tilt * 0.8,
-                transformOrigin: "top right",
+                transformOrigin: transformOrigin,
                 transition: {
                     type: "spring",
                     damping: 15,
@@ -89,14 +89,14 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
         {
             hidden: {
                 opacity: 0,
-                transformOrigin: "top right",
+                transformOrigin: transformOrigin,
                 scale: 0,
                 y: -100,
                 rotate: tilt * 2
             },
             visible: {
                 opacity: 1,
-                transformOrigin: "top right",
+                transformOrigin: transformOrigin,
                 scale: 1,
                 y: 0,
                 rotate: tilt * 0.8,
@@ -287,7 +287,6 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
     return (
         <motion.div
             ref={noteRef}
-            key={transformOrigin}
             layout
             className={cn(
                 "relative group",
@@ -297,12 +296,12 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
             variants={isNew ? newNoteVariants : existingNoteVariants}
             whileHover={{
                 rotate: 0,
-                transformOrigin: "top right",
+                transformOrigin: transformOrigin,
             }}
             initial="hidden"
             animate={isInView || isNew ? "visible" : "hidden"}
             style={{
-                transformOrigin: "top right",
+                transformOrigin: transformOrigin,
             }}
         >
             <motion.div
