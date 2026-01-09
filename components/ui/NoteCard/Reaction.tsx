@@ -35,7 +35,6 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     }
 
     const handleComment = () => {
-        setComments(comments + 1);
         setIsCommented(!isCommented);
     }
 
@@ -71,8 +70,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             >
                                 <Heart
                                     strokeWidth={2}
-                                    className={cn("sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125", isLiked ? "stroke-destructive" : "stroke-black")}
+                                    className={cn("sm:w-4 text-black sm:h-4 w-3 h-3 scale-125", isLiked ? "stroke-destructive" : "stroke-black")}
                                     animate={isLiked ? "fill" : undefined}
+                                    fill={isLiked ? "red" : "none"}
                                 />
                             </AnimateIcon>
                         </TooltipTrigger>
@@ -90,7 +90,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
                             onClick={handleComment}
                         >
-                            <MessageCircleMoreIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                            <MessageCircleMoreIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
                             <span className="text-sm font-semibold text-black">{numberShortForm(comments)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>
@@ -103,10 +103,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                         <AnimateIcon
                             animateOnTap="fill"
                             animateOnHover="path"
-                            className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
-                            onClick={handleView}
+                            className="flex items-center gap-2 rotate-5 cursor-help transition-all duration-150 ease-in-out"
                         >
-                            <UserRoundIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                            <UserRoundIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
                             <span className="text-sm font-semibold text-black">{numberShortForm(views)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>
@@ -120,7 +119,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <AnimateIcon animateOnTap="default" animateOnHover="horizontal" className="flex items-center gap-2 cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out">
-                                <EllipsisVerticalIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 max-sm:hidden scale-125" />
+                                <EllipsisVerticalIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
                             </AnimateIcon>
                         </TooltipTrigger>
                         <TooltipContent>

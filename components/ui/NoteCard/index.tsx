@@ -324,9 +324,9 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
                 style={{
                     maxWidth,
                     minHeight,
-                    backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
-                    borderColor: isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
-                    '--selected-bg': isDark ? darkenHex(backgroundColor as `#${string}`, 30) : darkenHex(backgroundColor as `#${string}`, 50),
+                    backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
+                    borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
+                    '--selected-bg': darkenHex(backgroundColor as `#${string}`, 30),
                     ...getClipPathStyle() as unknown as React.CSSProperties,
                 } as React.CSSProperties}
             >
@@ -378,13 +378,16 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
                             : 'none',
                     }}
                 >
-                    <p className={cn(
-                        "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl not-dark:shadow-[inset_0px_5px_10px_rgba(0,0,0,0.5)] dark:shadow-[inset_0px_5px_10px_rgba(255,255,255,0.5)]",
+                    <p 
+                        style={{
+                            backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
+                        } as React.CSSProperties}
+                        className={cn(
+                        "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
                         showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
                         selectedFont === FontFamily.Ole ? "schoolbell" : ""
                     )}>
                         {timestampText}
-                        {transformOrigin}
                     </p>
                     <article
                         ref={textRef}

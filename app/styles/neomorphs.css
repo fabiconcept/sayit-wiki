@@ -203,7 +203,7 @@
     /* 6 */ 0.12em 0.12em 0.12em inset rgba(255, 255, 255, 0.25),
     /* 7 */ -0.075em -0.25em 0.25em 0.1em inset rgba(5, 5, 5, 0.25);
 
-    &::after {
+    &:not(.rough-texture)::after {
       content: "";
       position: absolute;
       z-index: 0;
@@ -215,7 +215,7 @@
       transform: translate(-50%, -50%);
     }
 
-    &::before {
+    &:not(.rough-texture)::before {
       content: "";
       position: absolute;
       z-index: 0;

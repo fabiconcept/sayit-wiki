@@ -7,7 +7,7 @@ import { NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
 
-interface NewNoteCardProps {
+interface CommentNoteCardProps {
     id: string;
     clipType: ClipType;
     noteStyle?: NoteStyle;
@@ -20,14 +20,14 @@ interface NewNoteCardProps {
     tilt?: number;
 }
 
-const NewNoteCard: React.FC<NewNoteCardProps> = ({
+const CommentNoteCard: React.FC<CommentNoteCardProps> = ({
     id,
     clipType,
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
     content,
-    showRedLine = true,
-    showLines = true,
+    showRedLine = false,
+    showLines = false,
     onContentChange,
     selectedFont,
     tilt = 0,
@@ -35,9 +35,9 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
     const { theme } = useTheme();
     const isDark = theme === "dark";
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
-    const maxWidth = "450px";
-    const minHeight = "50px";
-    const maxChars = 500; // Maximum characters allowed
+    const maxWidth = "350px";
+    const minHeight = "40px";
+    const maxChars = 200; // Reduced character limit for comments
 
     // Function to limit word length to 20 characters
     const limitWordLength = (text: string): string => {
@@ -47,7 +47,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
 
             // Split by existing hyphens to preserve them
             const segments = word.split('-');
-            
+
             // Process each segment independently
             const processedSegments = segments.map(segment => {
                 // Only break segments that are longer than 20 chars
@@ -60,7 +60,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                 }
                 return segment;
             });
-            
+
             // Rejoin with original hyphens
             return processedSegments.join('-');
         }).join('');
@@ -84,7 +84,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
 
         // Apply character limiting
         newText = limitChars(newText);
-        
+
         // Only update if the text changed after limiting
         if (newText !== target.value) {
             target.value = newText;
@@ -301,11 +301,12 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
     };
 
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
+    const adjustedTilt = tilt * 0.3; // Reduce tilt significantly
 
     return (
         <div
             className={cn(
-                "relative group cursor-text",
+                "relative cursor-text",
                 selectedFont,
                 selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
             )}
@@ -333,9 +334,9 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                 style={{
                     maxWidth,
                     minHeight,
-                    backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
+                    backgroundColor: isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
                     borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
-                    '--rotater': '0deg',
+                    transform: `rotate(${adjustedTilt}deg)`,
                     '--selected-bg': darkenHex(backgroundColor as `#${string}`, 30),
                     ...getClipPathStyle() as unknown as React.CSSProperties,
                 } as React.CSSProperties}
@@ -349,8 +350,8 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     </filter>
                     <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
                 </svg>}
-                
-                {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
+
+                {/* {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <defs>
                         <filter id="stick-note-texture">
                             <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="10" result="noise" />
@@ -360,20 +361,8 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                         </filter>
                     </defs>
                     <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
-                </svg>}
+                </svg>} */}
 
-                {noteStyle === NoteStyle.POLAROID && <div
-                    className="absolute top-0 left-0 h-full w-full z-20 wooden-heavy brightness-90"
-                    style={{
-                        clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
-                    }}
-                />}
-                
-                {noteStyle === NoteStyle.POLAROID && <div className={cn(
-                    "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
-                    `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
-                )} />}
-                
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
@@ -397,12 +386,12 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                             wordBreak: 'break-word',
                             overflowWrap: 'break-word',
                         }}
-                        rows={10}
+                        rows={3}
                         autoFocus={true}
                         onChange={handleTextareaChange}
                         onPaste={handlePaste}
-                        placeholder="Start writing..."
-                        aria-label="New note content"
+                        placeholder="Add a comment..."
+                        aria-label="Comment content"
                         aria-multiline="true"
                     />
 
@@ -420,10 +409,10 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     )}>
                         {content.length} / {maxChars}
                     </span>
-                    
+
                     {clipType !== ClipType.PIN && <Clip
                         type={clipType}
-                        init={tilt < 0 ? 1 : 0}
+                        init={adjustedTilt < 0 ? 1 : 0}
                         noteStyle={noteStyle}
                         className={cn(
                             noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
@@ -431,7 +420,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     />}
                 </div>
             </div>
-            
+
             {clipType === ClipType.PIN && <Clip
                 type={ClipType.PIN}
                 className={cn(
@@ -443,4 +432,4 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
     );
 };
 
-export default NewNoteCard;
+export default CommentNoteCard;

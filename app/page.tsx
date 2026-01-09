@@ -5,7 +5,7 @@ import notes from "@/constants/mock/notes";
 
 export default function HomePage() {
     return (
-        <div className="h-full w-full grid place-items-center mt-20">
+        <div className="h-full w-full grid place-items-center sm:mt-20 mt-10">
             <Masonry items={notes || []} />
             <Loader />
             <MakeANote />

@@ -146,7 +146,7 @@ export default function Masonry({ items, enableNewNoteDemo = false }: MasonryPro
     }, [width, itemsToDisplay, newItemIds]);
 
     return (
-        <div className={cn("flex gap-8 mx-auto p-5 px-10 w-full")}>
+        <div className={cn("flex gap-8 mx-auto p-5 sm:px-10 w-full")}>
             {columns}
         </div>
     )
