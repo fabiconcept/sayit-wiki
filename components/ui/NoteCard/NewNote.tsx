@@ -335,16 +335,22 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     />
 
                     <span className={cn(
-                        "text-sm text-black absolute bottom-4 right-4",
+                        "text-sm absolute translate-y-1 bottom-4 right-4",
                         noteStyle === NoteStyle.TORN_BOTTOM ? "top-4" : "",
                         noteStyle === NoteStyle.CURVED_BOTTOM ? "top-4" : "",
                         noteStyle === NoteStyle.TORN_RIGHT ? "right-10" : "",
                         noteStyle === NoteStyle.POLAROID ? "top-8 right-8" : "",
-                        noteStyle === NoteStyle.SPIRAL_BOTTOM ? "bottom-6" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_TR ? "bottom-4" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_TL ? "bottom-4" : "",
+                        noteStyle === NoteStyle.SPIRAL_BOTTOM ? "translate-y-1 bottom-6" : "",
+                        noteStyle === NoteStyle.FOLDED_CORNER_TR ? "translate-y-1 bottom-4" : "",
+                        noteStyle === NoteStyle.FOLDED_CORNER_TL ? "translate-y-1 bottom-4" : "",
                         noteStyle === NoteStyle.FOLDED_CORNER_BR ? "top-4" : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_BL ? "bottom-4" : "",
+                        noteStyle === NoteStyle.FOLDED_CORNER_BL ? "translate-y-1 bottom-4" : "",
+                        [
+                            "#808080",
+                            "#666666",
+                            "#4D4D4D",
+                            "#333333",
+                            "#1A1A1A"].includes(backgroundColor) ? "text-white" : "text-black",
                     )}>
                         {content.length} / {maxChars}
                     </span>

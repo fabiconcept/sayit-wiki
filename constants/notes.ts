@@ -1,4 +1,5 @@
 export const backgroundColors = [
+    "#FFFFFF",
     "#FFE5B4",
     "#E6F3FF",
     "#FFE5E5",
@@ -16,6 +17,7 @@ export const backgroundColors = [
     "#E5FFF5",
     "#FFEBE5",
     "#E5F0FF",
+    "#E5E5E5",
     "#FFF5F0",
     "#F5E5FF",
     "#E5FFEB",

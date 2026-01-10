@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { motion, useInView, Variants } from 'framer-motion';
 import Clip, { ClipType } from "../Clip";
 import { cn, darkenHex, formatSocialTime } from '@/lib/utils';
@@ -9,7 +9,6 @@ import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
 
 const CommentNoteCard: React.FC<NoteCardProps> = ({
-    clipType,
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
     timestamp,
@@ -25,19 +24,19 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
     const isDark = theme === "dark";
     const textRef = useRef<HTMLDivElement>(null);
     const noteRef = useRef<HTMLDivElement>(null);
+    const hasAnimated = useRef(false); // Track if this note has already animated
     const isInView = useInView(noteRef, {
         once: true,
         margin: "-50px",
         amount: 0.25
     });
 
-    const minHeight = "40px"; // Reduced from 50px
+    const minHeight = "40px";
 
     const date = new Date(timestamp);
     const timestampText = formatSocialTime(date, true);
 
     // Smart delay calculation - stagger based on position
-    // Add some randomness to avoid rigid patterns
     const baseDelay = (index % 10) * 0.03;
     const randomOffset = Math.random() * 0.05;
     const staggerDelay = baseDelay + randomOffset;
@@ -105,21 +104,30 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
 
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
 
+    // Determine if this note should animate
+    // Only animate if: (1) it's new, or (2) it's in view and hasn't animated yet
+    const shouldAnimate = isNew || (isInView && !hasAnimated.current);
+    
+    // Mark as animated once it becomes visible
+    useEffect(() => {
+        if (isInView || isNew) {
+            hasAnimated.current = true;
+        }
+    }, [isInView, isNew]);
+
     return (
         <motion.div
             ref={noteRef}
-            layout
             className={cn(
                 "relative",
                 selectedFont,
                 selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
             )}
             variants={isNew ? newNoteVariants : existingNoteVariants}
-            initial="hidden"
-            animate={isInView || isNew ? "visible" : "hidden"}
+            initial={shouldAnimate ? "hidden" : "visible"}
+            animate={shouldAnimate ? "visible" : "visible"}
         >
-            <motion.div
-                layout="position"
+            <div
                 className={cn(
                     "transform-gpu paper relative"
                 )}
@@ -147,16 +155,15 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                 {noteStyle !== NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <filter id='roughpaper'>
                         <feTurbulence type="fractalNoise" baseFrequency='0.04' result='noise' numOctaves="5" />
-
                         <feDiffuseLighting in='noise' lightingColor='#fff' surfaceScale='2'>
                             <feDistantLight azimuth='45' elevation='60' />
                         </feDiffuseLighting>
                     </filter>
                     <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
                 </svg>}
+                
                 {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <defs>
-
                         <filter id="stick-note-texture">
                             <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="10" result="noise" />
                             <feDiffuseLighting lightingColor="white" diffuseConstant="1" surfaceScale=".5" result="diffLight">
@@ -164,7 +171,6 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                             </feDiffuseLighting>
                         </filter>
                     </defs>
-
                     <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
                 </svg>}
 
@@ -174,10 +180,12 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                         clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
                     }}
                 />}
+                
                 {noteStyle === NoteStyle.POLAROID && <div className={cn(
                     "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
                     `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
                 )} />}
+                
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
@@ -211,9 +219,9 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                         aria-readonly="true"
                     >
                         {content}
-                        {content.length}
                     </article>
                 </div>
+                
                 <p
                     style={{
                         backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
@@ -225,14 +233,14 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                     )}>
                     {timestampText}
                 </p>
-            </motion.div>
-            {<Clip
-                type={ClipType.PIN}
-                className={cn(
-                    "pointer-events-none -top-3",
-                    "relative z-20",
-                )}
-            />}
+                
+                <Clip
+                    type={ClipType.Staple}
+                    init={0}
+                    noteStyle={NoteStyle.TORN_LEFT}
+                    className={"absolute top-0 left-5 translate-x-1"}
+                />
+            </div>
         </motion.div>
     );
 };

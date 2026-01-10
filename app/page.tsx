@@ -7,7 +7,7 @@ import notes from "@/constants/mock/notes";
 export default function HomePage() {
     return (
         <div className="h-full w-full grid place-items-center sm:mt-20 mt-10">
-            <Masonry items={notes || []} />
+            <Masonry items={notes || []} key={"notes"} scrollOnNewItem={"bottom"}/>
             <Loader>
                 <h4 className="md:text-base sm:text-sm text-xs dark:text-slate-400 font-bold animate-bounce">Digging through notes...</h4>
             </Loader>

@@ -3,9 +3,9 @@ import { useResized } from "@/hooks/use-resized";
 import { cn } from "@/lib/utils";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { NoteCardProps, NoteStyle } from "@/types/note";
-import { AnimatePresence, motion } from "framer-motion";
 import NoteCard from "./NoteCard";
 import { ClipType } from "./Clip";
+import { motion } from "framer-motion";
 import { FontFamily } from "@/constants/fonts";
 
 interface MasonryProps<T = NoteCardProps> {
@@ -16,42 +16,51 @@ interface MasonryProps<T = NoteCardProps> {
     minWidth?: number;
     gap?: number;
     padding?: number;
+    scrollOnNewItem?: 'top' | 'bottom' | null;
 }
 
-export default function Masonry({ items, width: propWidth, enableNewNoteDemo = false, Child, minWidth = 250, gap, padding }: MasonryProps) {
+export default function Masonry({
+    items,
+    width: propWidth,
+    enableNewNoteDemo = false,
+    Child,
+    minWidth = 250,
+    gap,
+    padding,
+    scrollOnNewItem = null
+}: MasonryProps) {
     const { width: hookWidth } = useResized();
     const prevItemsLength = useRef(items.length);
+    const prevItemIds = useRef<Set<string>>(new Set());
     const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
     const [displayItems, setDisplayItems] = useState<NoteCardProps[]>([]);
     const demoTriggered = useRef(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    function removeDuplicatesAndSort<T extends { id: string }>(items: T[]): T[] {
-        if (items.length === 0) return [];
-        
-        // Single pass: deduplicate using Map (O(n))
-        const uniqueMap = new Map<string, T>();
+    // Ensure unique items - deduplicate and sort
+    const uniqueItems = useMemo(() => {
+        if (!items || items.length === 0) return [];
+
+        const uniqueMap = new Map<string, typeof items[0]>();
+
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            uniqueMap.set(item.id, item);
+            if (item?.id && !uniqueMap.has(item.id)) {
+                uniqueMap.set(item.id, item);
+            }
         }
-        
-        // Convert to array and sort in one go (O(n log n))
+
         return Array.from(uniqueMap.values())
-            .sort((a, b) => b.id.localeCompare(a.id)); // Reversed sort (descending)
-    }
+            .sort((a, b) => b.id.localeCompare(a.id));
+    }, [items]);
 
-    items = useMemo(() => removeDuplicatesAndSort(items), [items]);
+    useEffect(() => {
+        setDisplayItems(uniqueItems);
+    }, [uniqueItems]);
 
-    useEffect(()=>{
-        if (!items) return;
-
-        setDisplayItems(items);
-    }, [items])
-
-    // Use prop width if provided, otherwise fall back to hook width
     const width = propWidth ?? hookWidth;
 
-    // Demo: Add a new note after 5 seconds (EASILY REMOVABLE - just set enableNewNoteDemo to false)
+    // Demo: Add a new note after 5 seconds
     useEffect(() => {
         if (enableNewNoteDemo || demoTriggered.current) return;
 
@@ -79,19 +88,23 @@ export default function Masonry({ items, width: propWidth, enableNewNoteDemo = f
         return () => clearTimeout(timer);
     }, [enableNewNoteDemo]);
 
-    // Use displayItems instead of items for demo mode
     const itemsToDisplay = useMemo(() => {
-        return enableNewNoteDemo ? displayItems : items;
-    }, [enableNewNoteDemo, displayItems, items]);
+        return enableNewNoteDemo ? displayItems : uniqueItems;
+    }, [enableNewNoteDemo, displayItems, uniqueItems]);
 
     // Track when new items are added
     useEffect(() => {
-        if (itemsToDisplay.length > prevItemsLength.current) {
-            // New items were added - mark the first item as new
+        const currentIds = new Set(itemsToDisplay.map(item => item.id).filter(Boolean));
+
+        // Find truly new items by comparing IDs
+        const newIds = Array.from(currentIds).filter(id => !prevItemIds.current.has(id));
+        const hasNewItems = newIds.length > 0;
+
+        if (hasNewItems) {
+
             const firstItemId = itemsToDisplay[0]?.id;
-            if (firstItemId) {
+            if (firstItemId && newIds.includes(firstItemId)) {
                 setNewItemIds(new Set([firstItemId]));
-                // Clear the "new" status after animation completes
                 setTimeout(() => {
                     setNewItemIds(prev => {
                         const next = new Set(prev);
@@ -99,56 +112,96 @@ export default function Masonry({ items, width: propWidth, enableNewNoteDemo = f
                         return next;
                     });
                 }, 1200);
+
+                if (scrollOnNewItem && containerRef.current) {
+                    setTimeout(() => {
+                        if (scrollOnNewItem === 'top') {
+                            containerRef.current?.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start',
+                                inline: 'nearest'
+                            });
+                        } else if (scrollOnNewItem === 'bottom') {
+                            containerRef.current?.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'end',
+                                inline: 'nearest'
+                            });
+                        }
+                    }, 100);
+                }
+            } else {
             }
+        } else if (itemsToDisplay.length > prevItemsLength.current) {
+        } else if (itemsToDisplay.length === prevItemsLength.current) {
+        } else {
         }
+
         prevItemsLength.current = itemsToDisplay.length;
-    }, [itemsToDisplay]);
+        prevItemIds.current = currentIds;
+    }, [itemsToDisplay, scrollOnNewItem]);
+
+    // Calculate number of columns separately for stable column count
+    const columnsCount = useMemo(() => {
+        if (!width) return 1;
+        return Math.floor(((width - 105) / minWidth) * 0.8) || 1;
+    }, [width, minWidth]);
 
     const columns = useMemo(() => {
+
         if (!width) return null;
         if (itemsToDisplay.length === 0) return null;
 
-        const columnsToRender = Math.floor(((width - 105) / minWidth) * 0.8) || 1;
-
         // Create array of empty arrays for each column
         const columnItems: (NoteCardProps & { globalIndex: number })[][] = Array.from(
-            { length: columnsToRender },
+            { length: columnsCount },
             () => []
         );
 
         // Distribute items across columns and track global index
         itemsToDisplay.forEach((item, globalIndex) => {
-            const columnIndex = globalIndex % columnsToRender;
+            const columnIndex = globalIndex % columnsCount;
             columnItems[columnIndex].push({ ...item, globalIndex });
         });
 
         return columnItems.map((columnData, columnIndex) => (
-            <MasonryColumn key={`column-${columnIndex}`} gap={gap}>
-                <AnimatePresence mode="popLayout" initial={false}>
-                    {columnData.map((item) => {
-                        const itemId = item.id || item.globalIndex;
-                        const isNew = newItemIds.has(item.id || '');
+            <MasonryColumn key={columnIndex} gap={gap}>
+                {columnData.map((item) => {
+                    // Use ONLY the item id for stable keys
+                    const itemId = item.id;
+                    const isNew = newItemIds.has(item.id || '');
 
-                        return (
-                            <div className="drop-shadow-[10px_10px_10px_rgba(0,0,0,0.0.15),0_0_1px_rgba(0,0,0,0.0.5)]">
-                                {Child ? <Child key={itemId} {...item} /> : <NoteCard
-                                    key={itemId}
-                                    {...item}
-                                    index={item.globalIndex}
-                                    isNew={isNew}
-                                />}
-                            </div>
-                        );
-                    })}
-                </AnimatePresence>
+                    return (
+                        <motion.div
+                            key={itemId}
+                            layout
+                            transition={{
+                                layout: {
+                                    type: "spring",
+                                    damping: 20,
+                                    stiffness: 300
+                                }
+                            }}
+                            className="drop-shadow-[10px_10px_10px_rgba(0,0,0,0.0.15),0_0_1px_rgba(0,0,0,0.0.5)]"
+                        >
+                            {Child ? <Child {...item} /> : <NoteCard
+                                {...item}
+                                index={item.globalIndex}
+                                isNew={isNew}
+                            />}
+                        </motion.div>
+                    );
+                })}
             </MasonryColumn>
         ));
-    }, [width, itemsToDisplay, newItemIds]);
+    }, [width, itemsToDisplay, newItemIds, Child, gap, columnsCount]);
 
     const styles = { gap: gap ? `${gap}px` : undefined, padding: padding ? `${padding}px` : undefined }
 
+
     return (
         <div
+            ref={containerRef}
             className={cn("flex gap-8 mx-auto p-3 sm:px-10 w-full")}
             style={styles}
         >
@@ -162,7 +215,6 @@ function MasonryColumn({ children, gap }: { children: React.ReactNode, gap?: num
         <motion.div
             className="flex flex-col sm:gap-8 gap-4 flex-1"
             style={{ gap: gap ? `${gap}px` : undefined }}
-            layout
         >
             {children}
         </motion.div>

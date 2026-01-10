@@ -39,4 +39,5 @@ export interface NoteCardProps {
     selectedFont: string;
     index?: number;
     isNew?: boolean;
+    maxWidth?: number | string;
 }

@@ -1,5 +1,5 @@
 "use client";
-import { cn, numberShortForm, removeSearchParam, updateSearchParam } from "@/lib/utils";
+import { cn, luckyPick, numberShortForm, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -19,14 +19,18 @@ import { SendIcon } from "./animate-ui/icons/send";
 import Masonry from "./ui/Masonry";
 import { NoteCardProps, NoteStyle } from "@/types/note";
 import { TextInputHandler, NewlineTrimmer } from "./ui/NoteCard/actions";
+import NoteCard from "./ui/NoteCard";
+import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
+import { backgroundColors } from "@/constants/notes";
+import { ModerationLevel, NoBadWord, quickModerate, WordEntry, WordSeverity } from "@/lib/moderator";
+import { toast } from "sonner";
 
 export default function ViewNoteModal() {
     const searchParams = useSearchParams();
-    const [comments, setComments] = useState<NoteCardProps[]>(notes.slice(15, 20).map((note, index) => ({ ...note, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index, isNew: false })));
+    const [comments, setComments] = useState<NoteCardProps[]>(notes.slice(15, 20).map((note, index) => ({ ...note, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index, isNew: false, id: `comment_${Date.now()}_${index}` })));
     const [newComment, setNewComment] = useState<string>("");
 
     const isViewingNote = useMemo(() => Boolean(searchParams.get("note")), [searchParams]);
-    const id = useMemo(() => searchParams.get("note") || "", [searchParams]);
 
     const maxChars = 200; // Maximum characters allowed
 
@@ -55,19 +59,51 @@ export default function ViewNoteModal() {
         [textInputHandler]
     );
 
+    const handleAddComment = useCallback(() => {
+        if (!newComment.trim()) return;
+        const trimmedComment = newlineTrimmer.trimStrict(newComment);
+        const noteId = `comment_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        const randomPaperColor = backgroundColors[luckyPick(0, backgroundColors.length - 1)];
+
+        const moderationResult = quickModerate(trimmedComment, ModerationLevel.STRICT);
+
+        if (moderationResult.isWTF) {
+            toast.error("What the fuck? You're not allowed to say that!", {
+                description: "Please remove the prohibited words and try again",
+            });
+
+            return;
+        }
+
+        const note = { ...notes[77], id: noteId, content: moderationResult.sanitized, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index: comments.length, isNew: true, backgroundColor: randomPaperColor };
+
+
+        setComments(prev => [...prev.map(comment => ({ ...comment, isNew: undefined })), note]);
+        setNewComment("");
+    }, [newComment, comments]);
+
+    useShortcuts({
+        shortcuts: [
+            {
+                key: KeyboardKey.Enter,
+                ctrlKey: true,
+                platformAware: true,
+                enabled: isViewingNote,
+            }
+        ],
+        onTrigger: (key) => {
+            switch (key.key) {
+                case KeyboardKey.Enter:
+                    handleAddComment();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }, [isViewingNote, handleAddComment]);
 
     const containerRef = useRef<HTMLDivElement>(null);
-
     const containerWidth = useMemo(() => containerRef.current?.clientWidth, [containerRef]);
-
-    const handleAddComment = () => {
-        if (!newComment.trim()) return;
-
-        const trimmedComment = newlineTrimmer.trimStrict(newComment);
-
-        setComments(prev => [...prev, { ...notes[77], content: trimmedComment, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index: comments.length, isNew: true }]);
-        setNewComment("");
-    };
 
     return (
         <Dialog
@@ -178,13 +214,16 @@ export default function ViewNoteModal() {
                             "wooden rounded-2xl w-full min-h-[70dvh] max-h-[80dvh] flex flex-col"
                         )}>
                             <div className="mt-4 px-2 pr-3">
-                                <CommentNoteCard
+                                <NoteCard
                                     {...notes[77]}
+                                    tilt={0}
+                                    maxWidth="100%"
                                 />
                             </div>
-                            <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] my-3" />
-                            <ScrollArea className="flex-1 overflow-y-auto flex flex-col gap-10 pl-2 pr-3">
+                            <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] mt-3" />
+                            <ScrollArea className="flex-1 overflow-y-auto flex flex-col gap-10 pl-2 pr-3 shadow-[inset_2px_10px_20px_rgba(0,0,0,0.5),inset_0_5px_10px_rgba(0,0,0,0.4)]">
                                 <ScrollBar orientation="vertical" hidden />
+                                <div className="h-3" />
                                 {comments.length === 0 && (<div className="flex flex-col items-center justify-center h-60 gap-2">
                                     <Lottie
                                         animationData={emptyAnimation}
@@ -207,16 +246,18 @@ export default function ViewNoteModal() {
                                 <Masonry
                                     items={comments}
                                     width={containerWidth}
-                                    // key={comments.length}
+                                    key={"comments"}
                                     enableNewNoteDemo
                                     Child={CommentNoteCard}
                                     minWidth={400}
                                     gap={12}
                                     padding={3}
+                                    scrollOnNewItem={"top"}
                                 />
+                                <div className="h-3" />
                             </ScrollArea>
 
-                            <div className="p-1 mt-4">
+                            <div className="p-1">
                                 <WoodenPlatform
                                     className="h-fit w-full rounded-lg drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
                                     style={{ transition: "all 0.3s ease-in-out" }}
@@ -232,6 +273,7 @@ export default function ViewNoteModal() {
                                                 className="w-full min-h-16 resize-none field-sizing-content border-none outline-none max-h-20 text-sm p-3"
                                                 placeholder="Add a comment"
                                                 rows={10}
+                                                value={newComment}
                                                 onChange={handleTextareaChange}
                                                 onPaste={handlePaste}
                                                 autoFocus
@@ -254,6 +296,7 @@ export default function ViewNoteModal() {
                                                 </TooltipTrigger>
                                                 <TooltipContent>
                                                     <p>Pin to wall</p>
+
                                                 </TooltipContent>
                                             </Tooltip>
                                         </div>

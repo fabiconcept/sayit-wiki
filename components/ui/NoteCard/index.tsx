@@ -28,6 +28,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
     selectedFont,
     index = 0,
     isNew = false,
+    maxWidth = "450px",
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
@@ -71,7 +72,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
         }
     })();
 
-    const maxWidth = "450px";
+    const maxWidthString = useMemo(() => typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth, [maxWidth]);
     const minHeight = "50px";
 
     const date = new Date(timestamp);
@@ -319,7 +320,6 @@ const NoteCard: React.FC<NoteCardProps> = ({
     return (
         <motion.div
             ref={noteRef}
-            layout
             className={cn(
                 "relative group",
                 selectedFont,
@@ -337,7 +337,6 @@ const NoteCard: React.FC<NoteCardProps> = ({
             }}
         >
             <motion.div
-                layout="position"
                 className={cn(
                     "transform-gpu paper relative",
                     noteStyle === NoteStyle.FOLDED_CORNER_TR ? `
@@ -354,7 +353,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
                     ` : "",
                 )}
                 style={{
-                    maxWidth,
+                    maxWidth: maxWidthString,
                     minHeight,
                     backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
                     borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),

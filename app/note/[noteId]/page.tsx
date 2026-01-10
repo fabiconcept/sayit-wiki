@@ -12,12 +12,13 @@ import { cn, numberShortForm } from "@/lib/utils";
 import Lottie from "lottie-react";
 import { MessageCircleDashedIcon } from "lucide-react";
 import Link from "next/link";
+import NoteCard from "@/components/ui/NoteCard";
 
 export default function NotePage({ params }: { params: { noteId: string } }) {
     const { noteId } = params;
 
     return (
-        <div className="p-2 h-[calc(100dvh)] relative flex flex-col overflow-hidden">
+        <div className="p-2 h-[calc(100dvh)] max-w-[100vw] relative flex flex-col max-sm:overflow-x-hidden">
             <WoodenPlatform
                 className="h-fit w-full mx-auto rounded-lg drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)] group-hover:translate-x-2"
                 style={{ transition: "all 0.3s ease-in-out" }}
@@ -113,8 +114,10 @@ export default function NotePage({ params }: { params: { noteId: string } }) {
                         "wooden rounded-2xl w-full flex flex-col"
                     )}>
                         <div className="mt-4 px-2 pr-3">
-                            <CommentNoteCard
+                            <NoteCard
                                 {...notes[77]}
+                                tilt={0}
+                                maxWidth="100%"
                             />
                         </div>
                         <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] my-3" />
