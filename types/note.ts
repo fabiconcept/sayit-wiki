@@ -37,4 +37,6 @@ export interface NoteCardProps {
     showRedLine?: boolean;
     showLines?: boolean;
     selectedFont: string;
+    index?: number;
+    isNew?: boolean;
 }

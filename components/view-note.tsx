@@ -2,7 +2,7 @@
 import { cn, numberShortForm, removeSearchParam, updateSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
@@ -13,11 +13,61 @@ import notes from "@/constants/mock/notes";
 import CommentNoteCard from "./ui/NoteCard/CommentCard";
 import emptyAnimation from "./lottie/ghosty.json";
 import Loader from "./Loader";
+import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
+import NeoButton from "./neo-components/NeoButton";
+import { SendIcon } from "./animate-ui/icons/send";
+import Masonry from "./ui/Masonry";
+import { NoteCardProps, NoteStyle } from "@/types/note";
+import { TextInputHandler, NewlineTrimmer } from "./ui/NoteCard/actions";
 
 export default function ViewNoteModal() {
     const searchParams = useSearchParams();
+    const [comments, setComments] = useState<NoteCardProps[]>(notes.slice(15, 20).map((note, index) => ({ ...note, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index, isNew: false })));
+    const [newComment, setNewComment] = useState<string>("");
 
     const isViewingNote = useMemo(() => Boolean(searchParams.get("note")), [searchParams]);
+    const id = useMemo(() => searchParams.get("note") || "", [searchParams]);
+
+    const maxChars = 200; // Maximum characters allowed
+
+    /**
+     * Classes for handling text input
+     * - NewlineTrimmer: Handles newlines in the text input
+     * - TextInputHandler: Handles text input and limits the number of characters
+     */
+    const newlineTrimmer = useMemo(() => new NewlineTrimmer(), []);
+    const textInputHandler = useMemo(
+        () => new TextInputHandler(maxChars, setNewComment),
+        [maxChars, setNewComment]
+    );
+
+    const handleTextareaChange = useCallback(
+        (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            textInputHandler.handleTextareaChange(e);
+        },
+        [textInputHandler]
+    );
+
+    const handlePaste = useCallback(
+        (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+            textInputHandler.handlePaste(e);
+        },
+        [textInputHandler]
+    );
+
+
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const containerWidth = useMemo(() => containerRef.current?.clientWidth, [containerRef]);
+
+    const handleAddComment = () => {
+        if (!newComment.trim()) return;
+
+        const trimmedComment = newlineTrimmer.trimStrict(newComment);
+
+        setComments(prev => [...prev, { ...notes[77], content: trimmedComment, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index: comments.length, isNew: true }]);
+        setNewComment("");
+    };
 
     return (
         <Dialog
@@ -57,7 +107,7 @@ export default function ViewNoteModal() {
                                     loop={true}
                                     className="translate-y-0.5"
                                 >
-                                    <DialogClose className="cursor-pointer">
+                                    <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out">
                                         <XIcon strokeWidth={4} className="size-5 text-white hover:text-destructive" />
                                     </DialogClose>
                                 </AnimateIcon>
@@ -135,7 +185,7 @@ export default function ViewNoteModal() {
                             <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] my-3" />
                             <ScrollArea className="flex-1 overflow-y-auto flex flex-col gap-10 pl-2 pr-3">
                                 <ScrollBar orientation="vertical" hidden />
-                                {/* <div className="flex flex-col items-center justify-center h-60 gap-2">
+                                {comments.length === 0 && (<div className="flex flex-col items-center justify-center h-60 gap-2">
                                     <Lottie
                                         animationData={emptyAnimation}
                                         loop={true}
@@ -145,36 +195,25 @@ export default function ViewNoteModal() {
 
                                     <p className="text-sm font-bold">No comments yet</p>
                                     <p className="text-sm -mt-2 text-white/60">Be the first to leave a comment!</p>
-                                </div> */}
-                                {/* <div className="flex flex-col items-center justify-center h-60 gap-2">
+                                </div>)}
+                                {comments.length === 0 && <div className="flex flex-col items-center justify-center h-60 gap-2 mix-blend-screen">
                                     <Loader>
                                         <h4 className="md:text-base sm:text-sm text-xs dark:text-slate-400 font-bold animate-bounce">
                                             Loading comments...
                                         </h4>
                                     </Loader>
-                                </div> */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <CommentNoteCard
-                                        {...notes[17]}
-                                        tilt={0}
-                                    />
-                                    <CommentNoteCard
-                                        {...notes[17]}
-                                        tilt={0}
-                                    />
-                                    <CommentNoteCard
-                                        {...notes[17]}
-                                        tilt={0}
-                                    />
-                                    <CommentNoteCard
-                                        {...notes[17]}
-                                        tilt={0}
-                                    />
-                                    <CommentNoteCard
-                                        {...notes[17]}
-                                        tilt={0}
-                                    />
-                                </div>
+                                </div>}
+                                <div className="h-4" />
+                                <Masonry
+                                    items={comments}
+                                    width={containerWidth}
+                                    // key={comments.length}
+                                    enableNewNoteDemo
+                                    Child={CommentNoteCard}
+                                    minWidth={400}
+                                    gap={12}
+                                    padding={3}
+                                />
                             </ScrollArea>
 
                             <div className="p-1 mt-4">
@@ -186,14 +225,37 @@ export default function ViewNoteModal() {
                                     <div className="wooden p-0.5 flex border-2 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                                         <div
                                             className={cn(
-                                                "rounded-sm p-3 pr-5 bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex items-center justify-between gap-1"
+                                                "rounded-sm bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex items-start justify-between gap-1"
                                             )}
                                         >
                                             <textarea
-                                                className="w-full resize-none field-sizing-content border-none outline-none max-h-20 text-sm"
+                                                className="w-full min-h-16 resize-none field-sizing-content border-none outline-none max-h-20 text-sm p-3"
                                                 placeholder="Add a comment"
                                                 rows={10}
+                                                onChange={handleTextareaChange}
+                                                onPaste={handlePaste}
+                                                autoFocus
                                             />
+                                            <Tooltip>
+                                                <TooltipTrigger asChild className="p-3">
+                                                    <AnimateIcon animateOnHover="wiggle" loop={true}>
+                                                        <NeoButton
+                                                            element="div"
+                                                            onClick={handleAddComment}
+                                                            className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <SendIcon
+                                                                    strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
+                                                                <span className="sr-only">Pin to wall</span>
+                                                            </div>
+                                                        </NeoButton>
+                                                    </AnimateIcon>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Pin to wall</p>
+                                                </TooltipContent>
+                                            </Tooltip>
                                         </div>
                                     </div>
                                 </WoodenPlatform>

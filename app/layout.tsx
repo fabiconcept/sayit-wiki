@@ -26,7 +26,7 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body
-                className={`${fingerPaint.variable} antialiased min-h-screen dotted wooden`}
+                className={`${fingerPaint.variable} antialiased min-h-[100dvh] dotted wooden`}
             >
                 <ThemeProvider>
                     <Header />

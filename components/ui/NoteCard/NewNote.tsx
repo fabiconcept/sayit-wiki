@@ -1,11 +1,12 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import Clip, { ClipType } from "../Clip";
 import { cn, countTextLines, darkenHex } from '@/lib/utils';
 import '@/app/styles/notes.css';
 import { NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
+import { TextInputHandler } from './actions';
 
 interface NewNoteCardProps {
     id: string;
@@ -15,7 +16,7 @@ interface NewNoteCardProps {
     content: string;
     showRedLine?: boolean;
     showLines?: boolean;
-    onContentChange?: (id: string, content: string) => void;
+    onContentChange?: (content: string) => void;
     selectedFont?: FontFamily;
     tilt?: number;
 }
@@ -39,98 +40,25 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
     const minHeight = "50px";
     const maxChars = 500; // Maximum characters allowed
 
-    // Function to limit word length to 20 characters
-    const limitWordLength = (text: string): string => {
-        return text.split(/(\s+)/).map(word => {
-            // Preserve whitespace
-            if (/^\s+$/.test(word)) return word;
+    const textInputHandler = useMemo(
+        () => new TextInputHandler(maxChars, onContentChange),
+        [maxChars, id, onContentChange]
+    );
 
-            // Split by existing hyphens to preserve them
-            const segments = word.split('-');
-            
-            // Process each segment independently
-            const processedSegments = segments.map(segment => {
-                // Only break segments that are longer than 20 chars
-                if (segment.length > 20) {
-                    const chunks = [];
-                    for (let i = 0; i < segment.length; i += 20) {
-                        chunks.push(segment.slice(i, i + 20));
-                    }
-                    return chunks.join('-');
-                }
-                return segment;
-            });
-            
-            // Rejoin with original hyphens
-            return processedSegments.join('-');
-        }).join('');
-    };
+    const handleTextareaChange = useCallback(
+        (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            textInputHandler.handleTextareaChange(e);
+        },
+        [textInputHandler]
+    );
 
-    // Function to limit character count
-    const limitChars = (text: string): string => {
-        if (text.length > maxChars) {
-            return text.substring(0, maxChars);
-        }
-        return text;
-    };
+    const handlePaste = useCallback(
+        (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+            textInputHandler.handlePaste(e);
+        },
+        [textInputHandler]
+    );
 
-    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const target = e.target;
-        const cursorPosition = target.selectionStart;
-        let newText = target.value;
-
-        // Apply word length limiting
-        newText = limitWordLength(newText);
-
-        // Apply character limiting
-        newText = limitChars(newText);
-        
-        // Only update if the text changed after limiting
-        if (newText !== target.value) {
-            target.value = newText;
-            // Try to restore cursor position, but cap at text length
-            const newCursorPos = Math.min(cursorPosition, newText.length);
-            target.selectionStart = target.selectionEnd = newCursorPos;
-        }
-
-        if (onContentChange) {
-            onContentChange(id, newText);
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-        e.preventDefault();
-        let text = e.clipboardData.getData('text/plain');
-
-        // Apply word length limiting
-        text = limitWordLength(text);
-
-        // Get current cursor position and existing text
-        const target = e.currentTarget;
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-        const currentText = target.value;
-
-        // Construct new text with paste
-        const beforeCursor = currentText.substring(0, start);
-        const afterCursor = currentText.substring(end);
-        let newText = beforeCursor + text + afterCursor;
-
-        // Apply character limiting
-        newText = limitChars(newText);
-
-        // Set value
-        target.value = newText;
-
-        // Set cursor position after pasted content
-        const newCursorPos = Math.min(beforeCursor.length + text.length, newText.length);
-        target.selectionStart = target.selectionEnd = newCursorPos;
-
-        // Trigger change event
-        if (onContentChange) {
-            onContentChange(id, newText);
-        }
-    };
 
     const getClipPathStyle = () => {
         switch (noteStyle) {
@@ -349,7 +277,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     </filter>
                     <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
                 </svg>}
-                
+
                 {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <defs>
                         <filter id="stick-note-texture">
@@ -368,12 +296,12 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                         clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
                     }}
                 />}
-                
+
                 {noteStyle === NoteStyle.POLAROID && <div className={cn(
                     "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
                     `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
                 )} />}
-                
+
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
@@ -391,7 +319,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     <textarea
                         defaultValue={content}
                         ref={textAreaRef}
-                        className='text resize-none field-sizing-content overflow-hidden'
+                        className='text sm:min-h-[300px] min-h-[200px] resize-none field-sizing-content overflow-hidden'
                         style={{
                             marginLeft,
                             wordBreak: 'break-word',
@@ -420,7 +348,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     )}>
                         {content.length} / {maxChars}
                     </span>
-                    
+
                     {clipType !== ClipType.PIN && <Clip
                         type={clipType}
                         init={tilt < 0 ? 1 : 0}
@@ -431,7 +359,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
                     />}
                 </div>
             </div>
-            
+
             {clipType === ClipType.PIN && <Clip
                 type={ClipType.PIN}
                 className={cn(

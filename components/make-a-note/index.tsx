@@ -90,7 +90,7 @@ export default function MakeANote() {
         setSelectedFont(font);
     }
 
-    const handleContentChange = (id: string, content: string) => {
+    const handleContentChange = (content: string) => {
         setContent(content);
     }
 
@@ -123,6 +123,8 @@ export default function MakeANote() {
                     </Tooltip>
                 </div>
             </WoodenPlatform>
+
+            {/* Make a note modal */}
             <ResponsiveModal
                 open={open}
                 className="p-2"
@@ -138,6 +140,7 @@ export default function MakeANote() {
 
             >
                 <div className="flex flex-col gap-5 mt-5 text-white">
+                    {/* Note title */}
                     <div className="grid gap-2">
                         <div className="relative w-fit mx-auto">
                             <WoodenPlatform
@@ -157,9 +160,9 @@ export default function MakeANote() {
                         </div>
                         <p className="text-center text-sm drop-shadow-[0_0_10px_rgba(0,0,0,0.25),0_0_1px_rgba(0,0,0,0.9)]"><span className="bg-[var(--wooden-color)]/20 px-3">Your note will be visible to everyone on the community wall</span></p>
                     </div>
-
                     <div className="h-3" />
 
+                    {/* Note content */}
                     <div className="drop-shadow-[0_10px_10px_rgba(0,0,0,0.0.25),0_5px_2px_rgba(0,0,0,0.0.5)]">
                         <NewNoteCard
                             content={content || ""}
@@ -176,6 +179,8 @@ export default function MakeANote() {
                         />
                     </div>
                     <div className="h-2" />
+
+                    {/* Writing style */}
                     <div className="grid gap-4 px-2">
                         <Popover open={isDropDownOpen} onOpenChange={setIsDropDownOpen}>
                             <PopoverTrigger asChild>
@@ -247,9 +252,9 @@ export default function MakeANote() {
                             </PopoverContent>
                         </Popover>
                     </div>
-
                     <div className="h-2" />
 
+                    {/* Paper color */}
                     {selectedNoteStyle && selectedNoteStyle !== NoteStyle.POLAROID && <div className="relative px-2">
                         <WoodenPlatform
                             className="absolute -top-3 left-6 z-20 h-fit w-fit rounded-lg cursor-pointer drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
@@ -308,9 +313,9 @@ export default function MakeANote() {
                             </div>
                         </WoodenPlatform>
                     </div>}
-
                     <div className="h-2" />
 
+                    {/* Cancel and pin to wall buttons */}
                     <div className="w-full px-2">
                         <WoodenPlatform noScrews className="w-full h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)]">
                             <div className="px-2 py-2 flex items-center border-8 border-background/0 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">

@@ -9,7 +9,7 @@ import { useTheme } from 'next-themes';
 import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
 
-const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, transformOrigin: string }> = ({
+const NoteCard: React.FC<NoteCardProps> = ({
     id,
     clipType,
     noteStyle = NoteStyle.CLASSIC,
@@ -28,7 +28,6 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
     selectedFont,
     index = 0,
     isNew = false,
-    transformOrigin = "top right"
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
@@ -39,6 +38,38 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
         margin: "-50px",
         amount: 0.25
     });
+
+    const transformOrigin = (() => {
+        // Handle PIN clip type (consistent across most styles)
+        if (clipType === ClipType.PIN && noteStyle !== NoteStyle.TORN_TOP) {
+            return "top";
+        }
+
+        // Handle STAPLE clip type (consistent across most styles)
+        if (clipType === ClipType.Staple && noteStyle !== NoteStyle.CURVED_TOP) {
+            return "top left";
+        }
+
+        // Handle specific note styles
+        switch (noteStyle) {
+            case NoteStyle.CURVED_TOP:
+                return tilt < 0 ? "bottom right" : "bottom left";
+
+            case NoteStyle.FOLDED_CORNER_TR:
+                return tilt < 0 ? "top right" : "top left";
+
+            case NoteStyle.SPIRAL_BOTTOM:
+            case NoteStyle.SPIRAL_TOP:
+            case NoteStyle.STICKY_NOTE:
+                return tilt > 0 ? "top right" : "top left";
+
+            case NoteStyle.TORN_TOP:
+                return "top left";
+
+            default:
+                return tilt < 0 ? "top right" : "top left";
+        }
+    })();
 
     const maxWidth = "450px";
     const minHeight = "50px";
@@ -379,15 +410,15 @@ const NoteCard: React.FC<NoteCardProps & { index?: number; isNew?: boolean, tran
                             : 'none',
                     }}
                 >
-                    <p 
+                    <p
                         style={{
                             backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
                         } as React.CSSProperties}
                         className={cn(
-                        "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
-                        showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
-                        selectedFont === FontFamily.Ole ? "schoolbell" : ""
-                    )}>
+                            "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
+                            showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
+                            selectedFont === FontFamily.Ole ? "schoolbell" : ""
+                        )}>
                         {timestampText}
                     </p>
                     <article

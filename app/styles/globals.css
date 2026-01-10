@@ -73,8 +73,8 @@ body {
   --circle-diameter: 50px;
   --circle-scale-percent: 0.2;
   --radius: 0.625rem;
-  --wooden-color: rgb(85, 61, 19);
-  --wooden-color-heavy: rgba(98, 70, 22, 1);
+  --wooden-color: rgb(106, 71, 11);
+  --wooden-color-heavy: rgba(24, 24, 24, 0.927);
   --background: oklch(95.64% 0.003 48.72);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

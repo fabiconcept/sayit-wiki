@@ -8,17 +8,48 @@ import NoteCard from "./NoteCard";
 import { ClipType } from "./Clip";
 import { FontFamily } from "@/constants/fonts";
 
-interface MasonryProps {
-    items: NoteCardProps[];
-    enableNewNoteDemo?: boolean; // Set to true to demo new note animation
+interface MasonryProps<T = NoteCardProps> {
+    items: T[];
+    width?: number;
+    enableNewNoteDemo?: boolean;
+    Child?: React.FC<T>;
+    minWidth?: number;
+    gap?: number;
+    padding?: number;
 }
 
-export default function Masonry({ items, enableNewNoteDemo = false }: MasonryProps) {
-    const { width } = useResized();
+export default function Masonry({ items, width: propWidth, enableNewNoteDemo = false, Child, minWidth = 250, gap, padding }: MasonryProps) {
+    const { width: hookWidth } = useResized();
     const prevItemsLength = useRef(items.length);
     const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
-    const [displayItems, setDisplayItems] = useState(items);
+    const [displayItems, setDisplayItems] = useState<NoteCardProps[]>([]);
     const demoTriggered = useRef(false);
+
+    function removeDuplicatesAndSort<T extends { id: string }>(items: T[]): T[] {
+        if (items.length === 0) return [];
+        
+        // Single pass: deduplicate using Map (O(n))
+        const uniqueMap = new Map<string, T>();
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            uniqueMap.set(item.id, item);
+        }
+        
+        // Convert to array and sort in one go (O(n log n))
+        return Array.from(uniqueMap.values())
+            .sort((a, b) => b.id.localeCompare(a.id)); // Reversed sort (descending)
+    }
+
+    items = useMemo(() => removeDuplicatesAndSort(items), [items]);
+
+    useEffect(()=>{
+        if (!items) return;
+
+        setDisplayItems(items);
+    }, [items])
+
+    // Use prop width if provided, otherwise fall back to hook width
+    const width = propWidth ?? hookWidth;
 
     // Demo: Add a new note after 5 seconds (EASILY REMOVABLE - just set enableNewNoteDemo to false)
     useEffect(() => {
@@ -77,7 +108,7 @@ export default function Masonry({ items, enableNewNoteDemo = false }: MasonryPro
         if (!width) return null;
         if (itemsToDisplay.length === 0) return null;
 
-        const columnsToRender = Math.floor(((width - 105) / 250) * 0.8) || 1;
+        const columnsToRender = Math.floor(((width - 105) / minWidth) * 0.8) || 1;
 
         // Create array of empty arrays for each column
         const columnItems: (NoteCardProps & { globalIndex: number })[][] = Array.from(
@@ -92,52 +123,21 @@ export default function Masonry({ items, enableNewNoteDemo = false }: MasonryPro
         });
 
         return columnItems.map((columnData, columnIndex) => (
-            <MasonryColumn key={`column-${columnIndex}`}>
+            <MasonryColumn key={`column-${columnIndex}`} gap={gap}>
                 <AnimatePresence mode="popLayout" initial={false}>
                     {columnData.map((item) => {
                         const itemId = item.id || item.globalIndex;
                         const isNew = newItemIds.has(item.id || '');
 
-                        const transformOrigin = (() => {
-                            // Handle PIN clip type (consistent across most styles)
-                            if (item.clipType === ClipType.PIN && item.noteStyle !== NoteStyle.TORN_TOP) {
-                                return "top";
-                            }
-                    
-                            // Handle STAPLE clip type (consistent across most styles)
-                            if (item.clipType === ClipType.Staple && item.noteStyle !== NoteStyle.CURVED_TOP) {
-                                return "top left";
-                            }
-                    
-                            // Handle specific note styles
-                            switch (item.noteStyle) {
-                                case NoteStyle.CURVED_TOP:
-                                    return item.tilt < 0 ? "bottom right" : "bottom left";
-                    
-                                case NoteStyle.FOLDED_CORNER_TR:
-                                    return item.tilt < 0 ? "top right" : "top left";
-                    
-                                case NoteStyle.SPIRAL_BOTTOM:
-                                case NoteStyle.SPIRAL_TOP:
-                                case NoteStyle.STICKY_NOTE:
-                                    return item.tilt > 0 ? "top right" : "top left";
-                    
-                                case NoteStyle.TORN_TOP:
-                                    return "top left";
-                    
-                                default:
-                                    return item.tilt < 0 ? "top right" : "top left";
-                            }
-                        })();
-                        
                         return (
-                            <NoteCard 
-                                key={itemId} 
-                                {...item} 
-                                index={item.globalIndex}
-                                isNew={isNew}
-                                transformOrigin={transformOrigin}
-                            />
+                            <div className="drop-shadow-[10px_10px_10px_rgba(0,0,0,0.0.15),0_0_1px_rgba(0,0,0,0.0.5)]">
+                                {Child ? <Child key={itemId} {...item} /> : <NoteCard
+                                    key={itemId}
+                                    {...item}
+                                    index={item.globalIndex}
+                                    isNew={isNew}
+                                />}
+                            </div>
                         );
                     })}
                 </AnimatePresence>
@@ -145,17 +145,23 @@ export default function Masonry({ items, enableNewNoteDemo = false }: MasonryPro
         ));
     }, [width, itemsToDisplay, newItemIds]);
 
+    const styles = { gap: gap ? `${gap}px` : undefined, padding: padding ? `${padding}px` : undefined }
+
     return (
-        <div className={cn("flex gap-8 mx-auto p-5 sm:px-10 w-full")}>
+        <div
+            className={cn("flex gap-8 mx-auto p-3 sm:px-10 w-full")}
+            style={styles}
+        >
             {columns}
         </div>
     )
 }
 
-function MasonryColumn({ children }: { children: React.ReactNode }) {
+function MasonryColumn({ children, gap }: { children: React.ReactNode, gap?: number }) {
     return (
-        <motion.div 
-            className="flex flex-col gap-8 flex-1"
+        <motion.div
+            className="flex flex-col sm:gap-8 gap-4 flex-1"
+            style={{ gap: gap ? `${gap}px` : undefined }}
             layout
         >
             {children}
