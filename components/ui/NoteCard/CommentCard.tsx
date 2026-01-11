@@ -4,13 +4,14 @@ import { motion, useInView, Variants } from 'framer-motion';
 import Clip, { ClipType } from "../Clip";
 import { cn, darkenHex, formatSocialTime } from '@/lib/utils';
 import '@/app/styles/notes.css';
-import { NoteCardProps, NoteStyle } from '@/types/note';
+import { commentNoteCardProps, NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
 
-const CommentNoteCard: React.FC<NoteCardProps> = ({
+const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
+    clipType,
     timestamp,
     content,
     tilt,
@@ -19,6 +20,8 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
     selectedFont,
     index = 0,
     isNew = false,
+    title,
+    communityNote,
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
@@ -33,7 +36,7 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
 
     const minHeight = "40px";
 
-    const date = new Date(timestamp);
+    const date = timestamp ? new Date(timestamp) : new Date();
     const timestampText = formatSocialTime(date, true);
 
     // Smart delay calculation - stagger based on position
@@ -208,7 +211,7 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                         contentEditable={false}
                         suppressContentEditableWarning
                         spellCheck={false}
-                        className='text translate-y-7 pb-7'
+                        className='text translate-y-7 pb-7 min-h-5'
                         style={{
                             marginLeft,
                             wordBreak: 'break-word',
@@ -218,11 +221,19 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                         aria-label="Comment content"
                         aria-readonly="true"
                     >
+                        {title && <p className='font-bold' style={{
+                            "--selected-bg": "black",
+                            "--color-white": "white",
+                            color: darkenHex(backgroundColor as `#${string}`, 80),
+                        } as React.CSSProperties}>{title}</p>}
                         {content}
+                        <br />
+                        <br />
+                        {communityNote && <p className='font-medium'>Community note: <span className='text-red-500'>{communityNote}</span></p>}
                     </article>
                 </div>
                 
-                <p
+                {timestamp && <p
                     style={{
                         backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
                     } as React.CSSProperties}
@@ -232,14 +243,20 @@ const CommentNoteCard: React.FC<NoteCardProps> = ({
                         selectedFont === FontFamily.Ole ? "schoolbell" : ""
                     )}>
                     {timestampText}
-                </p>
-                
-                <Clip
+                </p>}
+                {title && <div className="animate-in slide-in-from-top-full duration-300">
+                    <Clip
+                        type={ClipType.PIN}
+                        className={"absolute top-0 left-5 translate-x-1"}
+                    />
+                </div>}
+
+                {!title && <Clip
                     type={ClipType.Staple}
                     init={0}
                     noteStyle={NoteStyle.TORN_LEFT}
                     className={"absolute top-0 left-5 translate-x-1"}
-                />
+                />}
             </div>
         </motion.div>
     );

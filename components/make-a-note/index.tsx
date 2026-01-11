@@ -20,6 +20,7 @@ import { XIcon } from "../animate-ui/icons/x";
 import { PinIcon } from "../animate-ui/icons/pin";
 import { useSearchParams } from "next/navigation";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
+import { toast } from "../ui/toast";
 
 export default function MakeANote() {
     const searchParams = useSearchParams();
@@ -40,12 +41,25 @@ export default function MakeANote() {
                 key: KeyboardKey.KeyN,
                 ctrlKey: true,
                 enabled: true,
+            },
+            {
+                key: KeyboardKey.KeyC,
+                ctrlKey: true,
+                platformAware: true,
+                enabled: true,
             }
         ],
         onTrigger: (key) => {
             switch (key.key) {
                 case KeyboardKey.KeyN:
                     handleOpenChange(true);
+                    break;
+                case KeyboardKey.KeyC:
+                    toast.success({
+                        title: "Link copied",
+                        description: "You have copied the link to this note",
+                        duration: 5000,
+                    }); 
                     break;
             }
         }

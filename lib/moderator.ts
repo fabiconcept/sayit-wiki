@@ -3,7 +3,7 @@
  * Supports multiple moderation levels and an expandable word library
  */
 
-import { badwords } from "@/constants/mock/badword";
+import { all_bad_words } from "@/constants/data";
 
 export enum ModerationLevel {
     STRICT = 'strict',     // Blocks mild, moderate, and severe content
@@ -166,31 +166,32 @@ export class NoBadWord {
             .split('')
             .map(char => {
                 const substitutions: Record<string, string> = {
-                    'a': '[aа@4áàâäåɑα]',
-                    'e': '[eе3€éèêëė]',
-                    'i': '[iі1!|íìîïıɪ]',
-                    'o': '[oо0óòôöøοơ]',
-                    'u': '[uúùûüυս]',
-                    's': '[sѕ$5zʂ]',
-                    't': '[t7+]',
-                    'l': '[l1!|]',
-                    'b': '[b8]',
-                    'g': '[g96]',
-                    'z': '[z2]',
-                    'c': '[cсϲ]',
-                    'p': '[pрρ]',
-                    'y': '[yуү]',
-                    'x': '[xхҳ]',
-                    'd': '[d]',
-                    'f': '[f]',
-                    'h': '[h]',
-                    'k': '[k]',
-                    'm': '[m]',
-                    'n': '[nñń]',
-                    'q': '[q]',
-                    'r': '[r]',
-                    'v': '[v]',
-                    'w': '[w]'
+                    'a': '[aаàáâãäåāăąǎαаӓӑ@4∆^Λλæ∀ª]',
+                    'b': '[bьЬβвВ68ßþҍ|3ḃḅҩ]',
+                    'c': '[cсϲćčċçĉ¢ςҫ©ċƈĉ\\[{(]',  // ← REMOVED (<{[
+                    'd': '[dďđðδԁþḋḍ]',
+                    'e': '[eеèéêëēĕėęěəэԑ3€ℯ∈ёєε℮ҽ]',
+                    'f': '[fƒფϝғӷḟ₣ſ]',
+                    'g': '[gģğġǧցĝ69ɡɢ₲ǥ]',
+                    'h': '[hһհңҥӊ#ħḣḥҺ]',
+                    'i': '[iіïîíīĩįìıɪіӏ1!|׀¡ιíɨ]',
+                    'j': '[jјʝĵјĵɉ]',
+                    'k': '[kķĸкқҝ|<ḳҟ]',
+                    'l': '[lĺļľŀłlӏ1!|׀Ɩḷḹ]',
+                    'm': '[mмӎḿṁṃ]',
+                    'n': '[nñńņňŋηпոռṅṇ]',
+                    'o': '[oоòóôõöøōŏőօοσоӧ0()\\[\\]{}⊙◯øӧ]',  // Keep these for o → 0
+                    'p': '[pрρթԗþṗṕ℗]',
+                    'q': '[qգ9ԛ]',
+                    'r': '[rŕŗřгяԁʀ®ṙṛ]',
+                    's': '[sѕśŝşšșʂ$5zž§ṡṣ]',
+                    't': '[tťţțтҭ7\\+†‡ṫṭł]',
+                    'u': '[uùúûüũūŭůűųսυմцu̲ʊμυúṳṵvνѵvԝṽṿ]',
+                    'v': '[vνѵvԝṽṿ]',
+                    'w': '[wŵѡաԝvvẁẃẅ]',
+                    'x': '[xхҳ×χẋẍ]',  // ← REMOVED ><][}{[
+                    'y': '[yýÿŷуүўʏγ¥ẏỳ]',
+                    'z': '[zźżžƶзʐ2ẑẓ]'
                 };
 
                 const lowerChar = char.toLowerCase();
@@ -428,6 +429,6 @@ export function quickModerate(
     level: ModerationLevel = ModerationLevel.MODERATE
 ): ModerationResult {
     const moderator = new NoBadWord(level);
-    moderator.importLibrary(badwords as WordEntry[]);
+    moderator.importLibrary(all_bad_words as WordEntry[]);
     return moderator.moderate(content);
 }

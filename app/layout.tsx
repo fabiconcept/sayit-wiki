@@ -6,7 +6,7 @@ import "./styles/neomorphs.css";
 import Header from "@/components/header";
 import ThemeProvider from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster, ToastProvider } from "@/components/ui/toast";
 
 const fingerPaint = Finger_Paint({
     variable: "--font-finger-paint",
@@ -29,11 +29,13 @@ export default function RootLayout({
             <body
                 className={`${fingerPaint.variable} antialiased min-h-[100dvh] dotted wooden`}
             >
-                <Toaster />
                 <ThemeProvider>
-                    <Header />
-                    {children}
-                    <ThemeToggle />
+                    <ToastProvider>
+                        <Toaster />
+                        <Header />
+                        {children}
+                        <ThemeToggle />
+                    </ToastProvider>
                 </ThemeProvider>
             </body>
         </html>

@@ -112,24 +112,6 @@ export default function Masonry({
                         return next;
                     });
                 }, 1200);
-
-                if (scrollOnNewItem && containerRef.current) {
-                    setTimeout(() => {
-                        if (scrollOnNewItem === 'top') {
-                            containerRef.current?.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start',
-                                inline: 'nearest'
-                            });
-                        } else if (scrollOnNewItem === 'bottom') {
-                            containerRef.current?.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'end',
-                                inline: 'nearest'
-                            });
-                        }
-                    }, 100);
-                }
             } else {
             }
         } else if (itemsToDisplay.length > prevItemsLength.current) {

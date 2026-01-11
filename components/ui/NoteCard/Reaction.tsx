@@ -1,7 +1,7 @@
 "use client";
 import { Heart } from "@/components/animate-ui/icons/heart";
 import { AnimateIcon } from "@/components/animate-ui/icons/icon";
-import { cn, numberShortForm, updateSearchParam } from "@/lib/utils";
+import { cn, copyToClipboard, numberShortForm, updateSearchParam } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { MessageCircleMoreIcon } from "@/components/animate-ui/icons/message-circle-more";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +11,7 @@ import { motion, inView, useTransform, useMotionValue, animate } from "framer-mo
 import { DropdownMenu, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "../dropdown-menu";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRouter } from "next/navigation";
+import { toast } from "../toast";
 
 interface ReactionStatistics {
     likes: number;
@@ -36,6 +37,12 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     const ref = useRef<HTMLDivElement>(null);
 
     const handleLike = () => {
+        if (isLiked) {
+            setLikes(likes - 1);
+            setIsLiked(false);
+            return;
+        }
+
         setLikes(likes + 1);
         setIsLiked(!isLiked);
     }
@@ -103,7 +110,14 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
                             onClick={handleComment}
                         >
-                            <MessageCircleMoreIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
+                            <MessageCircleMoreIcon 
+                                strokeWidth={2} 
+                                className={cn(
+                                    "sm:w-4 text-black sm:h-4 w-3 h-3 scale-125",
+                                    isCommented ? "stroke-blue-500" : "stroke-black"
+                                )} 
+                                fill={isCommented ? "rgb(255,255,255,0.25)" : "none"}
+                            />
                             <span className="text-sm font-semibold text-black">{numberShortForm(comments)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>
@@ -118,7 +132,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             animateOnHover="path"
                             className="flex items-center gap-2 rotate-5 cursor-help transition-all duration-150 ease-in-out"
                         >
-                            <UserRoundIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
+                            <UserRoundIcon strokeWidth={2} className="sm:w-3.5 text-black sm:h-3.5 w-2.5 h-2.5 scale-125 opacity-75" />
                             <span className="text-sm font-semibold text-black">{numberShortForm(views)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>

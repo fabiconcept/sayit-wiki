@@ -3,7 +3,6 @@ import { cn, luckyPick, numberShortForm, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
 import { XIcon } from "./animate-ui/icons/x";
@@ -22,8 +21,8 @@ import { TextInputHandler, NewlineTrimmer } from "./ui/NoteCard/actions";
 import NoteCard from "./ui/NoteCard";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { backgroundColors } from "@/constants/notes";
-import { ModerationLevel, NoBadWord, quickModerate, WordEntry, WordSeverity } from "@/lib/moderator";
-import { toast } from "sonner";
+import { ModerationLevel, quickModerate } from "@/lib/moderator";
+import { toast } from "./ui/toast";
 
 export default function ViewNoteModal() {
     const searchParams = useSearchParams();
@@ -59,28 +58,51 @@ export default function ViewNoteModal() {
         [textInputHandler]
     );
 
-    const handleAddComment = useCallback(() => {
+    const handleAddComment = useCallback(async () => {
+        if (!scrollAreaRef.current) return;
+
+        
         if (!newComment.trim()) return;
         const trimmedComment = newlineTrimmer.trimStrict(newComment);
         const noteId = `comment_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
         const randomPaperColor = backgroundColors[luckyPick(0, backgroundColors.length - 1)];
-
+        
         const moderationResult = quickModerate(trimmedComment, ModerationLevel.STRICT);
-
+        
         if (moderationResult.isWTF) {
-            toast.error("What the fuck? You're not allowed to say that!", {
-                description: "Please remove the prohibited words and try again",
+            toast.error({
+                title: "What's wrong with you?",
+                description: "You can't say that here, or to anyone else for that matter!",
+                communityNote: `Found ${moderationResult.matches.length} words: ${moderationResult.matches.map(match => match.word).join(", ")}`,
             });
-
+            
             return;
         }
+        
+        const scrollTimeout = setTimeout(() => {
+            scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
 
-        const note = { ...notes[77], id: noteId, content: moderationResult.sanitized, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index: comments.length, isNew: true, backgroundColor: randomPaperColor };
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const note = { 
+            ...notes[77], 
+            id: noteId, 
+            content: moderationResult.sanitized, 
+            tilt: 0, 
+            noteStyle: NoteStyle.SPIRAL_LEFT, 
+            index: comments.length, 
+            backgroundColor: randomPaperColor,
+            timestamp: new Date().toISOString(), 
+            isNew: true
+        };
 
 
-        setComments(prev => [...prev.map(comment => ({ ...comment, isNew: undefined })), note]);
+        setComments(prev => [...prev.map(comment => ({ ...comment })), note]);
         setNewComment("");
-    }, [newComment, comments]);
+
+        return () => clearTimeout(scrollTimeout);
+    }, [newComment, comments, newlineTrimmer]);
 
     useShortcuts({
         shortcuts: [
@@ -103,6 +125,7 @@ export default function ViewNoteModal() {
     }, [isViewingNote, handleAddComment]);
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
     const containerWidth = useMemo(() => containerRef.current?.clientWidth, [containerRef]);
 
     return (
@@ -221,9 +244,8 @@ export default function ViewNoteModal() {
                                 />
                             </div>
                             <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] mt-3" />
-                            <ScrollArea className="flex-1 overflow-y-auto flex flex-col gap-10 pl-2 pr-3 shadow-[inset_2px_10px_20px_rgba(0,0,0,0.5),inset_0_5px_10px_rgba(0,0,0,0.4)]">
-                                <ScrollBar orientation="vertical" hidden />
-                                <div className="h-3" />
+                            <div ref={scrollAreaRef} className="flex-1 overflow-y-auto flex flex-col gap-10 pl-2 pr-3">
+                                <div className="h-3 w-32 bg-white" />
                                 {comments.length === 0 && (<div className="flex flex-col items-center justify-center h-60 gap-2">
                                     <Lottie
                                         animationData={emptyAnimation}
@@ -242,7 +264,6 @@ export default function ViewNoteModal() {
                                         </h4>
                                     </Loader>
                                 </div>}
-                                <div className="h-4" />
                                 <Masonry
                                     items={comments}
                                     width={containerWidth}
@@ -252,10 +273,9 @@ export default function ViewNoteModal() {
                                     minWidth={400}
                                     gap={12}
                                     padding={3}
-                                    scrollOnNewItem={"top"}
                                 />
                                 <div className="h-3" />
-                            </ScrollArea>
+                            </div>
 
                             <div className="p-1">
                                 <WoodenPlatform

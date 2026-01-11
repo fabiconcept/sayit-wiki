@@ -41,3 +41,10 @@ export interface NoteCardProps {
     isNew?: boolean;
     maxWidth?: number | string;
 }
+
+export interface commentNoteCardProps extends Pick<NoteCardProps, "content" | "tilt" | "showRedLine" | "showLines" | "selectedFont" | "index" | "isNew" | "maxWidth" | "noteStyle" | "backgroundColor" | "id" > {
+    timestamp?: string;
+    title?: string;
+    communityNote?: string;
+    clipType?: ClipType;
+}
