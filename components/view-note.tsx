@@ -28,8 +28,13 @@ export default function ViewNoteModal() {
     const searchParams = useSearchParams();
     const [comments, setComments] = useState<NoteCardProps[]>(notes.slice(15, 20).map((note, index) => ({ ...note, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index, isNew: false, id: `comment_${Date.now()}_${index}` })));
     const [newComment, setNewComment] = useState<string>("");
-
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const isViewingNote = useMemo(() => Boolean(searchParams.get("note")), [searchParams]);
+
+    const handleCommentTap = () => {
+        if (!textareaRef.current) return;
+        textareaRef.current.focus();
+    }
 
     const maxChars = 200; // Maximum characters allowed
 
@@ -240,6 +245,7 @@ export default function ViewNoteModal() {
                                 <NoteCard
                                     {...notes[77]}
                                     tilt={0}
+                                    onCommentTap={handleCommentTap}
                                     maxWidth="100%"
                                 />
                             </div>
@@ -293,6 +299,7 @@ export default function ViewNoteModal() {
                                                 className="w-full min-h-16 resize-none field-sizing-content border-none outline-none max-h-20 text-sm p-3"
                                                 placeholder="Add a comment"
                                                 rows={10}
+                                                ref={textareaRef}
                                                 value={newComment}
                                                 onChange={handleTextareaChange}
                                                 onPaste={handlePaste}

@@ -69,9 +69,9 @@ function DrawerContent({
       >
         <div className="bg-black/25 shadow-[inset_1px_1px_5px_rgba(0,0,0,0.9)] mx-auto translate-y-5 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block relative z-10" />
         <WoodenPlatform className="w-full h-full rounded-lg overflow-hidden">
-          <div className="p-1 flex h-full border-4 border-t-[32px] border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
+          <div className="p-1 flex h-full overflow-y-auto border-4 border-t-[32px] border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
             <div className={cn(
-              "wooden rounded-lg h-full overflow-hidden w-full m-0",
+              "wooden rounded-lg h-fit w-full m-0",
               className
             )}>
               {children}

@@ -13,9 +13,16 @@ import Lottie from "lottie-react";
 import { MessageCircleDashedIcon } from "lucide-react";
 import Link from "next/link";
 import NoteCard from "@/components/ui/NoteCard";
+import { useRef } from "react";
 
 export default function NotePage({ params }: { params: { noteId: string } }) {
     const { noteId } = params;
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const handleCommentTap = () => {
+        if (!textareaRef.current) return;
+        textareaRef.current.focus();
+    }
 
     return (
         <div className="p-2 h-[calc(100dvh)] max-w-[100vw] relative flex flex-col max-sm:overflow-x-hidden">
@@ -118,6 +125,7 @@ export default function NotePage({ params }: { params: { noteId: string } }) {
                                 {...notes[77]}
                                 tilt={0}
                                 maxWidth="100%"
+                                onCommentTap={handleCommentTap}
                             />
                         </div>
                         <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] my-3" />
@@ -181,6 +189,7 @@ export default function NotePage({ params }: { params: { noteId: string } }) {
                                             className="w-full resize-none field-sizing-content border-none outline-none max-h-20 text-xs"
                                             placeholder="Add a comment"
                                             rows={10}
+                                            ref={textareaRef}
                                         />
                                     </div>
                                 </div>

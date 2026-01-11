@@ -1,17 +1,16 @@
 "use client";
 import { Heart } from "@/components/animate-ui/icons/heart";
 import { AnimateIcon } from "@/components/animate-ui/icons/icon";
-import { cn, copyToClipboard, numberShortForm, updateSearchParam } from "@/lib/utils";
+import { cn, numberShortForm, updateSearchParam } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { MessageCircleMoreIcon } from "@/components/animate-ui/icons/message-circle-more";
 import { useEffect, useRef, useState } from "react";
 import { EllipsisVerticalIcon } from "@/components/animate-ui/icons/ellipsis-vertical";
 import { UserRoundIcon } from "@/components/animate-ui/icons/user-round";
-import { motion, inView, useTransform, useMotionValue, animate } from "framer-motion";
-import { DropdownMenu, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "../dropdown-menu";
+import { motion, inView } from "framer-motion";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "../dropdown-menu";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRouter } from "next/navigation";
-import { toast } from "../toast";
 
 interface ReactionStatistics {
     likes: number;
@@ -21,6 +20,7 @@ interface ReactionStatistics {
     isCommented: boolean;
     isViewed: boolean;
     noteId: string;
+    onCommentTap: () => void;
 }
 
 export default function ReactionCard({ statistics, className }: { statistics: ReactionStatistics, className: string }) {
@@ -45,16 +45,6 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
 
         setLikes(likes + 1);
         setIsLiked(!isLiked);
-    }
-
-    const handleComment = () => {
-        if (isMobile) {
-            router.push(`/note/${statistics.noteId}`);
-            return;
-        }
-
-        if (!statistics.noteId) return;
-        updateSearchParam("note", statistics.noteId);
     }
 
     const handleView = () => {
@@ -108,7 +98,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             animateOnTap="fill"
                             animateOnHover="path"
                             className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
-                            onClick={handleComment}
+                            onClick={statistics.onCommentTap}
                         >
                             <MessageCircleMoreIcon 
                                 strokeWidth={2} 
@@ -155,9 +145,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                     </Tooltip>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="gap-1">
-                    <DropdownMenuItem>Copy</DropdownMenuItem>
-                    <DropdownMenuItem>Share</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive hover:text-destructive border border-destructive/50 bg-destructive/5">Report</DropdownMenuItem>
+                    <DropdownMenuItem className="text-white justify-center text-sm">Copy</DropdownMenuItem>
+                    <DropdownMenuItem className="text-white justify-center text-sm">Share</DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20">Report</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </motion.div>

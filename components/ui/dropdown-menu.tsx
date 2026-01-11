@@ -51,7 +51,7 @@ function DropdownMenuContent({
           <>
             <WoodenPlatform className="w-full h-full rounded-lg" noScrews={true}>
               <div className="wooden p-1 flex border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
-                <div 
+                <div
                   className={cn(
                     "rounded-sm p-1 h-full w-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)] flex flex-col gap-1",
                     className
@@ -95,9 +95,21 @@ function DropdownMenuItem({
       )}
       {...props}
       children={
-        <NeoButton element="div" className={cn("flex wooden items-center text-black gap-2 px-2 py-1 relative h-10 w-32", className)}>
-          {props.children}
-        </NeoButton>
+        <WoodenPlatform
+          className="w-full rounded-lg cursor-pointer drop-shadow-[0_0_10px_rgba(0,0,0,0.0.25),0_0_5px_rgba(0,0,0,0.0.5)] active:scale-95"
+          noScrews
+        >
+          <div className="wooden p-1 flex border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] dark:shadow-[inset_2px_2px_10px_rgba(20,20,20,0.25),inset_-2px_-2px_10px_rgba(20,20,20,0.5),0_0_4px_rgba(20,20,20,0.25)]">
+            <div
+              className={cn(
+                "rounded-sm px-2 py-1 bg-black/30 dark:bg-black/10 hover:bg-black/40 dark:hover:bg-white/10 duration-100 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex justify-between items-center gap-1",
+                className
+              )}
+            >
+              {props.children}
+            </div>
+          </div>
+        </WoodenPlatform>
       }
     />
   )

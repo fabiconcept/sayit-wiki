@@ -1,12 +1,14 @@
 "use client";
 import { useResized } from "@/hooks/use-resized";
-import { cn } from "@/lib/utils";
+import { cn, updateSearchParam } from "@/lib/utils";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { NoteCardProps, NoteStyle } from "@/types/note";
 import NoteCard from "./NoteCard";
 import { ClipType } from "./Clip";
 import { motion } from "framer-motion";
 import { FontFamily } from "@/constants/fonts";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useRouter } from "next/navigation";
 
 interface MasonryProps<T = NoteCardProps> {
     items: T[];
@@ -36,6 +38,8 @@ export default function Masonry({
     const [displayItems, setDisplayItems] = useState<NoteCardProps[]>([]);
     const demoTriggered = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
+    const router = useRouter();
 
     // Ensure unique items - deduplicate and sort
     const uniqueItems = useMemo(() => {
@@ -129,6 +133,16 @@ export default function Masonry({
         return Math.floor(((width - 105) / minWidth) * 0.8) || 1;
     }, [width, minWidth]);
 
+    const handleCommentTap = (noteId: string) => {
+        if (isMobile) {
+            router.push(`/note/${noteId}`);
+            return;
+        }
+
+        if (!noteId) return;
+        updateSearchParam("note", noteId);
+    }
+
     const columns = useMemo(() => {
 
         if (!width) return null;
@@ -170,6 +184,7 @@ export default function Masonry({
                                 {...item}
                                 index={item.globalIndex}
                                 isNew={isNew}
+                                onCommentTap={() => handleCommentTap(item.id || '')}
                             />}
                         </motion.div>
                     );
@@ -179,7 +194,6 @@ export default function Masonry({
     }, [width, itemsToDisplay, newItemIds, Child, gap, columnsCount]);
 
     const styles = { gap: gap ? `${gap}px` : undefined, padding: padding ? `${padding}px` : undefined }
-
 
     return (
         <div

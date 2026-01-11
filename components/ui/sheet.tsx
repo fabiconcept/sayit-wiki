@@ -72,9 +72,9 @@ function SheetContent({
         {...props}
       >
         <WoodenPlatform className="w-full h-full rounded-lg overflow-hidden">
-          <div className="p-1 flex h-full border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
+          <div className="p-1 flex h-full overflow-y-auto border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
             <div className={cn(
-              "wooden rounded-lg h-full overflow-y-auto w-full m-0",
+              "wooden rounded-lg h-fit w-full m-0",
               side === "right" && "shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]",
               className
             )}>

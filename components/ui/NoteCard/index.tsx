@@ -9,7 +9,7 @@ import { useTheme } from 'next-themes';
 import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
 
-const NoteCard: React.FC<NoteCardProps> = ({
+const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
     id,
     clipType,
     noteStyle = NoteStyle.CLASSIC,
@@ -29,6 +29,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
     index = 0,
     isNew = false,
     maxWidth = "450px",
+    onCommentTap,
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
@@ -438,7 +439,16 @@ const NoteCard: React.FC<NoteCardProps> = ({
                         {content}
                     </article>
                     <ReactionCard
-                        statistics={{ likes: likesCount, comments: commentsCount, views: viewsCount, isLiked, isCommented, isViewed, noteId: id || '' }}
+                        statistics={{ 
+                            likes: likesCount, 
+                            comments: commentsCount, 
+                            views: viewsCount, 
+                            isLiked, 
+                            isCommented, 
+                            isViewed, 
+                            noteId: id || '', 
+                            onCommentTap: onCommentTap 
+                        }}
                         className={cn(
                             "w-full px-6 translate-y-2",
                             showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
