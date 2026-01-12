@@ -461,6 +461,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                             content,
                             noteId: id || '',
                             canReact,
+                            selectedFont: selectedFont as FontFamily,
                             onDropMenuOpen: setDropMenuOpen,
                             onCommentTap: onCommentTap,
                             onSaveAsImage: downloadWithColor

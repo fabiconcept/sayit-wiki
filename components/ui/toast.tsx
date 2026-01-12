@@ -22,6 +22,7 @@ export interface Toast {
     type: ToastType;
     title?: string;
     description?: string;
+    selectedFont?: FontFamily;
     communityNote?: string;
     duration?: number;
     props: Omit<commentNoteCardProps, "backgroundColor">;
@@ -60,7 +61,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         const props: Omit<commentNoteCardProps, "backgroundColor"> = {
             noteStyle: noteStylesThreshold[luckNote],
             clipType: luckyClipType,
-            selectedFont: fontStylesThreshold[luckyFont],
+            selectedFont: toast.selectedFont ?? fontStylesThreshold[luckyFont],
             tilt: luckyTilt,
             content: toast.description ?? "",
             id: id,
@@ -119,6 +120,7 @@ interface ToastOptions {
     description?: string;
     duration?: number;
     communityNote?: string;
+    selectedFont?: FontFamily;
 }
 
 function createToast(type: ToastType, options: ToastOptions) {
@@ -133,6 +135,7 @@ function createToast(type: ToastType, options: ToastOptions) {
         description: options.description,
         duration: options.duration,
         communityNote: options.communityNote,
+        selectedFont: options.selectedFont,
     });
 }
 

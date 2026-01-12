@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuIte
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRouter } from "next/navigation";
 import { toast } from "../toast";
+import { FontFamily } from "@/constants/fonts";
 
 interface ReactionStatistics {
     likes: number;
@@ -26,6 +27,7 @@ interface ReactionStatistics {
     onDropMenuOpen: (open: boolean) => void;
     onCommentTap: () => void;
     onSaveAsImage: (color: string) => void;
+    selectedFont: FontFamily;
 }
 
 export default function ReactionCard({ statistics, className }: { statistics: ReactionStatistics, className: string }) {
@@ -69,6 +71,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 title: "Note copied",
                 description: statistics.content.length > 100 ? statistics.content.slice(0, 100) + "..." : statistics.content,
                 duration: 2000,
+                selectedFont: statistics.selectedFont,
             });
         }
     }
