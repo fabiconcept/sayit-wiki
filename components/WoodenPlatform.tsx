@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
-export default function WoodenPlatform({ children, className, style, noScrews = false }: { children: React.ReactNode, className?: string, style?: React.CSSProperties, noScrews?: false | true | "two" }) {
+export default function WoodenPlatform({ children, className, style, noScrews = false, onClick }: { children: React.ReactNode, className?: string, style?: React.CSSProperties, noScrews?: false | true | "two", onClick?: () => void }) {
     return (
         <>
-            <div className={cn("w-fit h-full relative rounded-full overflow-hidden group", className)} style={style}>
+            <div className={cn("w-fit h-full relative rounded-full overflow-hidden group", className)} style={style} onClick={onClick}>
                 <div className="absolute top-0 left-0 h-full w-full z-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-[120%] object-contain">
                         <filter id="filter">

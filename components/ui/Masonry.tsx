@@ -133,16 +133,6 @@ export default function Masonry({
         return Math.floor(((width - 105) / minWidth) * 0.8) || 1;
     }, [width, minWidth]);
 
-    const handleCommentTap = (noteId: string) => {
-        if (isMobile) {
-            router.push(`/note/${noteId}`);
-            return;
-        }
-
-        if (!noteId) return;
-        updateSearchParam("note", noteId);
-    }
-
     const columns = useMemo(() => {
 
         if (!width) return null;
@@ -159,6 +149,17 @@ export default function Masonry({
             const columnIndex = globalIndex % columnsCount;
             columnItems[columnIndex].push({ ...item, globalIndex });
         });
+
+
+        const handleCommentTap = (noteId: string) => {
+            if (isMobile) {
+                router.push(`/note/${noteId}`);
+                return;
+            }
+
+            if (!noteId) return;
+            updateSearchParam("note", noteId);
+        }
 
         return columnItems.map((columnData, columnIndex) => (
             <MasonryColumn key={columnIndex} gap={gap}>
@@ -178,7 +179,7 @@ export default function Masonry({
                                     stiffness: 300
                                 }
                             }}
-                            className="drop-shadow-[10px_10px_10px_rgba(0,0,0,0.0.15),0_0_1px_rgba(0,0,0,0.0.5)]"
+                            className="drop-shadow-[10px_10px_10px_rgba(0,0,0,0.0.15),0_0_1px_rgba(0,0,0,0.0.5)] overflow-visible"
                         >
                             {Child ? <Child {...item} /> : <NoteCard
                                 {...item}
@@ -191,7 +192,7 @@ export default function Masonry({
                 })}
             </MasonryColumn>
         ));
-    }, [width, itemsToDisplay, newItemIds, Child, gap, columnsCount]);
+    }, [width, itemsToDisplay, newItemIds, Child, gap, columnsCount, isMobile, router]);
 
     const styles = { gap: gap ? `${gap}px` : undefined, padding: padding ? `${padding}px` : undefined }
 

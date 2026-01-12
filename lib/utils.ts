@@ -41,13 +41,16 @@ const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
 
 export function intensifyHex(hex: HexColor, percent: number): HexColor {
   // HEX → RGB (0–1)
-  let r = parseInt(hex.slice(1, 3), 16) / 255;
-  let g = parseInt(hex.slice(3, 5), 16) / 255;
-  let b = parseInt(hex.slice(5, 7), 16) / 255;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h = 0, s = 0, l = (max + min) / 2;
+  
+  const l = (max + min) / 2;
+  let h = 0; 
+  let s = 0; 
 
   if (max !== min) {
     const d = max - min;

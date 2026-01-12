@@ -139,7 +139,7 @@ export default function ReportNoteModal() {
             open={isReportingNote}
             onOpenChange={(open) => {
                 if (!open) {
-                    removeSearchParam("note-to-report");
+                    removeSearchParam(searchParamsKeys.NOTE_TO_REPORT);
                 }
             }}
             className="max-h-[90dvh] sm:w-[90dvw] text-white group"
