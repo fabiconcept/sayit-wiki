@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Finger_Paint } from "next/font/google";
+import { Suspense } from "react";
 import "./styles/globals.css";
 import "./styles/fonts.css";
 import "./styles/neomorphs.css";
@@ -37,7 +38,9 @@ export default function RootLayout({
                     <ThemeProvider>
                         <ToastProvider>
                             <Toaster />
-                            <Header />
+                            <Suspense fallback={null}>
+                                <Header />
+                            </Suspense>
                             {children}
                             <ThemeToggle />
                         </ToastProvider>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Loader from "@/components/Loader";
 import MakeANote from "@/components/make-a-note";
 import PrivacySettings from "@/components/privacy-settings";
@@ -14,11 +15,21 @@ export default function HomePage() {
             <Loader>
                 <h4 className="md:text-base sm:text-sm text-xs text-black font-bold animate-bounce">Digging through notes...</h4>
             </Loader>
-            <MakeANote />
-            <ViewNoteModal />
-            <ReportNoteModal />
-            <ShareNoteModal />
-            <PrivacySettings />
+            <Suspense fallback={null}>
+                <MakeANote />
+            </Suspense>
+            <Suspense fallback={null}>
+                <ViewNoteModal />
+            </Suspense>
+            <Suspense fallback={null}>
+                <ReportNoteModal />
+            </Suspense>
+            <Suspense fallback={null}>
+                <ShareNoteModal />
+            </Suspense>
+            <Suspense fallback={null}>
+                <PrivacySettings />
+            </Suspense>
         </div>
     )
 }
