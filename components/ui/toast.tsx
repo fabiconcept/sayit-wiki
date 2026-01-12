@@ -316,9 +316,9 @@ export function Toaster() {
     const sortedToasts = useMemo(() => [...toasts].reverse(), [toasts.length]);
 
     return (
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" key={`toaster-container-presence`}>
             <ToastInitializer />
-            {sortedToasts.length > 0 && <motion.div className="fixed top-0 right-0 p-4 pointer-events-none" style={{ zIndex: 9999 }}
+            {sortedToasts.length > 0 && <motion.div key={`toaster-container`} className="fixed top-0 right-0 p-4 pointer-events-none" style={{ zIndex: 9999 }}
                 initial={{ opacity: 0, rotate: 10, pointerEvents: "none", transformOrigin: "top right" }}
                 animate={{ opacity: 1, rotate: 0, pointerEvents: "auto", transformOrigin: "top right" }}
                 exit={{ opacity: 0, rotate: 10, pointerEvents: "none", transformOrigin: "top right" }}
@@ -346,7 +346,7 @@ export function Toaster() {
                         <div className="flex flex-col gap-2 pointer-events-auto max-h-[80dvh] overflow-y-auto h-auto overflow-x-hidden">
                             {sortedToasts.map((toast) => (
                                 <div
-                                    key={toast.id}
+                                    key={`${toast.id}`}
                                     className="animate-in slide-in-from-right-full duration-300 w-full select-none mr-2"
                                 >
                                     <ToastItem toast={toast} onDismiss={removeToast} />

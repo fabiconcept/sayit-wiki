@@ -1592,7 +1592,16 @@ export default [
         clipType: ClipType.Staple,
         backgroundColor: "#F0EBFF",
         timestamp: "2024-12-24T17:45:00Z",
-        content: "Final prep checklist: Charge camera, set table, prep coffee for morning, lay out outfit. Ready for tomorrow's festivities! 🎄",
+        content: `Remember to Fix the Share Note Modal. It should persist the note id for 2 seconds after the modal is closed. ✅\n
+- It should also be able to share the note on Facebook, Twitter, and LinkedIn.\n
+- It should also be able to download the note as a PNG.\n
+- It should also be able to copy the note link.\n
+- It should also be able to copy the note content.\n
+- It should also be able to copy the note timestamp.\n
+- It should also be able to copy the note likes count.\n
+- It should also be able to copy the note comments count.\n
+- It should also be able to copy the note views count.
+        `,
         likesCount: 267,
         commentsCount: 73,
         viewsCount: 1567,

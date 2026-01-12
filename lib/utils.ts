@@ -340,3 +340,106 @@ export function generateNoteId(): string {
   const random = Math.random().toString(36).substring(2, 8);
   return `note_${timestamp}_${random}`;
 }
+
+interface ColorOptions {
+  opacity?: number;      // 0-1, default: 1
+  intensity?: number;    // 0-2, default: 1
+  brightness?: number;   // -100 to 100, default: 0
+}
+
+/**
+ * Generates the opposite color on the color wheel (complementary color)
+ * @param hex - Hex color code (e.g., "#FF5733" or "FF5733")
+ * @param options - Controller object for color adjustments
+ * @returns Opposite color in hex or rgba format
+ */
+export function getOppositeColor(hex: string, options: ColorOptions = {}): string {
+  const {
+    opacity = 1,
+    intensity = 1,
+    brightness = 0
+  } = options;
+
+  // Remove # if present
+  hex = hex.replace('#', '');
+
+  // Parse RGB values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // Convert RGB to HSL
+  const rgb = [r / 255, g / 255, b / 255];
+  const max = Math.max(...rgb);
+  const min = Math.min(...rgb);
+  let h: number;
+  let s: number;
+  let l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0; // achromatic
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case rgb[0]:
+        h = ((rgb[1] - rgb[2]) / d + (rgb[1] < rgb[2] ? 6 : 0)) / 6;
+        break;
+      case rgb[1]:
+        h = ((rgb[2] - rgb[0]) / d + 2) / 6;
+        break;
+      case rgb[2]:
+        h = ((rgb[0] - rgb[1]) / d + 4) / 6;
+        break;
+      default:
+        h = 0;
+        break;
+    }
+  }
+
+  // Get opposite hue (180 degrees on color wheel)
+  h = (h + 0.5) % 1;
+
+  // Apply intensity adjustment to saturation
+  s = Math.min(1, Math.max(0, s * intensity));
+
+  // Apply brightness adjustment to lightness
+  l = Math.min(1, Math.max(0, l + (brightness / 100)));
+
+  // Convert HSL back to RGB
+  const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
+    let r: number, g: number, b: number;
+
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p: number, q: number, t: number): number => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  };
+
+  const [newR, newG, newB] = hslToRgb(h, s, l);
+
+  // Return format based on opacity
+  if (opacity < 1) {
+    return `rgba(${newR}, ${newG}, ${newB}, ${opacity})`;
+  } else {
+    const toHex = (n: number): string => n.toString(16).padStart(2, '0');
+    return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+  }
+}

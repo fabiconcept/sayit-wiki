@@ -40,6 +40,7 @@ export interface NoteCardProps {
     index?: number;
     isNew?: boolean;
     maxWidth?: number | string;
+    canReact?: boolean;
 }
 
 export interface commentNoteCardProps extends Pick<NoteCardProps, "content" | "tilt" | "showRedLine" | "showLines" | "selectedFont" | "index" | "isNew" | "maxWidth" | "noteStyle" | "backgroundColor" | "id" > {

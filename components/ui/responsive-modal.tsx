@@ -17,8 +17,9 @@ import {
 import { ScrollArea } from "./scroll-area";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { Dialog, DialogContent } from "./dialog";
 
-interface ResponsiveModalProps {
+interface BaseResponsiveModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title?: string;
@@ -27,13 +28,28 @@ interface ResponsiveModalProps {
     className?: string;
 }
 
+interface DesktopDialogModalProps extends BaseResponsiveModalProps {
+    desktopModalType: "dialog";
+    header: React.ReactNode;
+}
+
+interface DesktopSheetModalProps extends BaseResponsiveModalProps {
+    desktopModalType?: "sheet";
+}
+
+type ResponsiveModalProps =
+    | DesktopDialogModalProps
+    | DesktopSheetModalProps;
+
+
 export function ResponsiveModal({
     open,
     onOpenChange,
     title,
     description,
     children,
-    className
+    className,
+    ...props
 }: ResponsiveModalProps) {
     const isMobile = useIsMobile();
 
@@ -50,11 +66,22 @@ export function ResponsiveModal({
                             {description && <DrawerDescription>{description}</DrawerDescription>}
                         </DrawerHeader>
                     )}
-                    <ScrollArea className="max-h-[70vh] overflow-y-auto">
+                    <ScrollArea className="max-h-[80vh] overflow-y-auto">
                         {children}
                     </ScrollArea>
                 </DrawerContent>
             </Drawer>
+        );
+    }
+
+    if (props.desktopModalType && props.desktopModalType === "dialog") {
+        return (
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className={cn("p-0 rounded-3xl", className)} showCloseButton={false}>
+                    {props.header}
+                    <ScrollArea className="max-h-[90dvh] overflow-y-auto">{children}</ScrollArea>
+                </DialogContent>
+            </Dialog>
         );
     }
 

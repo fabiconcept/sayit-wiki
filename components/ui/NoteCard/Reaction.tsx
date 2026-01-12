@@ -1,7 +1,7 @@
 "use client";
 import { Heart } from "@/components/animate-ui/icons/heart";
 import { AnimateIcon } from "@/components/animate-ui/icons/icon";
-import { cn, numberShortForm, updateSearchParam } from "@/lib/utils";
+import { cn, copyToClipboard, numberShortForm, removeSearchParam, updateSearchParam } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { MessageCircleMoreIcon } from "@/components/animate-ui/icons/message-circle-more";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +11,7 @@ import { motion, inView } from "framer-motion";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "../dropdown-menu";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRouter } from "next/navigation";
+import { toast } from "../toast";
 
 interface ReactionStatistics {
     likes: number;
@@ -20,7 +21,11 @@ interface ReactionStatistics {
     isCommented: boolean;
     isViewed: boolean;
     noteId: string;
+    canReact: boolean;
+    content: string;
+    onDropMenuOpen: (open: boolean) => void;
     onCommentTap: () => void;
+    onSaveAsImage: (color: string) => void;
 }
 
 export default function ReactionCard({ statistics, className }: { statistics: ReactionStatistics, className: string }) {
@@ -37,6 +42,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     const ref = useRef<HTMLDivElement>(null);
 
     const handleLike = () => {
+        if (!statistics.canReact) return;
         if (isLiked) {
             setLikes(likes - 1);
             setIsLiked(false);
@@ -48,9 +54,31 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     }
 
     const handleView = () => {
+        if (!statistics.canReact) return;
         if (!statistics.noteId) return;
         setViews(views + 1);
         setIsViewed(true);
+    }
+
+    const handleCopy = async () => {
+        if (!statistics.canReact) return;
+        if (!statistics.noteId) return;
+        
+        if (await copyToClipboard(statistics.content)) {
+            toast.success({
+                title: "Note copied",
+                description: statistics.content.length > 100 ? statistics.content.slice(0, 100) + "..." : statistics.content,
+                duration: 2000,
+            });
+        }
+    }
+
+    const handleReport = () => {
+        if (!statistics.canReact) return;
+        if (!statistics.noteId) return;
+
+        removeSearchParam("note");
+        updateSearchParam("note-to-report", statistics.noteId);
     }
 
     useEffect(() => {
@@ -69,13 +97,13 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
             <div className="flex items-center gap-5 flex-1">
                 <div className="flex items-center gap-2">
                     <Tooltip>
-                        <TooltipTrigger asChild className="cursor-pointer">
+                        <TooltipTrigger disabled={!statistics.canReact} asChild className="cursor-pointer">
                             <AnimateIcon
-                                animateOnTap={isLiked ? undefined : "fill"}
-                                animateOnHover={isLiked ? undefined : "path"}
-                                animate={isLiked ? "fill" : undefined}
-                                persistOnAnimateEnd={isLiked ? true : false}
-                                className="cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
+                                animateOnTap={statistics.canReact ? isLiked ? undefined : "fill" : undefined}
+                                animateOnHover={statistics.canReact ? isLiked ? undefined : "path" : undefined}
+                                animate={statistics.canReact ? isLiked ? "fill" : undefined : undefined}
+                                persistOnAnimateEnd={statistics.canReact ? isLiked ? true : false : false}
+                                className={cn("cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out", !statistics.canReact ? "cursor-not-allowed opacity-50" : "")}
                                 onClick={handleLike}
                             >
                                 <Heart
@@ -87,7 +115,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             </AnimateIcon>
                         </TooltipTrigger>
                         <TooltipContent>
-                            Like this note
+                            {statistics.canReact ? "Like this note" : "You can't like this note"}
                         </TooltipContent>
                     </Tooltip>
                     <span className="text-sm font-semibold text-black">{numberShortForm(likes)}</span>
@@ -95,9 +123,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 <Tooltip>
                     <TooltipTrigger asChild className="cursor-pointer">
                         <AnimateIcon
-                            animateOnTap="fill"
-                            animateOnHover="path"
-                            className="flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out"
+                            animateOnTap={statistics.canReact ? "fill" : undefined}
+                            animateOnHover={statistics.canReact ? "path" : undefined}
+                            className={cn("flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out", !statistics.canReact ? "cursor-not-allowed opacity-50" : "")}
                             onClick={statistics.onCommentTap}
                         >
                             <MessageCircleMoreIcon 
@@ -112,7 +140,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                         </AnimateIcon>
                     </TooltipTrigger>
                     <TooltipContent>
-                        Comment on this note
+                        {statistics.canReact ? "Comment on this note" : "You can't comment on this note"}
                     </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -131,7 +159,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                     </TooltipContent>
                 </Tooltip>
             </div>
-            <DropdownMenu>
+            {statistics.canReact && <DropdownMenu
+                onOpenChange={statistics.onDropMenuOpen}
+            >
                 <DropdownMenuTrigger>
                     <Tooltip>
                         <TooltipTrigger asChild className="cursor-pointer">
@@ -145,11 +175,14 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                     </Tooltip>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="gap-1">
-                    <DropdownMenuItem className="text-white justify-center text-sm">Copy</DropdownMenuItem>
-                    <DropdownMenuItem className="text-white justify-center text-sm">Share</DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20">Report</DropdownMenuItem>
+                    <DropdownMenuItem className="text-white justify-center text-sm" onClick={handleCopy}>Copy</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => statistics.onSaveAsImage("#f3e5ab")} className="text-white justify-center text-sm">Share</DropdownMenuItem>
+                    <DropdownMenuItem 
+                        className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20"
+                        onClick={handleReport}
+                    >Report</DropdownMenuItem>
                 </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu>}
         </motion.div>
     )
 }

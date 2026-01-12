@@ -1,5 +1,7 @@
 import Loader from "@/components/Loader";
 import MakeANote from "@/components/make-a-note";
+import ReportNoteModal from "@/components/report-note";
+import ShareNoteModal from "@/components/share-note";
 import Masonry from "@/components/ui/Masonry";
 import ViewNoteModal from "@/components/view-note";
 import notes from "@/constants/mock/notes";
@@ -13,6 +15,8 @@ export default function HomePage() {
             </Loader>
             <MakeANote />
             <ViewNoteModal />
+            <ReportNoteModal />
+            <ShareNoteModal />
         </div>
     )
 }

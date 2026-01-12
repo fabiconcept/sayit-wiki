@@ -6,6 +6,7 @@ interface NeoButtonBaseProps {
     children: React.ReactNode;
     className?: string;
     element?: "button" | "a" | "div";
+    disabled?: boolean;
 }
 
 interface ButtonProps extends NeoButtonBaseProps {
@@ -25,6 +26,7 @@ interface DivProps extends NeoButtonBaseProps {
     element: "div";
 }
 
+
 type NeoButtonProps = ButtonProps | LinkProps | DivProps;
 
 
@@ -43,7 +45,12 @@ export default function NeoButton({ children, ...props }: NeoButtonProps) {
                     <rect width="100%" height="100%" filter="url(#filter)" />
                 </svg>
             </div>
-            <div className={cn("platform absolute top-0 left-0 z-10", props.className?.includes("no-hover") ? "no-hover" : "")}>
+            <div 
+                className={cn(
+                    "platform absolute top-0 left-0 z-10", 
+                    props.className?.includes("no-hover") ? "no-hover" : "",
+                    props.disabled ? "opacity-50 pointer-events-none" : ""
+                )}>
                 <div className="platform-outer border-4 border-foreground/5 relative h-full w-full">
                     <div className={cn("platform-inner relative h-full w-full", props.className)}>
                         {children}
@@ -76,7 +83,8 @@ export default function NeoButton({ children, ...props }: NeoButtonProps) {
     );
 
     const baseClassName = cn(
-        "min-w-16 w-full h-fit relative rounded-full z-50 cursor-pointer",
+        "min-w-16 w-full h-fit relative rounded-full z-50 base-font",
+        props.disabled ? "cursor-not-allowed" : "cursor-pointer",
         props.className?.includes("cursor-default") ? "" : "focus:outline-4 focus:outline-background/25 focus:outline-offset-1 focus:outline-dotted focus:brightness-125 dark:focus:brightness-110 select-none hover:brightness-125 transition-all duration-300",
         props.className?.includes("selected") ? "outline-4 outline-background/50 outline-offset-1 outline-dotted brightness-125 select-none brightness-125 transition-all duration-300" : "",
     );

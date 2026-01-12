@@ -11,7 +11,7 @@ import { FontFamily } from '@/constants/fonts';
 const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
-    clipType,
+    clipType = ClipType.Staple,
     timestamp,
     content,
     tilt,
@@ -110,7 +110,7 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     // Determine if this note should animate
     // Only animate if: (1) it's new, or (2) it's in view and hasn't animated yet
     const shouldAnimate = isNew || (isInView && !hasAnimated.current);
-    
+
     // Mark as animated once it becomes visible
     useEffect(() => {
         if (isInView || isNew) {
@@ -164,7 +164,7 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                     </filter>
                     <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
                 </svg>}
-                
+
                 {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <defs>
                         <filter id="stick-note-texture">
@@ -183,12 +183,12 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
                     }}
                 />}
-                
+
                 {noteStyle === NoteStyle.POLAROID && <div className={cn(
                     "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
                     `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
                 )} />}
-                
+
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
@@ -232,7 +232,7 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         {communityNote && <p className='font-medium'>Community note: <span className='text-red-500'>{communityNote}</span></p>}
                     </article>
                 </div>
-                
+
                 {timestamp && <p
                     style={{
                         backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
@@ -243,21 +243,22 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         selectedFont === FontFamily.Ole ? "schoolbell" : ""
                     )}>
                     {timestampText}
+                    {clipType && clipType !== ClipType.PIN && <div className="animate-in slide-in-from-top-full duration-300">
+                        <Clip
+                            type={clipType}
+                            init={0}
+                            noteStyle={noteStyle}
+                            className={"absolute top-0 left-5 translate-x-1"}
+                        />
+                    </div>}
                 </p>}
-                {title && <div className="animate-in slide-in-from-top-full duration-300">
-                    <Clip
-                        type={ClipType.PIN}
-                        className={"absolute top-0 left-5 translate-x-1"}
-                    />
-                </div>}
-
-                {!title && <Clip
-                    type={ClipType.Staple}
-                    init={0}
-                    noteStyle={NoteStyle.TORN_LEFT}
-                    className={"absolute top-0 left-5 translate-x-1"}
-                />}
             </div>
+            {clipType && clipType === ClipType.PIN && <div className="animate-in slide-in-from-top-full duration-300">
+                <Clip
+                    type={ClipType.PIN}
+                    className={"absolute top-0 left-5 translate-x-1"}
+                />
+            </div>}
         </motion.div>
     );
 };

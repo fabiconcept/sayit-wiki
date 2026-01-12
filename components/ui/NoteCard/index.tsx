@@ -1,13 +1,14 @@
 "use client";
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { motion, useInView, Variants } from 'framer-motion';
 import Clip, { ClipType } from "../Clip";
-import { cn, darkenHex, formatSocialTime } from '@/lib/utils';
+import { cn, darkenHex, formatSocialTime, updateSearchParam } from '@/lib/utils';
 import '@/app/styles/notes.css';
 import { NoteCardProps, NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
+import searchParamsKeys from '@/constants/search-params';
 
 const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
     id,
@@ -30,16 +31,20 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
     isNew = false,
     maxWidth = "450px",
     onCommentTap,
+    canReact = true,
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
     const textRef = useRef<HTMLDivElement>(null);
     const noteRef = useRef<HTMLDivElement>(null);
+    const [dropMenuOpen, setDropMenuOpen] = useState(false);
+
     const isInView = useInView(noteRef, {
         once: true,
         margin: "-50px",
         amount: 0.25
     });
+
 
     const transformOrigin = (() => {
         // Handle PIN clip type (consistent across most styles)
@@ -93,14 +98,14 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                 opacity: 0,
                 y: 30,
                 scale: 0.95,
-                rotate: 0,
+                rotate: dropMenuOpen ? 0 : tilt * 0.8,
                 transformOrigin: transformOrigin,
             },
             visible: {
                 opacity: 1,
                 y: 0,
                 scale: 1,
-                rotate: tilt * 0.8,
+                rotate: dropMenuOpen ? 0 : tilt * 0.8,
                 transformOrigin: transformOrigin,
                 transition: {
                     type: "spring",
@@ -116,7 +121,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                 }
             }
         }
-    ), [tilt, staggerDelay, transformOrigin]);
+    ), [tilt, staggerDelay, transformOrigin, dropMenuOpen]);
 
     // Animation variants for new notes (bubble/spring effect)
     const newNoteVariants: Variants = useMemo(() => (
@@ -133,7 +138,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                 transformOrigin: transformOrigin,
                 scale: 1,
                 y: 0,
-                rotate: tilt * 0.8,
+                rotate: dropMenuOpen ? 0 : tilt * 0.8,
                 transition: {
                     type: "spring",
                     damping: 12,
@@ -146,7 +151,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                 }
             }
         }
-    ), [tilt, transformOrigin]);
+    ), [tilt, transformOrigin, dropMenuOpen]);
 
     const getClipPathStyle = () => {
         switch (noteStyle) {
@@ -318,6 +323,13 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
 
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
 
+    const downloadWithColor = async () => {
+        if(!id) return;
+        updateSearchParam(searchParamsKeys.SHARE_NOTE, id);
+    };
+
+
+
     return (
         <motion.div
             ref={noteRef}
@@ -439,15 +451,19 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                         {content}
                     </article>
                     <ReactionCard
-                        statistics={{ 
-                            likes: likesCount, 
-                            comments: commentsCount, 
-                            views: viewsCount, 
-                            isLiked, 
-                            isCommented, 
-                            isViewed, 
-                            noteId: id || '', 
-                            onCommentTap: onCommentTap 
+                        statistics={{
+                            likes: likesCount,
+                            comments: commentsCount,
+                            views: viewsCount,
+                            isLiked,
+                            isCommented,
+                            isViewed,
+                            content,
+                            noteId: id || '',
+                            canReact,
+                            onDropMenuOpen: setDropMenuOpen,
+                            onCommentTap: onCommentTap,
+                            onSaveAsImage: downloadWithColor
                         }}
                         className={cn(
                             "w-full px-6 translate-y-2",
