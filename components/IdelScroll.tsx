@@ -17,26 +17,29 @@ export default function IdleScroll() {
 
             isScrollingRef.current = true;
             scrollIntervalRef.current = setInterval(() => {
-                const scrollHeight = document.documentElement.scrollHeight;
-                const windowHeight = window.innerHeight / 2;
-                const currentScroll = window.scrollY;
-                const maxScroll = scrollHeight - windowHeight;
-
-                // Check if we've reached the bottom
-                if (directionRef.current === 'down' && currentScroll >= maxScroll - 10) {
-                    directionRef.current = 'up';
-                }
-                // Check if we've reached the top
-                else if (directionRef.current === 'up' && currentScroll <= 10) {
-                    directionRef.current = 'down';
-                }
+                const windowHeight = window.innerHeight;
 
                 // Scroll in the current direction
                 const scrollAmount = directionRef.current === 'down' ? windowHeight : -windowHeight;
                 window.scrollBy({
-                    top: scrollAmount,
+                    top: scrollAmount / 2,
                     behavior: 'smooth'
                 });
+
+                // Check direction AFTER scrolling to see where we'll end up
+                setTimeout(() => {
+                    const newScroll = window.scrollY;
+                    const newMaxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+                    // Check if we've reached the bottom
+                    if (directionRef.current === 'down' && newScroll >= newMaxScroll - 50) {
+                        directionRef.current = 'up';
+                    }
+                    // Check if we've reached the top
+                    else if (directionRef.current === 'up' && newScroll <= 50) {
+                        directionRef.current = 'down';
+                    }
+                }, 1000); // Wait for smooth scroll to complete
             }, SCROLL_INTERVAL);
         };
 
