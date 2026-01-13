@@ -42,6 +42,45 @@ const generateRandomPreset = (): NotePreset => ({
     noteStyle: Object.values(NoteStyle)[luckyPick(0, Object.values(NoteStyle).length - 1)],
 });
 
+// Helper function to safely get preset from localStorage
+const getSavedPreset = (): NotePreset => {
+    if (typeof window === 'undefined') {
+        return generateRandomPreset();
+    }
+    
+    try {
+        const savedPreset = localStorage.getItem(PRESET_KEY);
+        if (!savedPreset) {
+            const preset = generateRandomPreset();
+            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+            return preset;
+        }
+
+        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
+        
+        // Validate the preset
+        const isValidFont = Object.values(FontFamily).includes(parsedPreset?.font);
+        const isValidColor = backgroundColors.includes(parsedPreset?.paperColor);
+        const isValidTilt = parsedPreset?.tilt >= -4 && parsedPreset?.tilt <= 4;
+        const isValidClip = Object.values(ClipType).includes(parsedPreset?.clipType);
+        const isValidStyle = Object.values(NoteStyle).includes(parsedPreset?.noteStyle);
+
+        if (isValidFont && isValidColor && isValidTilt && isValidClip && isValidStyle) {
+            return parsedPreset;
+        }
+
+        // If invalid, generate new preset
+        const preset = generateRandomPreset();
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+        return preset;
+    } catch (error) {
+        console.error("Error loading preset:", error);
+        const preset = generateRandomPreset();
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+        return preset;
+    }
+};
+
 export default function MakeANote() {
     const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
@@ -66,91 +105,21 @@ export default function MakeANote() {
         }
         return "";
     }, [isCreatingNote]);
+    
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
     const [content, setContent] = useState<string>("");
 
-    const [selectedFont, setSelectedFont] = useState<FontFamily>(() => {
-        const savedPreset = localStorage.getItem(PRESET_KEY);
-        if (!savedPreset) {
-            const preset = generateRandomPreset();
-            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-            return preset.font;
-        }
-
-        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
-        const valid = Object.values(FontFamily).includes(parsedPreset?.font);
-        if (valid) return parsedPreset.font;
-        const preset = generateRandomPreset();
-        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-        return preset.font;
-    });
-
-    const [selectedPaperColor, setSelectedPaperColor] = useState<string>(() => {
-        const savedPreset = localStorage.getItem(PRESET_KEY);
-        if (!savedPreset) {
-            const preset = generateRandomPreset();
-            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-            return preset.paperColor;
-        }
-
-        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
-        const valid = backgroundColors.includes(parsedPreset?.paperColor);
-        if (valid) return parsedPreset.paperColor;
-        const preset = generateRandomPreset();
-        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-        return preset.paperColor;
-    });
-
-    const [selectedTilt, setSelectedTilt] = useState<number>(() => {
-        const savedPreset = localStorage.getItem(PRESET_KEY);
-        if (!savedPreset) {
-            const preset = generateRandomPreset();
-            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-            return preset.tilt;
-        }
-
-        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
-        if (parsedPreset?.tilt > -4 && parsedPreset?.tilt < 4) return parsedPreset.tilt;
-        const preset = generateRandomPreset();
-        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-        return preset.tilt;
-    });
-
-    const [selectedClipType, setSelectedClipType] = useState<ClipType>(() => {
-        const savedPreset = localStorage.getItem(PRESET_KEY);
-        if (!savedPreset) {
-            const preset = generateRandomPreset();
-            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-            return preset.clipType;
-        }
-        
-        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
-        const valid = Object.values(ClipType).includes(parsedPreset?.clipType);
-        if (parsedPreset && valid) return parsedPreset.clipType;
-        const preset = generateRandomPreset();
-        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-        return preset.clipType;
-    });
-
-    const [selectedNoteStyle, setSelectedNoteStyle] = useState<NoteStyle>(() => {
-        const savedPreset = localStorage.getItem(PRESET_KEY);
-        if (!savedPreset) {
-            const preset = generateRandomPreset();
-            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-            return preset.noteStyle;
-        }
-
-        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
-        const valid = Object.values(NoteStyle).includes(parsedPreset?.noteStyle);
-        if (parsedPreset && valid) return parsedPreset.noteStyle;
-        const preset = generateRandomPreset();
-        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-        return preset.noteStyle;
-    });
+    // Use lazy initialization with getSavedPreset
+    const [selectedFont, setSelectedFont] = useState<FontFamily>(() => getSavedPreset().font);
+    const [selectedPaperColor, setSelectedPaperColor] = useState<string>(() => getSavedPreset().paperColor);
+    const [selectedTilt, setSelectedTilt] = useState<number>(() => getSavedPreset().tilt);
+    const [selectedClipType, setSelectedClipType] = useState<ClipType>(() => getSavedPreset().clipType);
+    const [selectedNoteStyle, setSelectedNoteStyle] = useState<NoteStyle>(() => getSavedPreset().noteStyle);
 
     const handlePaperColorChange = (color: string) => {
         setSelectedPaperColor(color);
     }
+    
     const handleFontChange = (font: FontFamily) => {
         setSelectedFont(font);
     }
@@ -203,7 +172,9 @@ export default function MakeANote() {
             setSelectedTilt(newPreset.tilt);
             setSelectedClipType(newPreset.clipType);
             setSelectedNoteStyle(newPreset.noteStyle);
-            localStorage.setItem(PRESET_KEY, JSON.stringify(newPreset));
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(PRESET_KEY, JSON.stringify(newPreset));
+            }
         }, 500);
     }, [content, noteId, selectedPaperColor, selectedNoteStyle, selectedClipType, selectedTilt, selectedFont, dispatch, handleOpenChange]);
 
@@ -269,7 +240,6 @@ export default function MakeANote() {
                 onOpenChange={handleOpenChange}
                 description="Use the 'cmd + n' shortcut to open this modal."
                 title="Make a note"
-
             >
                 <div className="flex flex-col gap-5 mt-5 text-white">
                     {/* Note title */}
@@ -327,7 +297,6 @@ export default function MakeANote() {
                                                     "rounded-sm px-2 bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex flex-col gap-1"
                                                 )}
                                             >
-
                                                 <span className={cn("text-white text-xs py-1")}>Writing style</span>
                                             </div>
                                         </div>
@@ -342,7 +311,6 @@ export default function MakeANote() {
                                                     "rounded-sm px-4 pt-2 bg-black/30 hover:bg-black/40 duration-100 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex justify-between items-center gap-1"
                                                 )}
                                             >
-
                                                 <span className={cn("text-white text-shadow-[0_0_3px_rgba(0,0,0,0.0.5)] text-sm py-2", selectedFont ? `${selectedFont} font-bold` : 'base-font')}>{selectedFont ? Fonts[selectedFont].styleName : 'Select a handwriting style'}</span>
                                                 <ChevronDownIcon className="w-4 h-4 text-white" />
                                             </div>
@@ -372,7 +340,6 @@ export default function MakeANote() {
                                                             (font === FontFamily.Ole || font === FontFamily.SueEllenFrancisco) ? "-translate-x-2.5" : ""
                                                         )}
                                                         value={font}
-                                                    // key={font}
                                                     >
                                                         {Fonts[font].styleName}
                                                     </NoteItemHolder.Radio>
@@ -398,7 +365,6 @@ export default function MakeANote() {
                                         "rounded-sm px-2 bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex flex-col gap-1"
                                     )}
                                 >
-
                                     <span className={cn("text-white text-xs py-1")}>Paper color</span>
                                 </div>
                             </div>
