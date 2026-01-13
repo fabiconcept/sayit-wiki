@@ -19,6 +19,7 @@ const localStorage: LocalStorageUtil = {
    * @returns The parsed value or defaultValue
    */
   get<T = unknown>(key: string, defaultValue: T = null as T): T {
+    if (!window) return defaultValue;
     try {
       const item = window.localStorage.getItem(key);
       if (item === null) {
@@ -38,6 +39,7 @@ const localStorage: LocalStorageUtil = {
    * @returns True if successful, false otherwise
    */
   set<T = unknown>(key: string, value: T): boolean {
+    if (!window) return false;
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
       return true;
@@ -53,6 +55,7 @@ const localStorage: LocalStorageUtil = {
    * @returns True if successful, false otherwise
    */
   remove(key: string): boolean {
+    if (!window) return false;
     try {
       window.localStorage.removeItem(key);
       return true;
@@ -67,6 +70,7 @@ const localStorage: LocalStorageUtil = {
    * @returns True if successful, false otherwise
    */
   clear(): boolean {
+    if (!window) return false;
     try {
       window.localStorage.clear();
       return true;
@@ -82,6 +86,7 @@ const localStorage: LocalStorageUtil = {
    * @returns True if the key exists
    */
   has(key: string): boolean {
+    if (!window) return false;
     return window.localStorage.getItem(key) !== null;
   }
 };

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeftIcon } from "./animate-ui/icons/arrow-left";
 import { useMemo, useState } from "react";
 import searchParamsKeys from "@/constants/search-params";
-import useShortcuts from "@useverse/useshortcuts";
+import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { toPng } from "html-to-image"
 import { toast } from "./ui/toast";
 
@@ -38,7 +38,14 @@ export default function Header() {
                 ctrlKey: true,
                 platformAware: true,
                 enabled: !isSharingNote,
-            }
+            },
+            {
+                key: KeyboardKey.Digit5,
+                ctrlKey: true,
+                shiftKey: true,
+                platformAware: true,
+                enabled: isSharingNote,
+            },
         ],
         onTrigger: () => {
             setHideHeader(true);
@@ -98,7 +105,7 @@ export default function Header() {
                     setHideHeader(false);
                 });
         }
-    }, []);
+    }, [isSharingNote]);
 
     if (pathname !== "/") {
         if (pathname.startsWith("/note/")) return null;

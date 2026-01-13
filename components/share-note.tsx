@@ -340,6 +340,7 @@ export default function ShareNoteModal() {
                                                         {isDownloadingNote ? <LoaderCircleIcon
                                                             animate="path-loop"
                                                             strokeWidth={2.5}
+                                                            speed={0.05}
                                                             className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
                                                         /> : <CloudDownloadIcon
                                                             strokeWidth={2.5}
