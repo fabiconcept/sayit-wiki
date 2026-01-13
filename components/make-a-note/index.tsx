@@ -23,7 +23,6 @@ import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { toast } from "../ui/toast";
 import { useAppDispatch } from "@/store/hooks";
 import { addNote } from "@/store/slices/notesSlice";
-import localStorage from "@/lib/localstorage";
 
 interface NotePreset {
     font: FontFamily;
@@ -71,46 +70,81 @@ export default function MakeANote() {
     const [content, setContent] = useState<string>("");
 
     const [selectedFont, setSelectedFont] = useState<FontFamily>(() => {
-        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
-        const valid = Object.values(FontFamily).includes(savedPreset?.font);
-        if (savedPreset && valid) return savedPreset.font;
+        const savedPreset = localStorage.getItem(PRESET_KEY);
+        if (!savedPreset) {
+            const preset = generateRandomPreset();
+            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+            return preset.font;
+        }
+
+        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
+        const valid = Object.values(FontFamily).includes(parsedPreset?.font);
+        if (valid) return parsedPreset.font;
         const preset = generateRandomPreset();
-        localStorage.set(PRESET_KEY, preset);
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
         return preset.font;
     });
 
     const [selectedPaperColor, setSelectedPaperColor] = useState<string>(() => {
-        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
-        const valid = backgroundColors.includes(savedPreset?.paperColor);
-        if (savedPreset && valid) return savedPreset.paperColor;
+        const savedPreset = localStorage.getItem(PRESET_KEY);
+        if (!savedPreset) {
+            const preset = generateRandomPreset();
+            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+            return preset.paperColor;
+        }
+
+        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
+        const valid = backgroundColors.includes(parsedPreset?.paperColor);
+        if (valid) return parsedPreset.paperColor;
         const preset = generateRandomPreset();
-        localStorage.set(PRESET_KEY, preset);
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
         return preset.paperColor;
     });
 
     const [selectedTilt, setSelectedTilt] = useState<number>(() => {
-        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
-        if (savedPreset?.tilt > -4 && savedPreset?.tilt < 4) return savedPreset.tilt;
+        const savedPreset = localStorage.getItem(PRESET_KEY);
+        if (!savedPreset) {
+            const preset = generateRandomPreset();
+            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+            return preset.tilt;
+        }
+
+        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
+        if (parsedPreset?.tilt > -4 && parsedPreset?.tilt < 4) return parsedPreset.tilt;
         const preset = generateRandomPreset();
-        localStorage.set(PRESET_KEY, preset);
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
         return preset.tilt;
     });
 
     const [selectedClipType, setSelectedClipType] = useState<ClipType>(() => {
-        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
-        const valid = Object.values(ClipType).includes(savedPreset?.clipType);
-        if (savedPreset && valid) return savedPreset.clipType;
+        const savedPreset = localStorage.getItem(PRESET_KEY);
+        if (!savedPreset) {
+            const preset = generateRandomPreset();
+            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+            return preset.clipType;
+        }
+        
+        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
+        const valid = Object.values(ClipType).includes(parsedPreset?.clipType);
+        if (parsedPreset && valid) return parsedPreset.clipType;
         const preset = generateRandomPreset();
-        localStorage.set(PRESET_KEY, preset);
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
         return preset.clipType;
     });
 
     const [selectedNoteStyle, setSelectedNoteStyle] = useState<NoteStyle>(() => {
-        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
-        const valid = Object.values(NoteStyle).includes(savedPreset?.noteStyle);
-        if (savedPreset && valid) return savedPreset.noteStyle;
+        const savedPreset = localStorage.getItem(PRESET_KEY);
+        if (!savedPreset) {
+            const preset = generateRandomPreset();
+            localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
+            return preset.noteStyle;
+        }
+
+        const parsedPreset = JSON.parse(savedPreset) as NotePreset;
+        const valid = Object.values(NoteStyle).includes(parsedPreset?.noteStyle);
+        if (parsedPreset && valid) return parsedPreset.noteStyle;
         const preset = generateRandomPreset();
-        localStorage.set(PRESET_KEY, preset);
+        localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
         return preset.noteStyle;
     });
 
@@ -122,15 +156,10 @@ export default function MakeANote() {
     }
 
     const handleContentChange = (newContent: string) => {
-        console.log("Content changing from:", content, "to:", newContent);
         setContent(newContent);
     }
 
     const handleSubmitNote = useCallback(() => {
-        console.log("Submit - content state:", content);
-        console.log("Submit - content trimmed:", content.trim());
-        console.log("Submit - is empty?:", !content.trim());
-
         if (!content.trim()) {
             toast.error({
                 title: "Empty note",
@@ -174,7 +203,7 @@ export default function MakeANote() {
             setSelectedTilt(newPreset.tilt);
             setSelectedClipType(newPreset.clipType);
             setSelectedNoteStyle(newPreset.noteStyle);
-            localStorage.set(PRESET_KEY, newPreset);
+            localStorage.setItem(PRESET_KEY, JSON.stringify(newPreset));
         }, 500);
     }, [content, noteId, selectedPaperColor, selectedNoteStyle, selectedClipType, selectedTilt, selectedFont, dispatch, handleOpenChange]);
 

@@ -26,7 +26,7 @@ interface ReactionStatistics {
     content: string;
     onDropMenuOpen: (open: boolean) => void;
     onCommentTap: () => void;
-    onSaveAsImage: (color: string) => void;
+    shareTrigger: (color: string) => void;
     selectedFont: FontFamily;
 }
 
@@ -182,7 +182,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="gap-1">
                     <DropdownMenuItem className="text-white justify-center text-sm" onClick={handleCopy}>Copy</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => statistics.onSaveAsImage("#f3e5ab")} className="text-white justify-center text-sm">Share</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => statistics.shareTrigger("#f3e5ab")} className="text-white justify-center text-sm">Share</DropdownMenuItem>
                     <DropdownMenuItem
                         className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20"
                         onClick={handleReport}

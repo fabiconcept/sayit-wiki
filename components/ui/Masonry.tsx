@@ -1,7 +1,7 @@
 "use client";
 import { useResized } from "@/hooks/use-resized";
 import { cn, updateSearchParam } from "@/lib/utils";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { NoteCardProps } from "@/types/note";
 import NoteCard from "./NoteCard";
 import { motion } from "framer-motion";
@@ -16,6 +16,7 @@ interface MasonryProps<T = NoteCardProps> {
     gap?: number;
     padding?: number;
     scrollOnNewItem?: 'top' | 'bottom' | null;
+    onCommentTap?: (id: string) => void;
 }
 
 export default function Masonry({
@@ -25,7 +26,8 @@ export default function Masonry({
     minWidth = 250,
     gap,
     padding,
-    scrollOnNewItem = null
+    scrollOnNewItem = null,
+    onCommentTap
 }: MasonryProps) {
     const { width: hookWidth } = useResized();
     const prevItemsLength = useRef(items.length);
@@ -66,7 +68,6 @@ export default function Masonry({
         const hasNewItems = newIds.length > 0;
 
         if (hasNewItems) {
-
             const firstItemId = itemsToDisplay[0]?.id;
             if (firstItemId && newIds.includes(firstItemId)) {
                 setTimeout(() => {
@@ -76,11 +77,7 @@ export default function Masonry({
                         return next;
                     });
                 }, 1200);
-            } else {
             }
-        } else if (itemsToDisplay.length > prevItemsLength.current) {
-        } else if (itemsToDisplay.length === prevItemsLength.current) {
-        } else {
         }
 
         prevItemsLength.current = itemsToDisplay.length;
@@ -94,7 +91,6 @@ export default function Masonry({
     }, [width, minWidth]);
 
     const columns = useMemo(() => {
-
         if (!width) return null;
         if (itemsToDisplay.length === 0) return null;
 
@@ -109,17 +105,6 @@ export default function Masonry({
             const columnIndex = globalIndex % columnsCount;
             columnItems[columnIndex].push({ ...item, globalIndex });
         });
-
-
-        const handleCommentTap = (noteId: string) => {
-            if (isMobile) {
-                router.push(`/note/${noteId}`);
-                return;
-            }
-
-            if (!noteId) return;
-            updateSearchParam("note", noteId);
-        }
 
         return columnItems.map((columnData, columnIndex) => (
             <MasonryColumn key={columnIndex} gap={gap}>
@@ -145,14 +130,14 @@ export default function Masonry({
                                 {...item}
                                 index={item.globalIndex}
                                 isNew={isNew}
-                                onCommentTap={() => handleCommentTap(item.id || '')}
+                                onCommentTap={onCommentTap!}
                             />}
                         </motion.div>
                     );
                 })}
             </MasonryColumn>
         ));
-    }, [width, itemsToDisplay, newItemIds, Child, gap, columnsCount, isMobile, router]);
+    }, [width, itemsToDisplay, newItemIds, Child, gap, columnsCount, onCommentTap]);
 
     const styles = { gap: gap ? `${gap}px` : undefined, padding: padding ? `${padding}px` : undefined }
 
