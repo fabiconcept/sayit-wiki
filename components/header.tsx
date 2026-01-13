@@ -12,6 +12,7 @@ import { useMemo, useState } from "react";
 import searchParamsKeys from "@/constants/search-params";
 import useShortcuts from "@useverse/useshortcuts";
 import { toPng } from "html-to-image"
+import { toast } from "./ui/toast";
 
 
 export default function Header() {
@@ -84,6 +85,10 @@ export default function Header() {
 
                     // Clean up
                     document.body.removeChild(tempContainer);
+                    toast.success({
+                        title: "Snapshot taken",
+                        description: "You've taken a snapshot of today's page!",
+                    });
                 })
                 .catch(function (error) {
                     console.error('Error capturing image:', error);

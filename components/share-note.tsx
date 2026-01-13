@@ -21,6 +21,8 @@ import { toPng } from "html-to-image";
 import { Facebook, Linkedin, Loader2Icon, Twitter } from "lucide-react";
 import { useSocialShare } from "@/hooks/use-social-share";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { LoaderCircleIcon } from "./animate-ui/icons/loader-circle";
+import { toast } from "./ui/toast";
 
 const DownloadedMap = new Map<string, boolean>();
 
@@ -70,6 +72,11 @@ export default function ShareNoteModal() {
                 link.href = dataUrl
                 link.click();
                 DownloadedMap.set(noteId, true);
+
+                toast.success({
+                    title: "Note downloaded",
+                    description: "Your note has been downloaded to your device",
+                });
             } catch (err) {
                 console.log(err);
             }finally {
@@ -322,7 +329,7 @@ export default function ShareNoteModal() {
                                     <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                                     {!isDownloaded && <Tooltip>
                                         <TooltipTrigger className="flex-1" asChild>
-                                            <AnimateIcon animateOnHover={isDownloadingNote ? undefined : "wiggle"} className="flex-1" loop={true}>
+                                            <AnimateIcon animateOnHover={isDownloadingNote ? "undefined" : "wiggle"} className="flex-1" loop={true}>
                                                 <NeoButton
                                                     element="div"
                                                     className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3 w-full"
@@ -330,10 +337,14 @@ export default function ShareNoteModal() {
                                                     disabled={isDownloadingNote}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <CloudDownloadIcon
+                                                        {isDownloadingNote ? <LoaderCircleIcon
+                                                            animate="path-loop"
                                                             strokeWidth={2.5}
                                                             className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
-                                                        />
+                                                        /> : <CloudDownloadIcon
+                                                            strokeWidth={2.5}
+                                                            className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
+                                                        />}
                                                         <p className="text-black max-sm:hidden font-semibold base-font text-sm">{isDownloadingNote ? "Downloading note..." : "Download note"}</p>
                                                     </div>
                                                 </NeoButton>

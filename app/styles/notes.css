@@ -29,7 +29,6 @@
   min-height: calc(100% - 40px);
   width: 100%;
   background-image: repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px);
-  /* padding-bottom: 40px; */
 }
 
 .text {
