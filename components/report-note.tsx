@@ -23,15 +23,15 @@ export default function ReportNoteModal() {
     useShortcuts({
         shortcuts: [
             {
-                key: KeyboardKey.Enter,
+                key: KeyboardKey.KeyN,
                 ctrlKey: true,
-                platformAware: true,
                 enabled: isReportingNote,
             }
         ],
         onTrigger: (key) => {
             switch (key.key) {
-                case KeyboardKey.Enter:
+                case KeyboardKey.KeyN:
+                    removeSearchParam(searchParamsKeys.NOTE_TO_REPORT);
                     break;
             }
         }

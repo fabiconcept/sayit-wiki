@@ -16,6 +16,7 @@ import { toPng } from "html-to-image"
 
 export default function Header() {
     const searchParams = useSearchParams();
+    const isSharingNote = useMemo(() => Boolean(searchParams.get(searchParamsKeys.SHARE_NOTE)), [searchParams]);
     const pathname = usePathname();
 
     const [hideHeader, setHideHeader] = useState(false);
@@ -35,7 +36,7 @@ export default function Header() {
                 key: "S",
                 ctrlKey: true,
                 platformAware: true,
-                enabled: true,
+                enabled: !isSharingNote,
             }
         ],
         onTrigger: () => {
@@ -76,7 +77,8 @@ export default function Header() {
             })
                 .then(function (dataUrl) {
                     const link = document.createElement('a');
-                    link.download = 'sayit-wiki-today-screenshot.jpeg';
+                    const now = new Date();
+                    link.download = `sayit-wiki-${now.getDay()}-${now.getMonth()}-${now.getFullYear()} at ${now.getHours()}.${now.getMinutes()},${now.getSeconds()}.jpeg`;
                     link.href = dataUrl;
                     link.click();
 
@@ -119,7 +121,7 @@ export default function Header() {
         <>
             <WoodenPlatform className="w-fit h-full rounded-3xl drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)] sm:sticky sm:top-10 top-5 sm:left-10 left-1/2 max-sm:-translate-x-1/2 z-50">
                 <AnimateIcon animateOnHover="wiggle" loop={true}>
-                    <div className="md:px-5 px-3 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                    <div className="md:px-3 px-2 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                         <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                         <NeoButton element="div" className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3 cursor-default no-hover">
                             <div className="flex items-center gap-2">

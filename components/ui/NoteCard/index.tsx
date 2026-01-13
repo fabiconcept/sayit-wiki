@@ -84,11 +84,12 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
     const date = new Date(timestamp);
     const timestampText = formatSocialTime(date, true);
 
-    // Smart delay calculation - stagger based on position
-    // Add some randomness to avoid rigid patterns
-    const baseDelay = (index % 10) * 0.03;
-    const randomOffset = Math.random() * 0.05;
-    const staggerDelay = baseDelay + randomOffset;
+    const staggerDelay = useMemo(() => {
+        const baseDelay = (index % 10) * 0.03;
+        const pseudoRandom = ((index * 9301 + 49297) % 233280) / 233280;
+        const randomOffset = pseudoRandom * 0.05;
+        return baseDelay + randomOffset;
+    }, [index]);
 
 
     // Animation variants for existing notes (in-view)
@@ -413,7 +414,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                 )}
 
                 <div
-                    className={cn('lines')}
+                    className={cn('lines mb-10')}
                     style={noteStyle === NoteStyle.STICKY_NOTE ? {
                         backgroundImage: 'none',
                     } : {
@@ -435,8 +436,6 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                     </p>
                     <article
                         ref={textRef}
-                        contentEditable={false}
-                        suppressContentEditableWarning
                         spellCheck={false}
                         className='text'
                         style={{
@@ -446,7 +445,6 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                         }}
                         role="article"
                         aria-label="Note content"
-                        aria-readonly="true"
                     >
                         {content}
                     </article>
@@ -467,9 +465,9 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: () => void }> = ({
                             onSaveAsImage: downloadWithColor
                         }}
                         className={cn(
-                            "w-full px-6 translate-y-2",
+                            "w-full px-6 translate-y-4",
                             showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
-                            noteStyle === NoteStyle.FOLDED_CORNER_BR ? "pr-10" : "",
+                            noteStyle === NoteStyle.FOLDED_CORNER_BR || noteStyle === NoteStyle.TORN_RIGHT ? "pr-10" : "",
                         )}
                     />
                     {clipType !== ClipType.PIN && <Clip

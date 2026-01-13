@@ -2,18 +2,15 @@
 import { useResized } from "@/hooks/use-resized";
 import { cn, updateSearchParam } from "@/lib/utils";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { NoteCardProps, NoteStyle } from "@/types/note";
+import { NoteCardProps } from "@/types/note";
 import NoteCard from "./NoteCard";
-import { ClipType } from "./Clip";
 import { motion } from "framer-motion";
-import { FontFamily } from "@/constants/fonts";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRouter } from "next/navigation";
 
 interface MasonryProps<T = NoteCardProps> {
     items: T[];
     width?: number;
-    enableNewNoteDemo?: boolean;
     Child?: React.FC<T>;
     minWidth?: number;
     gap?: number;
@@ -24,7 +21,6 @@ interface MasonryProps<T = NoteCardProps> {
 export default function Masonry({
     items,
     width: propWidth,
-    enableNewNoteDemo = false,
     Child,
     minWidth = 250,
     gap,
@@ -35,8 +31,6 @@ export default function Masonry({
     const prevItemsLength = useRef(items.length);
     const prevItemIds = useRef<Set<string>>(new Set());
     const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
-    const [displayItems, setDisplayItems] = useState<NoteCardProps[]>([]);
-    const demoTriggered = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
     const router = useRouter();
@@ -55,46 +49,13 @@ export default function Masonry({
         }
 
         return Array.from(uniqueMap.values())
-            .sort((a, b) => b.id.localeCompare(a.id));
     }, [items]);
-
-    useEffect(() => {
-        setDisplayItems(uniqueItems);
-    }, [uniqueItems]);
 
     const width = propWidth ?? hookWidth;
 
-    // Demo: Add a new note after 5 seconds
-    useEffect(() => {
-        if (enableNewNoteDemo || demoTriggered.current) return;
-
-        const timer = setTimeout(() => {
-            demoTriggered.current = true;
-            const demoNote: NoteCardProps = {
-                id: 'demo-new-note',
-                clipType: ClipType.PIN,
-                noteStyle: NoteStyle.STICKY_NOTE,
-                backgroundColor: '#FFD700',
-                timestamp: new Date().toISOString(),
-                content: '🎉 This is a NEW note with bubble animation!',
-                likesCount: 0,
-                commentsCount: 0,
-                viewsCount: 0,
-                selectedFont: FontFamily.Schoolbell,
-                tilt: Math.random() * 6 - 3,
-                isLiked: false,
-                isCommented: false,
-                isViewed: false,
-            };
-            setDisplayItems(prev => [demoNote, ...prev]);
-        }, 5000);
-
-        return () => clearTimeout(timer);
-    }, [enableNewNoteDemo]);
-
     const itemsToDisplay = useMemo(() => {
-        return enableNewNoteDemo ? displayItems : uniqueItems;
-    }, [enableNewNoteDemo, displayItems, uniqueItems]);
+        return uniqueItems;
+    }, [uniqueItems]);
 
     // Track when new items are added
     useEffect(() => {
@@ -108,7 +69,6 @@ export default function Masonry({
 
             const firstItemId = itemsToDisplay[0]?.id;
             if (firstItemId && newIds.includes(firstItemId)) {
-                setNewItemIds(new Set([firstItemId]));
                 setTimeout(() => {
                     setNewItemIds(prev => {
                         const next = new Set(prev);

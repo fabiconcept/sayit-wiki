@@ -47,10 +47,10 @@ export function intensifyHex(hex: HexColor, percent: number): HexColor {
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  
+
   const l = (max + min) / 2;
-  let h = 0; 
-  let s = 0; 
+  let h = 0;
+  let s = 0;
 
   if (max !== min) {
     const d = max - min;
@@ -177,13 +177,14 @@ export function removeSearchParam(key: string) {
   window.history.pushState({}, "", url.toString());
 }
 
-export function numberShortForm(num: number, decimals: number = 1, long: boolean = false): string {
+export function numberShortForm(
+  num: number,
+  decimals: number = 1,
+  long: boolean = false
+): string {
   num = Number(num);
-  if (num < 1000) {
-    return num.toString();
-  }
+  if (num < 1000) return num.toString();
 
-  // Because I can 😂😂😂😂😂
   const units = [
     { value: 1e99, symbol: 'Tg', long: 'Tresvigintillion' },
     { value: 1e96, symbol: 'Dv', long: 'Duovigintillion' },
@@ -220,22 +221,33 @@ export function numberShortForm(num: number, decimals: number = 1, long: boolean
     { value: 1e3, symbol: 'K', long: 'Thousand' },
   ];
 
-  for (const unit of units) {
+  const factor = Math.pow(10, decimals);
+
+  for (let i = 0; i < units.length; i++) {
+    const unit = units[i];
+
     if (num >= unit.value) {
-      const formatted = num / unit.value;
+      let value = num / unit.value;
+      let rounded = Math.round(value * factor) / factor;
 
-      // Remove unnecessary decimal places
-      const rounded = Math.round(formatted * Math.pow(10, decimals)) / Math.pow(10, decimals);
+      // if rounding pushes us to 1000, move to the next unit
+      if (rounded >= 1000 && i > 0) {
+        const nextUnit = units[i - 1];
+        value = num / nextUnit.value;
+        rounded = Math.round(value * factor) / factor;
 
-      // Convert to string and remove trailing zeros
+        const str = rounded.toFixed(decimals).replace(/\.?0+$/, '');
+        return long ? str + ' ' + nextUnit.long : str + nextUnit.symbol;
+      }
+
       const str = rounded.toFixed(decimals).replace(/\.?0+$/, '');
-
       return long ? str + ' ' + unit.long : str + unit.symbol;
     }
   }
 
   return num.toString();
 }
+
 
 export function formatSocialTime(
   date: Date | string,

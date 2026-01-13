@@ -17,12 +17,12 @@ export const PageNames: Record<string, Page> = {
         description: "The Wall is a place where you can share your thoughts and ideas with the world.",
         icon: PinIcon,
     },
-    globalWiki: {
-        name: "Globe Wall",
-        action: () => updateSearchParam(searchParamsKeys.PRIVACY_SETTINGS, "true"),
-        description: "Global Wiki is a place where you can share your knowledge with the world.",
-        icon: RadioIcon,
-    },
+    // globalWiki: {
+    //     name: "Globe Wall",
+    //     action: () => updateSearchParam(searchParamsKeys.PRIVACY_SETTINGS, "true"),
+    //     description: "Global Wiki is a place where you can share your knowledge with the world.",
+    //     icon: RadioIcon,
+    // },
     privacySettings: {
         name: "Privacy Settings",
         action: () => updateSearchParam(searchParamsKeys.PRIVACY_SETTINGS, "true"),

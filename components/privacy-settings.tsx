@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { cn, removeSearchParam, updateSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { DialogClose, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { useMemo, useRef, useState } from "react";
@@ -17,6 +17,10 @@ import moderateAnimation from "./lottie/Cowboy Hat Face.json";
 import relaxedAnimation from "./lottie/Anxious Face with Sweat.json";
 import offAnimation from "./lottie/Animated Clown Face.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setModerationLevel } from "@/store/slices/appSlice";
+import { selectModerationLevel } from "@/store/selectors";
+import { Kbd, KbdGroup } from "./ui/kbd";
 
 export const ModerationInfo: Record<
     ModerationLevel,
@@ -47,7 +51,7 @@ export const ModerationInfo: Record<
 
 interface LottieCardProps {
     lottieRef: React.RefObject<LottieRefCurrentProps>;
-    animationData: any;
+    animationData: unknown;
     isSelected: boolean;
     onClick: () => void;
     className?: string;
@@ -138,37 +142,37 @@ function LottieCard({
 }
 
 export default function PrivacySettings() {
+    const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
     const isPrivacySettingsOpen = useMemo(() => searchParams.get(searchParamsKeys.PRIVACY_SETTINGS) === "true", [searchParams]);
-    const [moderationLevel, setModerationLevel] = useState<ModerationLevel>(ModerationLevel.MODERATE);
+    const moderationLevel = useAppSelector(selectModerationLevel);
 
     const lottieOffRef = useRef<LottieRefCurrentProps>(null);
     const lottieRelaxedRef = useRef<LottieRefCurrentProps>(null);
     const lottieModerateRef = useRef<LottieRefCurrentProps>(null);
     const lottieStrictRef = useRef<LottieRefCurrentProps>(null);
 
+    const handleModerationLevelChange = (level: ModerationLevel) => {
+        localStorage.setItem("moderation-level", level);
+        dispatch(setModerationLevel(level));
+    };
+
     useShortcuts({
         shortcuts: [
             {
-                key: KeyboardKey.Enter,
+                key: KeyboardKey.KeyN,
                 ctrlKey: true,
-                platformAware: true,
                 enabled: isPrivacySettingsOpen,
             }
         ],
         onTrigger: (key) => {
             switch (key.key) {
-                case KeyboardKey.Enter:
+                case KeyboardKey.KeyN:
+                    removeSearchParam(searchParamsKeys.PRIVACY_SETTINGS);
                     break;
             }
         }
     }, [isPrivacySettingsOpen]);
-
-    const removeSearchParam = (key: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete(key);
-        window.history.pushState(null, '', `?${params.toString()}`);
-    };
 
     return (
         <ResponsiveModal
@@ -303,7 +307,7 @@ export default function PrivacySettings() {
                                             lottieRef={lottieStrictRef as React.RefObject<LottieRefCurrentProps>}
                                             animationData={strictAnimation}
                                             isSelected={moderationLevel === ModerationLevel.STRICT}
-                                            onClick={() => setModerationLevel(ModerationLevel.STRICT)}
+                                            onClick={() => handleModerationLevelChange(ModerationLevel.STRICT)}
                                             reverseOnExit
                                         />
                                         <div className="w-full">
@@ -321,7 +325,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Strict mode
+                                                            Strict mode <KbdGroup><Kbd className="bg-black/50 text-white">S</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -329,7 +333,7 @@ export default function PrivacySettings() {
                                         </div>
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="max-w-32">
                                     <p>{ModerationInfo[ModerationLevel.STRICT].tooltip}</p>
                                 </TooltipContent>
                             </Tooltip>
@@ -353,14 +357,14 @@ export default function PrivacySettings() {
                                             animationData={moderateAnimation}
                                             className="p-2"
                                             isSelected={moderationLevel === ModerationLevel.MODERATE}
-                                            onClick={() => setModerationLevel(ModerationLevel.MODERATE)}
+                                            onClick={() => handleModerationLevelChange(ModerationLevel.MODERATE)}
                                             reverseOnExit
                                         />
                                         <div className="w-full">
                                             <WoodenPlatform
                                                 className={cn(
                                                     "h-fit w-full rounded-full drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]",
-                                                    moderationLevel === ModerationLevel.STRICT ? "selected active saturate-150 brightness-110 grayscale-0" : ""
+                                                    moderationLevel === ModerationLevel.MODERATE ? "selected active saturate-150 brightness-110 grayscale-0" : ""
                                                 )}
                                                 noScrews
                                             >
@@ -371,7 +375,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Moderate Mode
+                                                            Moderate Mode <KbdGroup><Kbd className="bg-black/50 text-white">M</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -379,7 +383,7 @@ export default function PrivacySettings() {
                                         </div>
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="max-w-32">
                                     <p>{ModerationInfo[ModerationLevel.MODERATE].tooltip}</p>
                                 </TooltipContent>
                             </Tooltip>
@@ -402,14 +406,14 @@ export default function PrivacySettings() {
                                             lottieRef={lottieRelaxedRef as React.RefObject<LottieRefCurrentProps>}
                                             animationData={relaxedAnimation}
                                             isSelected={moderationLevel === ModerationLevel.RELAXED}
-                                            onClick={() => setModerationLevel(ModerationLevel.RELAXED)}
+                                            onClick={() => handleModerationLevelChange(ModerationLevel.RELAXED)}
                                             reverseOnExit
                                         />
                                         <div className="w-full">
                                             <WoodenPlatform
                                                 className={cn(
                                                     "h-fit w-full rounded-full drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]",
-                                                    moderationLevel === ModerationLevel.STRICT ? "selected active saturate-150 brightness-110 grayscale-0" : ""
+                                                    moderationLevel === ModerationLevel.RELAXED ? "selected active saturate-150 brightness-110 grayscale-0" : ""
                                                 )}
                                                 noScrews
                                             >
@@ -420,7 +424,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Relaxed Mode
+                                                            Relaxed Mode <KbdGroup><Kbd className="bg-black/50 text-white">R</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -428,7 +432,7 @@ export default function PrivacySettings() {
                                         </div>
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="max-w-32">
                                     <p>{ModerationInfo[ModerationLevel.RELAXED].tooltip}</p>
                                 </TooltipContent>
                             </Tooltip>
@@ -451,14 +455,14 @@ export default function PrivacySettings() {
                                             lottieRef={lottieOffRef as React.RefObject<LottieRefCurrentProps>}
                                             animationData={offAnimation}
                                             isSelected={moderationLevel === ModerationLevel.OFF}
-                                            onClick={() => setModerationLevel(ModerationLevel.OFF)}
+                                            onClick={() => handleModerationLevelChange(ModerationLevel.OFF)}
                                             reverseOnExit
                                         />
                                         <div className="w-full">
                                             <WoodenPlatform
                                                 className={cn(
                                                     "h-fit w-full rounded-full drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]",
-                                                    moderationLevel === ModerationLevel.STRICT ? "selected active saturate-150 brightness-110 grayscale-0" : ""
+                                                    moderationLevel === ModerationLevel.OFF ? "selected active saturate-150 brightness-110 grayscale-0" : ""
                                                 )}
                                                 noScrews
                                             >
@@ -469,7 +473,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Free For All
+                                                            Free For All <KbdGroup><Kbd className="bg-black/50 text-white">F</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -477,7 +481,7 @@ export default function PrivacySettings() {
                                         </div>
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="max-w-32">
                                     <p>{ModerationInfo[ModerationLevel.OFF].tooltip}</p>
                                 </TooltipContent>
                             </Tooltip>

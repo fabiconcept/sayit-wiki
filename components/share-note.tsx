@@ -54,6 +54,7 @@ export default function ShareNoteModal() {
     const handleDownloadNote = useCallback(async () => {
         if (!noteId) return;
         if (isDownloaded) return;
+        if (isDownloadingNote) return;
 
         setIsDownloadingNote(true);
         await new Promise(resolve => setTimeout(resolve, 6000));
@@ -75,14 +76,14 @@ export default function ShareNoteModal() {
                 setIsDownloadingNote(false);
             }
         }
-    }, [noteForExportRef, isMobile, isDownloadingNote, noteId]);
+    }, [noteForExportRef, isMobile, isDownloadingNote, noteId, isDownloaded]);
 
     const handleShareOnFacebook = useCallback(async () => {
         if (isDownloadingNote) return;
         if (!selectedNote) return;
         await handleDownloadNote();
         openShareWindow("facebook", { text: selectedNote.content, url: window.location.href });
-    }, [selectedNote, handleDownloadNote, isDownloadingNote]);
+    }, [selectedNote, handleDownloadNote, isDownloadingNote, openShareWindow]);
 
     const handleShareOnTwitter = useCallback(async () => {
         if (isDownloadingNote) return;
@@ -90,31 +91,40 @@ export default function ShareNoteModal() {
         await handleDownloadNote();
 
         openShareWindow("twitter", { text: selectedNote.content, url: window.location.href });
-    }, [selectedNote, handleDownloadNote, isDownloadingNote]);
+    }, [selectedNote, handleDownloadNote, isDownloadingNote, openShareWindow]);
 
     const handleShareOnLinkedIn = useCallback(async () => {
         if (isDownloadingNote) return;
         if (!selectedNote) return;
         await handleDownloadNote();
         openShareWindow("linkedin", { text: selectedNote.content, url: window.location.href });
-    }, [selectedNote, handleDownloadNote, isDownloadingNote]);
+    }, [selectedNote, handleDownloadNote, isDownloadingNote, openShareWindow]);
 
     useShortcuts({
         shortcuts: [
             {
-                key: KeyboardKey.Enter,
+                key: KeyboardKey.KeyS,
                 ctrlKey: true,
                 platformAware: true,
                 enabled: isSharingNote,
-            }
+            },
+            {
+                key: KeyboardKey.KeyN,
+                ctrlKey: true,
+                enabled: isSharingNote,
+            },
         ],
         onTrigger: (key) => {
             switch (key.key) {
-                case KeyboardKey.Enter:
+                case KeyboardKey.KeyS:
+                    handleDownloadNote();
+                    break;
+                case KeyboardKey.KeyN:
+                    removeSearchParam(searchParamsKeys.SHARE_NOTE);
                     break;
             }
         }
-    }, [isSharingNote]);
+    }, [isSharingNote, handleDownloadNote]);
 
     return (
         <ResponsiveModal

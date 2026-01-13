@@ -167,7 +167,7 @@ body {
 
 .wooden {
   background-color: var(--wooden-color);
-  background-image: url("/wooden-pattern.png");
+  background-image: url("/wooden-pattern-smaller.png");
   background-size: 400px 100px;
   will-change: scroll-position;
   background-attachment: scroll;
@@ -176,7 +176,7 @@ body {
 
 .wooden-heavy {
   background-color: var(--wooden-color-heavy);
-  background-image: url("/wooden-pattern.png");
+  background-image: url("/wooden-pattern-smaller.png");
   background-size: 400px 100px;
   background-position: -6rem 0;
 }

@@ -11,7 +11,6 @@ import { FontFamily } from '@/constants/fonts';
 const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
-    clipType,
     timestamp,
     content,
     tilt,
@@ -40,9 +39,12 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     const timestampText = formatSocialTime(date, true);
 
     // Smart delay calculation - stagger based on position
-    const baseDelay = (index % 10) * 0.03;
-    const randomOffset = Math.random() * 0.05;
-    const staggerDelay = baseDelay + randomOffset;
+    const staggerDelay = useMemo(() => {
+        const baseDelay = (index % 10) * 0.03;
+        const pseudoRandom = ((index * 9301 + 49297) % 233280) / 233280;
+        const randomOffset = pseudoRandom * 0.05;
+        return baseDelay + randomOffset;
+    }, [index]);
 
     // Reduce tilt by 70%
     const adjustedTilt = tilt * 0.3;
@@ -108,9 +110,11 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
 
     // Determine if this note should animate
-    // Only animate if: (1) it's new, or (2) it's in view and hasn't animated yet
-    const shouldAnimate = isNew || (isInView && !hasAnimated.current);
-    
+    // Replace the ref with state:
+
+    // Now you can safely use it during render:
+    const shouldAnimate = isNew || (isInView && !hasAnimated);
+
     // Mark as animated once it becomes visible
     useEffect(() => {
         if (isInView || isNew) {
@@ -164,7 +168,7 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                     </filter>
                     <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
                 </svg>}
-                
+
                 {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
                     <defs>
                         <filter id="stick-note-texture">
@@ -183,18 +187,18 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
                     }}
                 />}
-                
+
                 {noteStyle === NoteStyle.POLAROID && <div className={cn(
                     "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
                     `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
                 )} />}
-                
+
                 {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
                     <div className='redMargin' />
                 )}
 
                 <div
-                    className={cn('lines')}
+                    className={cn('lines mb-0')}
                     style={{
                         ...(noteStyle === NoteStyle.STICKY_NOTE ? {
                             backgroundImage: 'none',
@@ -208,10 +212,8 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                 >
                     <article
                         ref={textRef}
-                        contentEditable={false}
-                        suppressContentEditableWarning
                         spellCheck={false}
-                        className='text translate-y-7 pb-7 min-h-5'
+                        className='text translate-y-7 pb-0 mb-0 min-h-5'
                         style={{
                             marginLeft,
                             wordBreak: 'break-word',
@@ -219,7 +221,6 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         }}
                         role="article"
                         aria-label="Comment content"
-                        aria-readonly="true"
                     >
                         {title && <p className='font-bold' style={{
                             "--selected-bg": "black",
@@ -232,13 +233,13 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         {communityNote && <p className='font-medium'>Community note: <span className='text-red-500'>{communityNote}</span></p>}
                     </article>
                 </div>
-                
+
                 {timestamp && <p
                     style={{
                         backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
                     } as React.CSSProperties}
                     className={cn(
-                        "text-xs px-3 py-0.5 border w-fit -translate-y-9 -translate-x-1 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
+                        "text-xs px-3 py-0.5 border w-fit absolute top-3.5 right-3.5 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
                         showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
                         selectedFont === FontFamily.Ole ? "schoolbell" : ""
                     )}>

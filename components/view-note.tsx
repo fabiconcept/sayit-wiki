@@ -2,7 +2,7 @@
 import { cn, luckyPick, numberShortForm, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
 import { XIcon } from "./animate-ui/icons/x";
@@ -26,7 +26,16 @@ import { toast } from "./ui/toast";
 
 export default function ViewNoteModal() {
     const searchParams = useSearchParams();
-    const [comments, setComments] = useState<NoteCardProps[]>(notes.slice(15, 20).map((note, index) => ({ ...note, tilt: 0, noteStyle: NoteStyle.SPIRAL_LEFT, index, isNew: false, id: `comment_${Date.now()}_${index}` })));
+    const [comments, setComments] = useState<NoteCardProps[]>(() =>
+        notes.slice(15, 20).map((note, index) => ({
+            ...note,
+            tilt: 0,
+            noteStyle: NoteStyle.SPIRAL_LEFT,
+            index,
+            isNew: false,
+            id: `comment_${Date.now()}_${index}`
+        }))
+    );
     const [newComment, setNewComment] = useState<string>("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const isViewingNote = useMemo(() => Boolean(searchParams.get("note")), [searchParams]);
@@ -66,39 +75,39 @@ export default function ViewNoteModal() {
     const handleAddComment = useCallback(async () => {
         if (!scrollAreaRef.current) return;
 
-        
+
         if (!newComment.trim()) return;
         const trimmedComment = newlineTrimmer.trimStrict(newComment);
         const noteId = `comment_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
         const randomPaperColor = backgroundColors[luckyPick(0, backgroundColors.length - 1)];
-        
+
         const moderationResult = quickModerate(trimmedComment, ModerationLevel.STRICT);
-        
+
         if (moderationResult.isWTF) {
             toast.error({
                 title: "What's wrong with you?",
                 description: "You can't say that here, or to anyone else for that matter!",
                 communityNote: `Found ${moderationResult.matches.length} words: ${moderationResult.matches.map(match => match.word).join(", ")}`,
             });
-            
+
             return;
         }
-        
+
         const scrollTimeout = setTimeout(() => {
             scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
         }, 100);
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        const note = { 
-            ...notes[77], 
-            id: noteId, 
-            content: moderationResult.sanitized, 
-            tilt: 0, 
-            noteStyle: NoteStyle.SPIRAL_LEFT, 
-            index: comments.length, 
+        const note = {
+            ...notes[77],
+            id: noteId,
+            content: moderationResult.sanitized,
+            tilt: 0,
+            noteStyle: NoteStyle.SPIRAL_LEFT,
+            index: comments.length,
             backgroundColor: randomPaperColor,
-            timestamp: new Date().toISOString(), 
+            timestamp: new Date().toISOString(),
             isNew: true
         };
 
@@ -131,7 +140,21 @@ export default function ViewNoteModal() {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const containerWidth = useMemo(() => containerRef.current?.clientWidth, [containerRef]);
+    const [containerWidth, setContainerWidth] = useState<number | undefined>(undefined);
+
+    useEffect(() => {
+        if (containerRef.current) {
+            setContainerWidth(containerRef.current.clientWidth);
+        }
+    }, [isViewingNote]);
+
+    const sortedComments = useMemo(() => {
+        return [...comments].sort((a, b) => {
+            const dateA = new Date(a.timestamp);
+            const dateB = new Date(b.timestamp);
+            return dateB.getTime() - dateA.getTime();
+        });
+    }, [comments]);
 
     return (
         <Dialog
@@ -271,10 +294,9 @@ export default function ViewNoteModal() {
                                     </Loader>
                                 </div>}
                                 <Masonry
-                                    items={comments}
+                                    items={sortedComments}
                                     width={containerWidth}
                                     key={"comments"}
-                                    enableNewNoteDemo
                                     Child={CommentNoteCard}
                                     minWidth={400}
                                     gap={12}

@@ -5,7 +5,7 @@ import { AnimateIcon } from "../animate-ui/icons/icon";
 import { MessageSquareDiffIcon } from "../animate-ui/icons/message-square-diff";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { ResponsiveModal } from "../ui/responsive-modal";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { NoteStyle } from "@/types/note";
 import NewNoteCard from "../ui/NoteCard/NewNote";
 import { ClipType } from "../ui/Clip";
@@ -21,19 +21,162 @@ import { PinIcon } from "../animate-ui/icons/pin";
 import { useSearchParams } from "next/navigation";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { toast } from "../ui/toast";
+import { useAppDispatch } from "@/store/hooks";
+import { addNote } from "@/store/slices/notesSlice";
+import localStorage from "@/lib/localstorage";
+
+interface NotePreset {
+    font: FontFamily;
+    paperColor: string;
+    tilt: number;
+    clipType: ClipType;
+    noteStyle: NoteStyle;
+}
+
+const PRESET_KEY = "note-preset";
+
+const generateRandomPreset = (): NotePreset => ({
+    font: Object.values(FontFamily)[luckyPick(0, Object.values(FontFamily).length - 1)],
+    paperColor: backgroundColors[luckyPick(0, backgroundColors.length - 1)],
+    tilt: luckyPick(-4, 4),
+    clipType: Object.values(ClipType)[luckyPick(0, Object.values(ClipType).length - 1)],
+    noteStyle: Object.values(NoteStyle)[luckyPick(0, Object.values(NoteStyle).length - 1)],
+});
 
 export default function MakeANote() {
+    const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
 
     const isCreatingNote = searchParams.get("createNote") === "true";
+    const [noteWasCreated, setNoteWasCreated] = useState(false);
 
-    const handleOpenChange = (open: boolean) => {
+    const handleOpenChange = useCallback((open: boolean) => {
         if (open) {
             updateSearchParam("createNote", "true");
         } else {
             removeSearchParam("createNote");
+            if (noteWasCreated) {
+                setNoteWasCreated(false);
+            }
         }
+    }, [noteWasCreated]);
+
+    const noteId = useMemo(() => {
+        if (isCreatingNote) {
+            return generateNoteId();
+        }
+        return "";
+    }, [isCreatingNote]);
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+    const [content, setContent] = useState<string>("");
+
+    const [selectedFont, setSelectedFont] = useState<FontFamily>(() => {
+        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
+        const valid = Object.values(FontFamily).includes(savedPreset?.font);
+        if (savedPreset && valid) return savedPreset.font;
+        const preset = generateRandomPreset();
+        localStorage.set(PRESET_KEY, preset);
+        return preset.font;
+    });
+
+    const [selectedPaperColor, setSelectedPaperColor] = useState<string>(() => {
+        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
+        const valid = backgroundColors.includes(savedPreset?.paperColor);
+        if (savedPreset && valid) return savedPreset.paperColor;
+        const preset = generateRandomPreset();
+        localStorage.set(PRESET_KEY, preset);
+        return preset.paperColor;
+    });
+
+    const [selectedTilt, setSelectedTilt] = useState<number>(() => {
+        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
+        if (savedPreset?.tilt > -4 && savedPreset?.tilt < 4) return savedPreset.tilt;
+        const preset = generateRandomPreset();
+        localStorage.set(PRESET_KEY, preset);
+        return preset.tilt;
+    });
+
+    const [selectedClipType, setSelectedClipType] = useState<ClipType>(() => {
+        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
+        const valid = Object.values(ClipType).includes(savedPreset?.clipType);
+        if (savedPreset && valid) return savedPreset.clipType;
+        const preset = generateRandomPreset();
+        localStorage.set(PRESET_KEY, preset);
+        return preset.clipType;
+    });
+
+    const [selectedNoteStyle, setSelectedNoteStyle] = useState<NoteStyle>(() => {
+        const savedPreset = localStorage.get<NotePreset>(PRESET_KEY);
+        const valid = Object.values(NoteStyle).includes(savedPreset?.noteStyle);
+        if (savedPreset && valid) return savedPreset.noteStyle;
+        const preset = generateRandomPreset();
+        localStorage.set(PRESET_KEY, preset);
+        return preset.noteStyle;
+    });
+
+    const handlePaperColorChange = (color: string) => {
+        setSelectedPaperColor(color);
     }
+    const handleFontChange = (font: FontFamily) => {
+        setSelectedFont(font);
+    }
+
+    const handleContentChange = (newContent: string) => {
+        console.log("Content changing from:", content, "to:", newContent);
+        setContent(newContent);
+    }
+
+    const handleSubmitNote = useCallback(() => {
+        console.log("Submit - content state:", content);
+        console.log("Submit - content trimmed:", content.trim());
+        console.log("Submit - is empty?:", !content.trim());
+
+        if (!content.trim()) {
+            toast.error({
+                title: "Empty note",
+                description: "Please write something before posting",
+            });
+            return;
+        }
+
+        const newNote = {
+            id: noteId,
+            content: content.trim(),
+            backgroundColor: selectedPaperColor || backgroundColors[luckyPick(0, backgroundColors.length - 1)],
+            noteStyle: selectedNoteStyle || NoteStyle.SPIRAL_LEFT,
+            clipType: selectedClipType || ClipType.PIN,
+            tilt: selectedTilt || 0,
+            selectedFont: selectedFont || FontFamily.Schoolbell,
+            timestamp: new Date().toISOString(),
+            likesCount: 0,
+            commentsCount: 0,
+            viewsCount: 0,
+            isLiked: false,
+            isCommented: false,
+            isViewed: false,
+            isNew: true,
+        };
+
+        dispatch(addNote(newNote));
+        setNoteWasCreated(true);
+        setContent("");
+        handleOpenChange(false);
+
+        toast.success({
+            title: "Note posted!",
+            description: "Your note has been pinned to the wall",
+        });
+
+        setTimeout(() => {
+            const newPreset = generateRandomPreset();
+            setSelectedFont(newPreset.font);
+            setSelectedPaperColor(newPreset.paperColor);
+            setSelectedTilt(newPreset.tilt);
+            setSelectedClipType(newPreset.clipType);
+            setSelectedNoteStyle(newPreset.noteStyle);
+            localStorage.set(PRESET_KEY, newPreset);
+        }, 500);
+    }, [content, noteId, selectedPaperColor, selectedNoteStyle, selectedClipType, selectedTilt, selectedFont, dispatch, handleOpenChange]);
 
     useShortcuts({
         shortcuts: [
@@ -43,10 +186,10 @@ export default function MakeANote() {
                 enabled: true,
             },
             {
-                key: KeyboardKey.KeyC,
+                key: KeyboardKey.Enter,
                 ctrlKey: true,
                 platformAware: true,
-                enabled: true,
+                enabled: isCreatingNote,
             }
         ],
         onTrigger: (key) => {
@@ -54,64 +197,17 @@ export default function MakeANote() {
                 case KeyboardKey.KeyN:
                     handleOpenChange(true);
                     break;
-                case KeyboardKey.KeyC:
-                    toast.success({
-                        title: "Link copied",
-                        description: "You have copied the link to this note",
-                        duration: 5000,
-                    }); 
+                case KeyboardKey.Enter:
+                    handleSubmitNote();
                     break;
             }
         }
-    }, [isCreatingNote])
-
-    const noteId = useMemo(() => generateNoteId(), []);
-    const [open, setOpen] = useState(false);
-    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-    const [content, setContent] = useState<string>("");
-    const [selectedFont, setSelectedFont] = useState<FontFamily | null>(null);
-    const [selectedPaperColor, setSelectedPaperColor] = useState<string | null>(null);
-    const [selectedTilt, setSelectedTilt] = useState<number | null>(null);
-    const [selectedClipType, setSelectedClipType] = useState<ClipType | null>(null);
-    const [selectedNoteStyle, setSelectedNoteStyle] = useState<NoteStyle | null>(null);
-
-    const randomFont = Object.values(FontFamily)[luckyPick(0, Object.values(FontFamily).length - 1)];
-    const randomPaperColor = backgroundColors[luckyPick(0, backgroundColors.length - 1)];
-    const randomTilt = luckyPick(-4, 4);
-    const randomClipType = Object.values(ClipType)[luckyPick(0, Object.values(ClipType).length - 1)];
-    const randomNoteStyle = Object.values(NoteStyle)[luckyPick(0, Object.values(NoteStyle).length - 1)];
-
-    useEffect(() => {
-        setSelectedFont(randomFont);
-        setSelectedPaperColor(randomPaperColor);
-        setSelectedTilt(randomTilt);
-        setSelectedClipType(randomClipType);
-        setSelectedNoteStyle(randomNoteStyle);
-    }, []);
-
-    useEffect(() => {
-        if (isCreatingNote) {
-            setOpen(true);
-            return;
-        }
-        setOpen(false);
-    }, [isCreatingNote]);
-
-    const handlePaperColorChange = (color: string) => {
-        setSelectedPaperColor(color);
-    }
-    const handleFontChange = (font: FontFamily) => {
-        setSelectedFont(font);
-    }
-
-    const handleContentChange = (content: string) => {
-        setContent(content);
-    }
+    }, [isCreatingNote, handleSubmitNote]);
 
     return (
         <>
             <WoodenPlatform className="w-fit h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)] fixed sm:bottom-10 sm:right-10 bottom-5 right-5 z-50">
-                <div className="md:px-5 px-3 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                <div className="md:px-3 px-2 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                     <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                     <Tooltip>
                         <TooltipTrigger
@@ -122,7 +218,6 @@ export default function MakeANote() {
                                 <NeoButton
                                     element="div"
                                     className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                    onClick={() => setOpen(true)}
                                 >
                                     <div className="flex items-center gap-2">
                                         <MessageSquareDiffIcon
@@ -140,15 +235,9 @@ export default function MakeANote() {
 
             {/* Make a note modal */}
             <ResponsiveModal
-                open={open}
+                open={isCreatingNote}
                 className="p-2"
-                onOpenChange={(open) => {
-                    if (open) {
-                        updateSearchParam("createNote", "true");
-                    } else {
-                        removeSearchParam("createNote");
-                    }
-                }}
+                onOpenChange={handleOpenChange}
                 description="Use the 'cmd + n' shortcut to open this modal."
                 title="Make a note"
 
@@ -359,7 +448,7 @@ export default function MakeANote() {
                                             <NeoButton
                                                 element="div"
                                                 className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                onClick={() => setOpen(true)}
+                                                onClick={handleSubmitNote}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <PinIcon

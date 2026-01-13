@@ -26,12 +26,15 @@ export interface Toast {
     communityNote?: string;
     duration?: number;
     props: Omit<commentNoteCardProps, "backgroundColor">;
+    resolvePromise?: (value: ToastDismissalReason) => void;
 }
+
+export type ToastDismissalReason = "timeout" | "user-dismiss" | "swipe" | "programmatic";
 
 interface ToastContextType {
     toasts: Toast[];
-    addToast: (toast: Omit<Toast, "id" | "props">) => void;
-    removeToast: (id: string) => void;
+    addToast: (toast: Omit<Toast, "id" | "props" | "resolvePromise">) => Promise<ToastDismissalReason>;
+    removeToast: (id: string, reason?: ToastDismissalReason) => void;
 }
 
 // ============================================================================
@@ -42,43 +45,72 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const timeoutRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
-    const removeToast = useCallback((id: string) => {
-        setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    const removeToast = useCallback((id: string, reason: ToastDismissalReason = "programmatic") => {
+        setToasts((prev) => {
+            const toast = prev.find(t => t.id === id);
+            if (toast?.resolvePromise) {
+                toast.resolvePromise(reason);
+            }
+            return prev.filter((toast) => toast.id !== id);
+        });
+
+        // Clear timeout if exists
+        const timeout = timeoutRefs.current.get(id);
+        if (timeout) {
+            clearTimeout(timeout);
+            timeoutRefs.current.delete(id);
+        }
     }, []);
 
-    const addToast = useCallback((toast: Omit<Toast, "id" | "props">) => {
-        const ignoredFontStyles = [FontFamily.Ole, FontFamily.UnifrakturMaguntia, FontFamily.OvertheRainbow, FontFamily.Kablammo];
-        const noteStylesThreshold = Object.values(NoteStyle).filter(style => style !== NoteStyle.POLAROID);
-        const fontStylesThreshold = Object.values(FontFamily).filter(font => !ignoredFontStyles.includes(font));
+    const addToast = useCallback((toast: Omit<Toast, "id" | "props" | "resolvePromise">): Promise<ToastDismissalReason> => {
+        return new Promise((resolve) => {
+            const ignoredFontStyles = [FontFamily.Ole, FontFamily.UnifrakturMaguntia, FontFamily.OvertheRainbow, FontFamily.Kablammo];
+            const noteStylesThreshold = Object.values(NoteStyle).filter(style => style !== NoteStyle.POLAROID);
+            const fontStylesThreshold = Object.values(FontFamily).filter(font => !ignoredFontStyles.includes(font));
 
-        const id = Math.random().toString(36).substring(2, 9);
-        const luckyClipType = Object.values(ClipType)[luckyPick(0, Object.values(ClipType).length - 1)];
-        const luckyTilt = luckyPick(-4, 4);
-        const luckNote = luckyPick(0, noteStylesThreshold.length - 1);
-        const luckyFont = luckyPick(0, fontStylesThreshold.length - 1);
+            const id = Math.random().toString(36).substring(2, 9);
+            const luckyClipType = Object.values(ClipType)[luckyPick(0, Object.values(ClipType).length - 1)];
+            const luckyTilt = luckyPick(-4, 4);
+            const luckNote = luckyPick(0, noteStylesThreshold.length - 1);
+            const luckyFont = luckyPick(0, fontStylesThreshold.length - 1);
 
-        const props: Omit<commentNoteCardProps, "backgroundColor"> = {
-            noteStyle: noteStylesThreshold[luckNote],
-            clipType: luckyClipType,
-            selectedFont: toast.selectedFont ?? fontStylesThreshold[luckyFont],
-            tilt: luckyTilt,
-            content: toast.description ?? "",
-            id: id,
-        };
+            const props: Omit<commentNoteCardProps, "backgroundColor"> = {
+                noteStyle: noteStylesThreshold[luckNote],
+                clipType: luckyClipType,
+                selectedFont: toast.selectedFont ?? fontStylesThreshold[luckyFont],
+                tilt: luckyTilt,
+                content: toast.description ?? "",
+                id: id,
+            };
 
-        const newToast = { ...toast, id, props };
+            const newToast: Toast = {
+                ...toast,
+                id,
+                props,
+                resolvePromise: resolve
+            };
 
+            setToasts((prev) => [...prev, newToast]);
 
-        setToasts((prev) => [...prev, newToast]);
-
-        const duration = toast.duration ?? 4000;
-        if (duration > 0) {
-            setTimeout(() => {
-                removeToast(id);
-            }, duration);
-        }
+            const duration = toast.duration ?? 4000;
+            if (duration > 0) {
+                const timeout = setTimeout(() => {
+                    removeToast(id, "timeout");
+                }, duration);
+                timeoutRefs.current.set(id, timeout);
+            }
+        });
     }, [removeToast]);
+
+    // Cleanup timeouts on unmount
+    useEffect(() => {
+        return () => {
+            timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+            timeoutRefs.current.clear();
+        };
+    }, []);
 
     return (
         <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
@@ -99,9 +131,9 @@ function useToastContext() {
 // Toast Handler (Imperative API)
 // ============================================================================
 
-let toastHandler: ((toast: Omit<Toast, "id" | "props">) => void) | null = null;
+let toastHandler: ((toast: Omit<Toast, "id" | "props" | "resolvePromise">) => Promise<ToastDismissalReason>) | null = null;
 
-function setToastHandler(handler: (toast: Omit<Toast, "id" | "props">) => void) {
+function setToastHandler(handler: (toast: Omit<Toast, "id" | "props" | "resolvePromise">) => Promise<ToastDismissalReason>) {
     toastHandler = handler;
 }
 
@@ -123,13 +155,13 @@ interface ToastOptions {
     selectedFont?: FontFamily;
 }
 
-function createToast(type: ToastType, options: ToastOptions) {
+async function createToast(type: ToastType, options: ToastOptions): Promise<ToastDismissalReason> {
     if (!toastHandler) {
         console.warn("Toast handler not initialized. Make sure ToastProvider is mounted.");
-        return;
+        return Promise.reject(new Error("Toast handler not initialized"));
     }
 
-    toastHandler({
+    return toastHandler({
         type,
         title: options.title,
         description: options.description,
@@ -149,7 +181,53 @@ export const toast = {
     // Convenience method
     message: (title: string, description?: string) =>
         createToast("default", { title, description }),
+
+    // Promise helper to wait for user confirmation
+    promise: async <T, E>(
+        promise: Promise<T>,
+        options: {
+            loading: ToastOptions;
+            success: ToastOptions | ((data: T) => ToastOptions);
+            error: ToastOptions | ((error: E) => ToastOptions);
+        }
+    ): Promise<T> => {
+        const loadingToast = createToast("info", options.loading);
+
+        try {
+            const data = await promise;
+            await loadingToast; // Wait for loading toast to be dismissed
+
+            const successOptions = typeof options.success === "function"
+                ? options.success(data)
+                : options.success;
+            await createToast("success", successOptions);
+
+            return data;
+        } catch (error) {
+            await loadingToast; // Wait for loading toast to be dismissed
+
+            const errorOptions = typeof options.error === "function"
+                ? options.error(error as E)
+                : options.error;
+            await createToast("error", errorOptions);
+
+            throw error;
+        }
+    },
 };
+
+// ============================================================================
+// Custom Hook for Toast Management
+// ============================================================================
+
+export function useToast() {
+    const { removeToast } = useToastContext();
+
+    return {
+        toast,
+        dismiss: (id: string) => removeToast(id, "programmatic"),
+    };
+}
 
 // ============================================================================
 // Toast Item Component
@@ -157,7 +235,7 @@ export const toast = {
 
 interface ToastItemProps {
     toast: Toast;
-    onDismiss: (id: string) => void;
+    onDismiss: (id: string, reason: ToastDismissalReason) => void;
 }
 
 function ToastItem({ toast, onDismiss }: ToastItemProps) {
@@ -185,7 +263,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
 
         // Swipe threshold: 100px
         if (Math.abs(dragOffset) > 100) {
-            onDismiss(toast.id);
+            onDismiss(toast.id, "swipe");
         } else {
             setDragOffset(0);
         }
@@ -294,7 +372,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
                     loop={true}
                 >
                     <button
-                        onClick={() => onDismiss(toast.id)}
+                        onClick={() => onDismiss(toast.id, "user-dismiss")}
                         className="w-7 h-7 cursor-pointer rounded-full hover:bg-destructive text-destructive hover:text-white flex items-center justify-center transition-colors absolute top-2 right-2 z-10"
                         aria-label="Close toast"
                     >
@@ -316,10 +394,10 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
 export function Toaster() {
     const { toasts, removeToast } = useToastContext();
 
-    const sortedToasts = useMemo(() => [...toasts].reverse(), [toasts.length]);
+    const sortedToasts = useMemo(() => [...toasts].reverse(), [toasts]);
 
     return (
-        <AnimatePresence mode="wait" key={`toaster-container-presence`}>
+        <AnimatePresence mode="popLayout" key={`toaster-container-presence`}>
             <ToastInitializer />
             {sortedToasts.length > 0 && <motion.div key={`toaster-container`} className="fixed top-0 right-0 p-4 pointer-events-none" style={{ zIndex: 9999 }}
                 initial={{ opacity: 0, rotate: 10, pointerEvents: "none", transformOrigin: "top right" }}

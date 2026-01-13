@@ -4,7 +4,7 @@ import { AnimateIcon } from "@/components/animate-ui/icons/icon";
 import { cn, copyToClipboard, numberShortForm, removeSearchParam, updateSearchParam } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { MessageCircleMoreIcon } from "@/components/animate-ui/icons/message-circle-more";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EllipsisVerticalIcon } from "@/components/animate-ui/icons/ellipsis-vertical";
 import { UserRoundIcon } from "@/components/animate-ui/icons/user-round";
 import { motion, inView } from "framer-motion";
@@ -43,7 +43,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
 
     const ref = useRef<HTMLDivElement>(null);
 
-    const handleLike = () => {
+    const handleLike = useCallback(() => {
         if (!statistics.canReact) return;
         if (isLiked) {
             setLikes(likes - 1);
@@ -53,19 +53,22 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
 
         setLikes(likes + 1);
         setIsLiked(!isLiked);
-    }
+    }, [statistics.canReact, isLiked, likes]);
 
-    const handleView = () => {
+    const handleView = useCallback(() => {
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
-        setViews(views + 1);
-        setIsViewed(true);
-    }
+        setIsViewed((prev) => {
+            if (prev) return prev;
+            setViews(views + 1);
+            return true;
+        });
+    }, [statistics.canReact, statistics.noteId, views]);
 
-    const handleCopy = async () => {
+    const handleCopy = useCallback(async () => {
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
-        
+
         if (await copyToClipboard(statistics.content)) {
             toast.success({
                 title: "Note copied",
@@ -74,20 +77,20 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 selectedFont: statistics.selectedFont,
             });
         }
-    }
+    }, [statistics.canReact, statistics.noteId, statistics.content, statistics.selectedFont]);
 
-    const handleReport = () => {
+    const handleReport = useCallback(() => {
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
 
         removeSearchParam("note");
         updateSearchParam("note-to-report", statistics.noteId);
-    }
+    }, [statistics.canReact, statistics.noteId]);
 
     useEffect(() => {
         if (!ref.current) return;
         inView(ref.current, handleView);
-    }, [ref, inView]);
+    }, [ref, handleView]);
     return (
         <motion.div
             className={cn("flex items-center gap-5", className)}
@@ -98,45 +101,44 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
             transition={{ duration: 0.3 }}
         >
             <div className="flex items-center gap-5 flex-1">
-                <div className="flex items-center gap-2">
-                    <Tooltip>
-                        <TooltipTrigger disabled={!statistics.canReact} asChild className="cursor-pointer">
-                            <AnimateIcon
-                                animateOnTap={statistics.canReact ? isLiked ? undefined : "fill" : undefined}
-                                animateOnHover={statistics.canReact ? isLiked ? undefined : "path" : undefined}
-                                animate={statistics.canReact ? isLiked ? "fill" : undefined : undefined}
-                                persistOnAnimateEnd={statistics.canReact ? isLiked ? true : false : false}
-                                className={cn("cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out", !statistics.canReact ? "cursor-not-allowed opacity-50" : "")}
-                                onClick={handleLike}
-                            >
-                                <Heart
-                                    strokeWidth={2}
-                                    className={cn("sm:w-4 text-black sm:h-4 w-3 h-3 scale-125", isLiked ? "stroke-destructive" : "stroke-black")}
-                                    animate={isLiked ? "fill" : undefined}
-                                    fill={isLiked ? "red" : "none"}
-                                />
-                            </AnimateIcon>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            {statistics.canReact ? "Like this note" : "You can't like this note"}
-                        </TooltipContent>
-                    </Tooltip>
-                    <span className="text-sm font-semibold text-black">{numberShortForm(likes)}</span>
-                </div>
+                <Tooltip>
+                    <TooltipTrigger disabled={!statistics.canReact} asChild className="cursor-pointer">
+                        <AnimateIcon
+                            animateOnTap={statistics.canReact ? isLiked ? undefined : "fill" : undefined}
+                            animateOnHover={statistics.canReact ? isLiked ? undefined : "path" : undefined}
+                            animate={statistics.canReact ? isLiked ? "fill" : undefined : undefined}
+                            persistOnAnimateEnd={statistics.canReact ? isLiked ? true : false : false}
+                            className={cn("cursor-pointer flex items-center gap-1 active:scale-95 transition-all duration-150 ease-in-out", !statistics.canReact ? "cursor-not-allowed opacity-50" : "")}
+                            onClick={handleLike}
+                        >
+                            <Heart
+                                strokeWidth={2}
+                                className={cn("sm:w-4 text-black sm:h-4 w-3 h-3 scale-125 -rotate-2", isLiked ? "stroke-destructive" : "stroke-black")}
+                                animate={isLiked ? "fill" : undefined}
+                                fill={isLiked ? "red" : "none"}
+                            />
+                            <span className="text-sm font-semibold text-black">{numberShortForm(likes)}</span>
+                        </AnimateIcon>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {statistics.canReact ? "Like this note" : "You can't like this note"}
+                    </TooltipContent>
+                </Tooltip>
+
                 <Tooltip>
                     <TooltipTrigger asChild className="cursor-pointer">
                         <AnimateIcon
                             animateOnTap={statistics.canReact ? "fill" : undefined}
                             animateOnHover={statistics.canReact ? "path" : undefined}
-                            className={cn("flex items-center gap-2 cursor-pointer rotate-2 active:scale-95 transition-all duration-150 ease-in-out", !statistics.canReact ? "cursor-not-allowed opacity-50" : "")}
+                            className={cn("flex items-center gap-1 cursor-pointer active:scale-95 transition-all duration-150 ease-in-out", !statistics.canReact ? "cursor-not-allowed opacity-50" : "")}
                             onClick={statistics.onCommentTap}
                         >
-                            <MessageCircleMoreIcon 
-                                strokeWidth={2} 
+                            <MessageCircleMoreIcon
+                                strokeWidth={2}
                                 className={cn(
-                                    "sm:w-4 text-black sm:h-4 w-3 h-3 scale-125",
+                                    "sm:w-4 text-black sm:h-4 w-3 h-3 scale-125 rotate-2",
                                     isCommented ? "stroke-blue-500" : "stroke-black"
-                                )} 
+                                )}
                                 fill={isCommented ? "rgb(255,255,255,0.25)" : "none"}
                             />
                             <span className="text-sm font-semibold text-black">{numberShortForm(comments)}</span>
@@ -146,14 +148,15 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                         {statistics.canReact ? "Comment on this note" : "You can't comment on this note"}
                     </TooltipContent>
                 </Tooltip>
+
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <AnimateIcon
                             animateOnTap="fill"
                             animateOnHover="path"
-                            className="flex items-center gap-2 rotate-5 cursor-help transition-all duration-150 ease-in-out"
+                            className="flex items-center gap-1 cursor-help transition-all duration-150 ease-in-out"
                         >
-                            <UserRoundIcon strokeWidth={2} className="sm:w-3.5 text-black sm:h-3.5 w-2.5 h-2.5 scale-125 opacity-75" />
+                            <UserRoundIcon strokeWidth={2} className="sm:w-3.5 text-black sm:h-3.5 w-2.5 h-2.5 scale-125 opacity-75 rotate-5" />
                             <span className="text-sm font-semibold text-black">{numberShortForm(views)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>
@@ -180,7 +183,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 <DropdownMenuContent align="end" className="gap-1">
                     <DropdownMenuItem className="text-white justify-center text-sm" onClick={handleCopy}>Copy</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => statistics.onSaveAsImage("#f3e5ab")} className="text-white justify-center text-sm">Share</DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                         className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20"
                         onClick={handleReport}
                     >Report</DropdownMenuItem>

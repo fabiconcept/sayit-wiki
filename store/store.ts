@@ -1,10 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { api } from './api';
+import notesReducer from './slices/notesSlice';
+import commentsReducer from './slices/commentsSlice';
+import appReducer from './slices/appSlice';
 
 export const makeStore = () => {
     return configureStore({
         reducer: {
             [api.reducerPath]: api.reducer,
+            notes: notesReducer,
+            comments: commentsReducer,
+            app: appReducer,
         },
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware().concat(api.middleware),
