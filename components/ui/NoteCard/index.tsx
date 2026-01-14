@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useCallback } from 'react';
 import { motion, useInView, Variants } from 'framer-motion';
 import Clip, { ClipType } from "../Clip";
 import { cn, darkenHex, formatSocialTime, updateSearchParam } from '@/lib/utils';
@@ -10,7 +10,7 @@ import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
 import searchParamsKeys from '@/constants/search-params';
 
-const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }> = React.memo(({
+const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }> = ({
     id,
     clipType,
     noteStyle = NoteStyle.CLASSIC,
@@ -39,7 +39,6 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
     const textRef = useRef<HTMLDivElement>(null);
     const noteRef = useRef<HTMLDivElement>(null);
     const [dropMenuOpen, setDropMenuOpen] = useState(false);
-    const hasAnimated = useRef(false); // Track if this note has already animated
 
     const isInView = useInView(noteRef, {
         once: true,
@@ -95,21 +94,19 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
         return baseDelay + randomOffset;
     }, [index]);
 
-    // Animation variants - REMOVED dropMenuOpen dependency
+    // Animation variants for existing notes (in-view)
     const existingNoteVariants: Variants = useMemo(() => ({
         hidden: {
             opacity: 0,
             y: 30,
             scale: 0.95,
-            rotate: tilt * 0.8,
-            transformOrigin: transformOrigin,
+            rotate: 0,
         },
         visible: {
             opacity: 1,
             y: 0,
             scale: 1,
             rotate: tilt * 0.8,
-            transformOrigin: transformOrigin,
             transition: {
                 type: "spring",
                 damping: 15,
@@ -123,19 +120,18 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
                 }
             }
         }
-    }), [tilt, staggerDelay, transformOrigin]);
+    }), [tilt, staggerDelay]);
 
+    // Animation variants for new notes (bubble/spring effect)
     const newNoteVariants: Variants = useMemo(() => ({
         hidden: {
             opacity: 0,
-            transformOrigin: transformOrigin,
             scale: 0,
             y: -100,
             rotate: tilt * 2
         },
         visible: {
             opacity: 1,
-            transformOrigin: transformOrigin,
             scale: 1,
             y: 0,
             rotate: tilt * 0.8,
@@ -150,7 +146,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
                 }
             }
         }
-    }), [tilt, transformOrigin]);
+    }), [tilt]);
 
     // Memoize clip path style
     const clipPathStyle = useMemo(() => {
@@ -334,210 +330,198 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
         onCommentTap(id);
     }, [onCommentTap, id]);
 
-    const shouldAnimate = useMemo(() => isNew || (isInView && !hasAnimated), [isNew, isInView, hasAnimated]);
-
-    // Mark as animated once it becomes visible
-    useEffect(() => {
-        if (isInView || isNew) {
-            hasAnimated.current = true;
-        }
-    }, [isInView, isNew]);
 
     return (
-        <motion.div
-            ref={noteRef}
-            className={cn(
-                "relative group",
-                selectedFont,
-                selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
-            )}
-            variants={isNew ? newNoteVariants : existingNoteVariants}
-            whileHover={{
-                rotate: 0,
-                transformOrigin: transformOrigin,
-                transition: { duration: 0.2 }
-            }}
-            initial={shouldAnimate ? "hidden" : "visible"}
-            animate={shouldAnimate ? "visible" : "visible"}
-            style={{
-                transformOrigin: transformOrigin,
-            }}
-        >
-            {/* Separate animation for dropMenu rotation */}
+        <>
             <motion.div
-                animate={{
-                    rotate: dropMenuOpen ? 0 : undefined,
+                ref={noteRef}
+                className={cn(
+                    "relative group",
+                    selectedFont,
+                    selectedFont === FontFamily.OvertheRainbow ? "imperialScript" : "text-lg"
+                )}
+                variants={isNew ? newNoteVariants : existingNoteVariants}
+                whileHover={{
+                    rotate: 0,
+                    transformOrigin: transformOrigin,
+                    transition: { duration: 0.2 }
                 }}
-                transition={{ duration: 0.2 }}
+                initial="hidden"
+                animate={isInView ? "visible" : "hidden"}
+                style={{
+                    transformOrigin: transformOrigin,
+                }}
             >
+                {/* Separate animation for dropMenu rotation */}
                 <motion.div
-                    className={cn(
-                        "transform-gpu paper relative",
-                        noteStyle === NoteStyle.FOLDED_CORNER_TR ? `
-                            after:content-[''] after:z-30 after:absolute after:top-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
-                        ` : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_BR ? `
-                            after:content-[''] after:z-30 after:absolute after:bottom-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[5px_-5px_10px_rgba(0,0,0,0.05),2px_-2px_5px_rgba(0,0,0,0.2)]
-                        ` : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_TL ? `
-                            after:content-[''] after:z-30 after:absolute after:top-0 after:left-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
-                        ` : "",
-                        noteStyle === NoteStyle.FOLDED_CORNER_BL ? `
-                            after:content-[''] after:z-30 after:absolute after:bottom-0 after:left-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[5px_-5px_10px_rgba(0,0,0,0.05),2px_-2px_5px_rgba(0,0,0,0.2)]
-                        ` : "",
-                    )}
-                    style={{
-                        maxWidth: maxWidthString,
-                        minHeight,
-                        backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
-                        borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
-                        '--selected-bg': darkenHex(backgroundColor as `#${string}`, 30),
-                        ...clipPathStyle as React.CSSProperties,
-                    } as React.CSSProperties}
+                    animate={{
+                        rotate: dropMenuOpen ? 0 : undefined,
+                    }}
+                    transition={{ duration: 0.2 }}
                 >
-                    {noteStyle !== NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
-                        <filter id='roughpaper'>
-                            <feTurbulence type="fractalNoise" baseFrequency='0.04' result='noise' numOctaves="5" />
-                            <feDiffuseLighting in='noise' lightingColor='#fff' surfaceScale='2'>
-                                <feDistantLight azimuth='45' elevation='60' />
-                            </feDiffuseLighting>
-                        </filter>
-                        <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
-                    </svg>}
-                    {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
-                        <defs>
-                            <filter id="stick-note-texture">
-                                <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="10" result="noise" />
-                                <feDiffuseLighting lightingColor="white" diffuseConstant="1" surfaceScale=".5" result="diffLight">
-                                    <feDistantLight azimuth="100" elevation="55" />
+                    <motion.div
+                        className={cn(
+                            "transform-gpu paper relative",
+                            noteStyle === NoteStyle.FOLDED_CORNER_TR ? `
+                                after:content-[''] after:z-30 after:absolute after:top-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
+                            ` : "",
+                            noteStyle === NoteStyle.FOLDED_CORNER_BR ? `
+                                after:content-[''] after:z-30 after:absolute after:bottom-0 after:right-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[5px_-5px_10px_rgba(0,0,0,0.05),2px_-2px_5px_rgba(0,0,0,0.2)]
+                            ` : "",
+                            noteStyle === NoteStyle.FOLDED_CORNER_TL ? `
+                                after:content-[''] after:z-30 after:absolute after:top-0 after:left-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[-5px_5px_10px_rgba(0,0,0,0.05),-2px_2px_5px_rgba(0,0,0,0.2)]
+                            ` : "",
+                            noteStyle === NoteStyle.FOLDED_CORNER_BL ? `
+                                after:content-[''] after:z-30 after:absolute after:bottom-0 after:left-0 after:h-10 after:w-10 after:bg-white dark:after:bg-slate-600 after:shadow-[5px_-5px_10px_rgba(0,0,0,0.05),2px_-2px_5px_rgba(0,0,0,0.2)]
+                            ` : "",
+                        )}
+                        style={{
+                            maxWidth: maxWidthString,
+                            minHeight,
+                            backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
+                            borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
+                            '--selected-bg': darkenHex(backgroundColor as `#${string}`, 30),
+                            ...clipPathStyle as React.CSSProperties,
+                        } as React.CSSProperties}
+                    >
+                        {noteStyle !== NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
+                            <filter id='roughpaper'>
+                                <feTurbulence type="fractalNoise" baseFrequency='0.04' result='noise' numOctaves="5" />
+                                <feDiffuseLighting in='noise' lightingColor='#fff' surfaceScale='2'>
+                                    <feDistantLight azimuth='45' elevation='60' />
                                 </feDiffuseLighting>
                             </filter>
-                        </defs>
-                        <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
-                    </svg>}
-
-                    {noteStyle === NoteStyle.POLAROID && <div
-                        className="absolute top-0 left-0 h-full w-full z-20 wooden-heavy brightness-90"
-                        style={{
-                            clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
-                        }}
-                    />}
-                    {noteStyle === NoteStyle.POLAROID && <div className={cn(
-                        "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
-                        `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
-                    )} />}
-                    {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
-                        <div className='redMargin' />
-                    )}
-
-                    <div
-                        className={cn('lines mb-10')}
-                        style={noteStyle === NoteStyle.STICKY_NOTE ? {
-                            backgroundImage: 'none',
-                        } : {
-                            backgroundImage: showLines
-                                ? 'repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px)'
-                                : 'none',
-                        }}
-                    >
-                        <p
+                            <rect filter="url(#roughpaper)" width="100%" height="100%" fill="grey" />
+                        </svg>}
+                        {noteStyle === NoteStyle.STICKY_NOTE && <svg className='absolute top-0 left-0 w-full h-full z-0 mix-blend-multiply pointer-events-none'>
+                            <defs>
+                                <filter id="stick-note-texture">
+                                    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="10" result="noise" />
+                                    <feDiffuseLighting lightingColor="white" diffuseConstant="1" surfaceScale=".5" result="diffLight">
+                                        <feDistantLight azimuth="100" elevation="55" />
+                                    </feDiffuseLighting>
+                                </filter>
+                            </defs>
+                            <rect filter="url(#stick-note-texture)" width="100%" height="100%" fill="grey" />
+                        </svg>}
+                        {noteStyle === NoteStyle.POLAROID && <div
+                            className="absolute top-0 left-0 h-full w-full z-20 wooden-heavy brightness-90"
                             style={{
-                                backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
-                            } as React.CSSProperties}
-                            className={cn(
-                                "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
-                                showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
-                                selectedFont === FontFamily.Ole ? "schoolbell" : ""
-                            )}>
-                            {timestampText}
-                        </p>
-                        <article
-                            ref={textRef}
-                            spellCheck={false}
-                            className='text'
-                            style={{
-                                marginLeft,
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
+                                clipPath: "polygon(0px 0px, 0px 100%, 15px 100%, 15px 15px, calc(100% - 15px) 15px, calc(100% - 15px) 85%, 15px 85%, 15px 100%, 100% 100%, 100% 0px)"
                             }}
-                            role="article"
-                            aria-label="Note content"
-                        >
-                            {content}
-                        </article>
-                        <ReactionCard
-                            statistics={{
-                                likes: likesCount,
-                                comments: commentsCount,
-                                views: viewsCount,
-                                isLiked,
-                                isCommented,
-                                isViewed,
-                                content,
-                                noteId: id || '',
-                                canReact,
-                                selectedFont: selectedFont as FontFamily,
-                                onDropMenuOpen: setDropMenuOpen,
-                                onCommentTap: handleCommentTap,
-                                shareTrigger
-                            }}
-                            className={cn(
-                                "w-full px-6 translate-y-4",
-                                showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
-                                noteStyle === NoteStyle.FOLDED_CORNER_BR || noteStyle === NoteStyle.TORN_RIGHT ? "pr-10" : "",
-                            )}
-                        />
-                        {clipType !== ClipType.PIN && <Clip
-                            type={clipType}
-                            init={tilt < 0 ? 1 : 0}
-                            noteStyle={noteStyle}
-                            className={cn(
-                                noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
-                            )}
                         />}
-                    </div>
+                        {noteStyle === NoteStyle.POLAROID && <div className={cn(
+                            "absolute top-0 left-0 h-full w-full z-10 pointer-events-none",
+                            `shadow-[inset_0px_5px_50px_rgba(0,0,0,0.5)]`,
+                        )} />}
+                        {showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) && (
+                            <div className='redMargin' />
+                        )}
+                        <div
+                            className={cn('lines mb-10')}
+                            style={noteStyle === NoteStyle.STICKY_NOTE ? {
+                                backgroundImage: 'none',
+                            } : {
+                                backgroundImage: showLines
+                                    ? 'repeating-linear-gradient(transparent 0px, transparent 24px, #4682b4 24px, #4682b4 25px, transparent 25px)'
+                                    : 'none',
+                            }}
+                        >
+                            <p
+                                style={{
+                                    backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
+                                } as React.CSSProperties}
+                                className={cn(
+                                    "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",
+                                    showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "ml-14" : "mx-6",
+                                    selectedFont === FontFamily.Ole ? "schoolbell" : ""
+                                )}>
+                                {timestampText}
+                            </p>
+                            <article
+                                ref={textRef}
+                                spellCheck={false}
+                                className='text'
+                                style={{
+                                    marginLeft,
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                }}
+                                role="article"
+                                aria-label="Note content"
+                            >
+                                {content}
+                            </article>
+                            <ReactionCard
+                                statistics={{
+                                    likes: likesCount,
+                                    comments: commentsCount,
+                                    views: viewsCount,
+                                    isLiked,
+                                    isCommented,
+                                    isViewed,
+                                    content,
+                                    noteId: id || '',
+                                    canReact,
+                                    selectedFont: selectedFont as FontFamily,
+                                    onDropMenuOpen: setDropMenuOpen,
+                                    onCommentTap: handleCommentTap,
+                                    shareTrigger
+                                }}
+                                className={cn(
+                                    "w-full px-6 translate-y-4",
+                                    showRedLine && noteStyle !== NoteStyle.POLAROID && noteStyle !== NoteStyle.STICKY_NOTE ? "pl-14" : "",
+                                    noteStyle === NoteStyle.FOLDED_CORNER_BR || noteStyle === NoteStyle.TORN_RIGHT ? "pr-10" : "",
+                                )}
+                            />
+                            {clipType !== ClipType.PIN && <Clip
+                                type={clipType}
+                                init={tilt < 0 ? 1 : 0}
+                                noteStyle={noteStyle}
+                                className={cn(
+                                    noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
+                                )}
+                            />}
+                        </div>
+                    </motion.div>
                 </motion.div>
+                {clipType === ClipType.PIN && <Clip
+                    type={ClipType.PIN}
+                    className={cn(
+                        "pointer-events-none",
+                        "relative z-20",
+                        noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
+                        noteStyle === NoteStyle.TORN_TOP ? `-top-4 left-2` : "",
+                    )}
+                />}
             </motion.div>
-            {clipType === ClipType.PIN && <Clip
-                type={ClipType.PIN}
-                className={cn(
-                    "pointer-events-none",
-                    "relative z-20",
-                    noteStyle === NoteStyle.POLAROID ? `-top-6` : "",
-                    noteStyle === NoteStyle.TORN_TOP ? `-top-4 left-2` : "",
-                )}
-            />}
-        </motion.div>
+        </>
     );
-});
+};
 
 NoteCard.displayName = 'NoteCard';
 
 // Export with memo and custom comparison
 export default React.memo(NoteCard, (prevProps, nextProps) => {
+    // Compare all props to determine if re-render is needed
+    // IMPORTANT: Exclude 'index' because it changes when new notes are added to the grid
     const propsToCompare: (keyof typeof prevProps)[] = [
         'id', 'clipType', 'noteStyle', 'backgroundColor', 'timestamp',
         'content', 'likesCount', 'commentsCount', 'viewsCount', 'tilt',
         'isLiked', 'isCommented', 'isViewed', 'showRedLine', 'showLines',
-        'selectedFont', 'index', 'isNew', 'maxWidth', 'canReact'
+        'selectedFont', 'isNew', 'maxWidth', 'canReact'
     ];
 
-    const changes: string[] = [];
-
-    propsToCompare.forEach(key => {
+    for (const key of propsToCompare) {
         if (prevProps[key] !== nextProps[key]) {
-            changes.push(`${String(key)}: ${JSON.stringify(prevProps[key])} → ${JSON.stringify(nextProps[key])}`);
+            return false; // Props changed, re-render
         }
-    });
+    }
 
     // Check if onCommentTap function reference changed
     if (prevProps.onCommentTap !== nextProps.onCommentTap) {
-        changes.push('onCommentTap: function reference changed');
+        return false;
     }
 
-    if (changes.length > 0) {
-        return false; // Re-render
-    }
-
-    return true; // Skip re-render
+    return true; // No changes, skip re-render
 });

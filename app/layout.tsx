@@ -29,9 +29,6 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <head>
-                <link rel="preload" as="image" href="/wooden-pattern.png" />
-            </head>
             <body
                 className={`${fingerPaint.variable} antialiased min-h-[100dvh] dotted wooden`}
             >

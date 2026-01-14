@@ -1,12 +1,10 @@
 "use client";
 import { useResized } from "@/hooks/use-resized";
-import { cn, updateSearchParam } from "@/lib/utils";
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { cn } from "@/lib/utils";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { NoteCardProps } from "@/types/note";
 import NoteCard from "./NoteCard";
 import { motion } from "framer-motion";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import { useRouter } from "next/navigation";
 
 interface MasonryProps<T = NoteCardProps> {
     items: T[];
@@ -34,8 +32,6 @@ export default function Masonry({
     const prevItemIds = useRef<Set<string>>(new Set());
     const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
-    const isMobile = useIsMobile();
-    const router = useRouter();
 
     // Ensure unique items - deduplicate and sort
     const uniqueItems = useMemo(() => {
