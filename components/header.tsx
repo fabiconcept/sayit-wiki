@@ -131,7 +131,7 @@ export default function Header() {
 
     return (
         <>
-            <WoodenPlatform className="w-fit h-full rounded-3xl drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)] sm:sticky sm:top-10 top-5 sm:left-10 left-1/2 max-sm:-translate-x-1/2 z-50">
+            <WoodenPlatform className="w-fit h-full rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)] sm:sticky sm:top-10 top-5 sm:left-10 left-1/2 max-sm:-translate-x-1/2 z-50">
                 <AnimateIcon animateOnHover="wiggle" loop={true}>
                     <div className="md:px-3 px-2 md:py-3 py-2 flex border-8 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                         <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
@@ -146,7 +146,7 @@ export default function Header() {
                 </AnimateIcon>
             </WoodenPlatform>
 
-            <WoodenPlatform className="w-fit h-full rounded-3xl drop-shadow-[0_0_10px_rgba(0,0,0,0.0.15),0_0_3px_rgba(0,0,0,0.0.75)] sticky sm:-mt-16 mt-8 sm:top-10 top-5 sm:right-10 right-[unset] max-sm:left-1/2 max-sm:-translate-x-3.5 sm:float-right z-50">
+            <WoodenPlatform className="w-fit h-full rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)] sticky sm:-mt-16 mt-8 sm:top-10 top-5 sm:right-10 right-[unset] max-sm:left-1/2 max-sm:-translate-x-3.5 sm:float-right z-50">
                 <div className="absolute wooden inset-0 rounded-full m-2 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
                 <nav className="md:px-2 px-1 md:py-2 py-1 flex border-8 border-background/0 sm:gap-3 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                     {Object.values(PageNames).map((PageName) => {
