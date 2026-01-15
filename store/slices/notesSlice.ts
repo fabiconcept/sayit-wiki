@@ -9,7 +9,7 @@ interface NotesState {
 }
 
 const initialState: NotesState = {
-    notes: [...notes.slice(0, 24)],
+    notes: [...notes],
     isLoading: false,
     hasMore: true,
 };

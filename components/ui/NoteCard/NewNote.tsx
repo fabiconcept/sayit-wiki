@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useMemo, useRef } from 'react';
 import Clip, { ClipType } from "../Clip";
-import { cn, countTextLines, darkenHex } from '@/lib/utils';
+import { cn, darkenHex } from '@/lib/utils';
 import '@/app/styles/notes.css';
 import { NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
@@ -22,7 +22,6 @@ interface NewNoteCardProps {
 }
 
 const NewNoteCard: React.FC<NewNoteCardProps> = ({
-    id,
     clipType,
     noteStyle = NoteStyle.CLASSIC,
     backgroundColor,
@@ -42,7 +41,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
 
     const textInputHandler = useMemo(
         () => new TextInputHandler(maxChars, onContentChange),
-        [maxChars, id, onContentChange]
+        [maxChars, onContentChange]
     );
 
     const handleTextareaChange = useCallback(

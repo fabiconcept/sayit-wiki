@@ -1,13 +1,22 @@
+import { quickModerate, ModerationLevel } from '@/lib/moderator';
+import { toast } from '@/components/ui/toast';
+
 class TextInputHandler {
     private maxChars: number;
     private onContentChange?: (content: string) => void;
+    private enableModeration: boolean;
+    private moderationLevel: ModerationLevel;
 
     constructor(
         maxChars: number,
-        onContentChange?: (content: string) => void
+        onContentChange?: (content: string) => void,
+        enableModeration: boolean = true,
+        moderationLevel: ModerationLevel = ModerationLevel.STRICT
     ) {
         this.maxChars = maxChars;
         this.onContentChange = onContentChange;
+        this.enableModeration = enableModeration;
+        this.moderationLevel = moderationLevel;
     }
 
     /**
@@ -56,6 +65,23 @@ class TextInputHandler {
         const target = e.target;
         const cursorPosition = target.selectionStart;
         let newText = target.value;
+
+        // Apply moderation check if enabled
+        if (this.enableModeration) {
+            const moderationResult = quickModerate(newText, this.moderationLevel);
+            
+            if (moderationResult.isWTF) {
+                toast.error({
+                    title: "What's wrong with you?",
+                    description: "You can't say that here, or to anyone else for that matter!",
+                    communityNote: `Found ${moderationResult.matches.length} words: ${moderationResult.matches.map(match => match.word).join(', ')}`,
+                });
+                
+                // Revert to previous value
+                e.preventDefault();
+                return;
+            }
+        }
 
         // Apply word length limiting
         newText = this.limitWordLength(newText);
@@ -125,6 +151,20 @@ class TextInputHandler {
      */
     public setOnContentChange(callback: (content: string) => void): void {
         this.onContentChange = callback;
+    }
+
+    /**
+     * Enables or disables moderation
+     */
+    public setModeration(enabled: boolean): void {
+        this.enableModeration = enabled;
+    }
+
+    /**
+     * Updates the moderation level
+     */
+    public setModerationLevel(level: ModerationLevel): void {
+        this.moderationLevel = level;
     }
 }
 

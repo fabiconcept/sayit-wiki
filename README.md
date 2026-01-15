@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📌 SayIt Wiki
 
-## Getting Started
+A beautiful, interactive note-sharing platform that brings the nostalgic feel of a physical bulletin board to the web.
 
-First, run the development server:
+## ✨ What is it?
+
+SayIt Wiki lets you pin colorful, customizable notes to a shared virtual wall. Each note can have different styles, handwriting fonts, paper colors, and clip types - just like a real bulletin board!
+
+## 🚀 Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to start pinning notes!
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🎨 Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **16+ Note Styles** - Classic, spiral, torn edges, sticky notes, polaroid, and more
+- **10+ Handwriting Fonts** - Authentic handwriting styles for personal touch
+- **Interactive Grid** - Responsive masonry layout with smooth animations
+- **Like & Comment** - Engage with notes from the community
+- **Auto-Scroll** - Showcase mode for unattended displays
+- **Dark Mode** - Beautiful theme support
+- **Keyboard Shortcuts** - `Ctrl/Cmd + N` to create, `Ctrl/Cmd + S` to screenshot
 
-## Learn More
+## 🛠️ Built With
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js 16 & React 19
+- Framer Motion for animations
+- Redux Toolkit for state management
+- Tailwind CSS 4 for styling
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📖 Documentation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [FEATURES.md](./FEATURES.md) for detailed feature documentation.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Made with ❤️ and lots of virtual pins**

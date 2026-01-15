@@ -3,21 +3,60 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useEffect, useRef, useState } from 'react';
 
 export default function IdleScroll() {
+    const isMobile = useIsMobile();
+    
+    const IDLE_DELAY = isMobile ? 5000 : 10000;
+    const INITIAL_DELAY = isMobile ? 2000 : 5000;
+    const SCROLL_INTERVAL = isMobile ? 2000 : 5000;
+    const COUNTDOWN_DURATION = IDLE_DELAY + (isMobile ? 7000 : 4000);
+    const MAX_COUNTDOWN = COUNTDOWN_DURATION / 1000; 
+    
+    // Refs for timers and state
     const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
     const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const scrollDirectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const hideCountdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const autoScrollStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    
+    // Refs for scroll state
     const isScrollingRef = useRef(false);
     const directionRef = useRef<'down' | 'up'>('down');
-    const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const idleStartTimeRef = useRef<number>(0);
-    const isMobile = useIsMobile();
 
+    // React state
     const [countdown, setCountdown] = useState<number>(0);
     const [isIdle, setIsIdle] = useState(false);
 
     useEffect(() => {
-        const IDLE_DELAY = isMobile ? 5000 : 10000; // 10 seconds of inactivity
-        const INITIAL_DELAY = isMobile ? 2000 : 5000; // 5 seconds before countdown starts
-        const SCROLL_INTERVAL = isMobile ? 2000 : 5000; // milliseconds
+
+        // Cleanup all timers
+        const cleanupAllTimers = () => {
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+                idleTimerRef.current = null;
+            }
+            if (scrollIntervalRef.current) {
+                clearInterval(scrollIntervalRef.current);
+                scrollIntervalRef.current = null;
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+                countdownIntervalRef.current = null;
+            }
+            if (scrollDirectionTimeoutRef.current) {
+                clearTimeout(scrollDirectionTimeoutRef.current);
+                scrollDirectionTimeoutRef.current = null;
+            }
+            if (hideCountdownTimeoutRef.current) {
+                clearTimeout(hideCountdownTimeoutRef.current);
+                hideCountdownTimeoutRef.current = null;
+            }
+            if (autoScrollStartTimeoutRef.current) {
+                clearTimeout(autoScrollStartTimeoutRef.current);
+                autoScrollStartTimeoutRef.current = null;
+            }
+        };
 
         const startCountdown = () => {
             idleStartTimeRef.current = Date.now();
@@ -25,7 +64,7 @@ export default function IdleScroll() {
 
             countdownIntervalRef.current = setInterval(() => {
                 const elapsed = Date.now() - idleStartTimeRef.current;
-                const remaining = Math.max(0, (IDLE_DELAY + 4500) - elapsed);
+                const remaining = Math.max(0, COUNTDOWN_DURATION - elapsed);
                 setCountdown(Math.ceil(remaining / 1000));
 
                 if (remaining <= 0) {
@@ -33,8 +72,7 @@ export default function IdleScroll() {
                         clearInterval(countdownIntervalRef.current);
                         countdownIntervalRef.current = null;
                     }
-                    // Hide the countdown indicator after reaching 0
-                    setTimeout(() => {
+                    hideCountdownTimeoutRef.current = setTimeout(() => {
                         setIsIdle(false);
                     }, 100);
                 }
@@ -45,6 +83,10 @@ export default function IdleScroll() {
             if (countdownIntervalRef.current) {
                 clearInterval(countdownIntervalRef.current);
                 countdownIntervalRef.current = null;
+            }
+            if (hideCountdownTimeoutRef.current) {
+                clearTimeout(hideCountdownTimeoutRef.current);
+                hideCountdownTimeoutRef.current = null;
             }
             setIsIdle(false);
             setCountdown(0);
@@ -63,7 +105,7 @@ export default function IdleScroll() {
                     behavior: 'smooth'
                 });
 
-                setTimeout(() => {
+                scrollDirectionTimeoutRef.current = setTimeout(() => {
                     const newScroll = window.scrollY;
                     const newMaxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
@@ -81,6 +123,10 @@ export default function IdleScroll() {
                 clearInterval(scrollIntervalRef.current);
                 scrollIntervalRef.current = null;
             }
+            if (scrollDirectionTimeoutRef.current) {
+                clearTimeout(scrollDirectionTimeoutRef.current);
+                scrollDirectionTimeoutRef.current = null;
+            }
             isScrollingRef.current = false;
         };
 
@@ -90,20 +136,24 @@ export default function IdleScroll() {
 
             if (idleTimerRef.current) {
                 clearTimeout(idleTimerRef.current);
+                idleTimerRef.current = null;
+            }
+            if (autoScrollStartTimeoutRef.current) {
+                clearTimeout(autoScrollStartTimeoutRef.current);
+                autoScrollStartTimeoutRef.current = null;
             }
 
-            // Wait 5 seconds before starting countdown
             idleTimerRef.current = setTimeout(() => {
                 startCountdown();
                 
-                // Start auto-scroll after IDLE_DELAY from countdown start
-                setTimeout(() => {
+                autoScrollStartTimeoutRef.current = setTimeout(() => {
                     startAutoScroll();
                 }, IDLE_DELAY);
             }, INITIAL_DELAY);
         };
 
-        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'] as const;
+        
         events.forEach(event => {
             document.addEventListener(event, resetIdleTimer, { passive: true });
         });
@@ -114,13 +164,10 @@ export default function IdleScroll() {
             events.forEach(event => {
                 document.removeEventListener(event, resetIdleTimer);
             });
-            stopAutoScroll();
-            stopCountdown();
-            if (idleTimerRef.current) {
-                clearTimeout(idleTimerRef.current);
-            }
+            cleanupAllTimers();
+            isScrollingRef.current = false;
         };
-    }, [isMobile]);
+    }, [isMobile, IDLE_DELAY, INITIAL_DELAY, SCROLL_INTERVAL, COUNTDOWN_DURATION]);
 
     // Show countdown only when idle and countdown is active
     if (!isIdle || countdown === 0) return null;
@@ -151,7 +198,7 @@ export default function IdleScroll() {
                     stroke="rgba(255, 255, 255, 0.75)"
                     strokeWidth="8"
                     strokeDasharray={2 * Math.PI * 25}
-                    strokeDashoffset={2 * Math.PI * 25 * (1 - countdown / 14.5)}
+                    strokeDashoffset={2 * Math.PI * 25 * (1 - countdown / MAX_COUNTDOWN)}
                     strokeLinecap="round"
                     style={{
                         transition: 'stroke-dashoffset 0.1s linear'

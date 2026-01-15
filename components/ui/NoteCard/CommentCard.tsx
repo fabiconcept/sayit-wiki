@@ -7,6 +7,9 @@ import '@/app/styles/notes.css';
 import { commentNoteCardProps, NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
+import { quickModerate } from '@/lib/moderator';
+import { useAppSelector } from '@/store/hooks';
+import { selectModerationLevel } from '@/store/selectors';
 
 const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     noteStyle = NoteStyle.CLASSIC,
@@ -24,6 +27,7 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
 }) => {
     const { theme } = useTheme();
     const isDark = theme === "dark";
+    const moderationLevel = useAppSelector(selectModerationLevel);
     const textRef = useRef<HTMLDivElement>(null);
     const noteRef = useRef<HTMLDivElement>(null);
     const hasAnimated = useRef(false); // Track if this note has already animated
@@ -108,6 +112,18 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
     ), [adjustedTilt]);
 
     const marginLeft = showRedLine && ![NoteStyle.STICKY_NOTE, NoteStyle.POLAROID].includes(noteStyle) ? '55px' : '20px';
+
+    // Apply moderation to content
+    const moderatedContent = useMemo(() => {
+        const result = quickModerate(content, moderationLevel);
+        return result.sanitized;
+    }, [content, moderationLevel]);
+
+    const moderatedCommunityNote = useMemo(() => {
+        if (!communityNote) return undefined;
+        const result = quickModerate(communityNote, moderationLevel);
+        return result.sanitized;
+    }, [communityNote, moderationLevel]);
 
     // Determine if this note should animate
     // Replace the ref with state:
@@ -227,10 +243,10 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                             "--color-white": "white",
                             color: darkenHex(backgroundColor as `#${string}`, 80),
                         } as React.CSSProperties}>{title}</p>}
-                        {content}
+                        {moderatedContent}
                         <br />
                         <br />
-                        {communityNote && <p className='font-medium'>Community note: <span className='text-red-500'>{communityNote}</span></p>}
+                        {moderatedCommunityNote && <p className='font-medium'>Community note: <span className='text-red-500'>{moderatedCommunityNote}</span></p>}
                     </article>
                 </div>
 
