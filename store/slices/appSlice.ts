@@ -14,22 +14,21 @@ interface AppState {
 
 const getInitialModerationLevel = (): ModerationLevel => {
     if (typeof window === 'undefined') return ModerationLevel.MODERATE;
-    
+
     try {
         const stored = localStorage.getItem('moderation-level');
-        const valid = Object.values(ModerationLevel).includes(stored as ModerationLevel);
-        if (stored && valid) {
+
+        if (stored && Object.values(ModerationLevel).includes(stored as ModerationLevel)) {
             return stored as ModerationLevel;
         }
 
-        throw new Error('No moderation level found in localStorage');
+        // No valid stored value, set default
+        localStorage.setItem('moderation-level', ModerationLevel.STRICT);
+        return ModerationLevel.STRICT;
     } catch (error) {
-        localStorage.setItem("moderation-level", ModerationLevel.STRICT);
         console.error('Error loading moderation level from localStorage:', error);
         return ModerationLevel.STRICT;
     }
-    
-    return ModerationLevel.MODERATE;
 };
 
 const initialState: AppState = {
