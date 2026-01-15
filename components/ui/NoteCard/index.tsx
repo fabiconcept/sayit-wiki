@@ -110,7 +110,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
             opacity: 1,
             y: 0,
             scale: 1,
-            rotate: dropMenuOpen ? tilt * 0.8 : 0,
+            rotate: !dropMenuOpen ? tilt * 0.8 : 0,
             transition: {
                 type: "spring",
                 damping: 15,
@@ -138,7 +138,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
             opacity: 1,
             scale: 1,
             y: 0,
-            rotate: dropMenuOpen ? tilt * 0.8 : 0,
+            rotate: !dropMenuOpen ? tilt * 0.8 : 0,
             transition: {
                 type: "spring",
                 damping: 12,
