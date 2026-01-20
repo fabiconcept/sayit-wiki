@@ -94,7 +94,9 @@ export default function ViewNoteModal() {
         }
 
         const scrollTimeout = setTimeout(() => {
-            scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+            if (scrollAreaRef.current) {
+                scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }, 100);
 
         await new Promise(resolve => setTimeout(resolve, 100));

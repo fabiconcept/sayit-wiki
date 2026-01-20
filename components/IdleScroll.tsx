@@ -99,11 +99,20 @@ export default function IdleScroll() {
             scrollIntervalRef.current = setInterval(() => {
                 const windowHeight = window.innerHeight;
                 const scrollAmount = directionRef.current === 'down' ? windowHeight : -windowHeight;
+                const currentScroll = window.scrollY;
+                const targetScroll = currentScroll + (scrollAmount / (isMobile ? 3 : 2));
 
-                window.scrollBy({
-                    top: scrollAmount / (isMobile ? 3 : 2),
-                    behavior: 'smooth'
-                });
+                if (window.lenis) {
+                    window.lenis.scrollTo(targetScroll, {
+                        duration: 1.2,
+                        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                    });
+                } else {
+                    window.scrollBy({
+                        top: scrollAmount / (isMobile ? 3 : 2),
+                        behavior: 'smooth'
+                    });
+                }
 
                 scrollDirectionTimeoutRef.current = setTimeout(() => {
                     const newScroll = window.scrollY;

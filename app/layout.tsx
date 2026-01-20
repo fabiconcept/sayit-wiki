@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Toaster, ToastProvider } from "@/components/ui/toast";
 import StoreProvider from "@/store/provider";
 import IdleScroll from "@/components/IdleScroll";
+import LenisProvider from "@/components/LenisProvider";
 
 const fingerPaint = Finger_Paint({
     variable: "--font-finger-paint",
@@ -32,19 +33,21 @@ export default function RootLayout({
             <body
                 className={`${fingerPaint.variable} antialiased min-h-[100dvh] dotted wooden`}
             >
-                <IdleScroll />
-                <StoreProvider>
-                    <ThemeProvider>
-                        <ToastProvider>
-                            <Toaster />
-                            <Suspense fallback={null}>
-                                <Header />
-                            </Suspense>
-                            {children}
-                            <ThemeToggle />
-                        </ToastProvider>
-                    </ThemeProvider>
-                </StoreProvider>
+                <LenisProvider>
+                    <IdleScroll />
+                    <StoreProvider>
+                        <ThemeProvider>
+                            <ToastProvider>
+                                <Toaster />
+                                <Suspense fallback={null}>
+                                    <Header />
+                                </Suspense>
+                                {children}
+                                <ThemeToggle />
+                            </ToastProvider>
+                        </ThemeProvider>
+                    </StoreProvider>
+                </LenisProvider>
             </body>
         </html>
     )

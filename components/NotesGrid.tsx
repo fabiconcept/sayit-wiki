@@ -14,10 +14,14 @@ export default function NotesGrid() {
 
     useEffect(() => {
         if (reduxNotes.length === 0) return;
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        if (window.lenis) {
+            window.lenis.scrollTo(0, { duration: 1.2 });
+        } else {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
     }, [reduxNotes.length]);
 
     const handleCommentTap = useMemo(() => {
