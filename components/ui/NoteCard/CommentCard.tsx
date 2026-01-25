@@ -7,7 +7,7 @@ import '@/app/styles/notes.css';
 import { commentNoteCardProps, NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
-import { quickModerate } from '@/lib/moderator';
+import { quickModerate } from '@useverse/profanity-guard';
 import { useAppSelector } from '@/store/hooks';
 import { selectModerationLevel } from '@/store/selectors';
 

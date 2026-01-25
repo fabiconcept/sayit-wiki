@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ModerationLevel } from '@/lib/moderator';
+import { ModerationLevel } from '@useverse/profanity-guard';
 
 interface AppState {
     moderationLevel: ModerationLevel;

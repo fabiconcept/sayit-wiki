@@ -1,5 +1,5 @@
 "use client";
-import { cn, removeSearchParam, updateSearchParam } from "@/lib/utils";
+import { cn, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { DialogClose, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { useMemo, useRef, useState } from "react";
@@ -10,7 +10,7 @@ import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { ResponsiveModal } from "./ui/responsive-modal";
 import searchParamsKeys from "@/constants/search-params";
 import { SettingsIcon } from "./animate-ui/icons/settings";
-import { ModerationLevel } from "@/lib/moderator";
+import { ModerationLevel } from "@useverse/profanity-guard";
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import strictAnimation from "./lottie/Kissing.json";
 import moderateAnimation from "./lottie/Cowboy Hat Face.json";

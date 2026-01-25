@@ -21,7 +21,7 @@ import { TextInputHandler, NewlineTrimmer } from "./ui/NoteCard/actions";
 import NoteCard from "./ui/NoteCard";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { backgroundColors } from "@/constants/notes";
-import { ModerationLevel, quickModerate } from "@/lib/moderator";
+import { ModerationLevel, quickModerate, WordSeverity } from "@useverse/profanity-guard";
 import { toast } from "./ui/toast";
 
 export default function ViewNoteModal() {
@@ -83,7 +83,7 @@ export default function ViewNoteModal() {
 
         const moderationResult = quickModerate(trimmedComment, ModerationLevel.STRICT);
 
-        if (moderationResult.isWTF) {
+        if (moderationResult.severity === WordSeverity.WTF) {
             toast.error({
                 title: "What's wrong with you?",
                 description: "You can't say that here, or to anyone else for that matter!",

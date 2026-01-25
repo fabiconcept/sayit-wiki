@@ -1,4 +1,4 @@
-import { quickModerate, ModerationLevel } from '@/lib/moderator';
+import { quickModerate, ModerationLevel, WordSeverity } from '@useverse/profanity-guard';
 import { toast } from '@/components/ui/toast';
 
 class TextInputHandler {
@@ -70,7 +70,7 @@ class TextInputHandler {
         if (this.enableModeration) {
             const moderationResult = quickModerate(newText, this.moderationLevel);
             
-            if (moderationResult.isWTF) {
+            if (moderationResult.severity === WordSeverity.WTF) {
                 toast.error({
                     title: "What's wrong with you?",
                     description: "You can't say that here, or to anyone else for that matter!",

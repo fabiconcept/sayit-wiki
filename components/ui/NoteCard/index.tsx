@@ -9,7 +9,7 @@ import { useTheme } from 'next-themes';
 import ReactionCard from './Reaction';
 import { FontFamily } from '@/constants/fonts';
 import searchParamsKeys from '@/constants/search-params';
-import { quickModerate } from '@/lib/moderator';
+import { quickModerate } from '@useverse/profanity-guard';
 import { useAppSelector } from '@/store/hooks';
 import { selectModerationLevel } from '@/store/selectors';
 
