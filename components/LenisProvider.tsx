@@ -12,17 +12,16 @@ declare global {
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1.2,
+            duration: 0.8,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             orientation: 'vertical',
             gestureOrientation: 'vertical',
             smoothWheel: true,
-            wheelMultiplier: 0.8,
-            touchMultiplier: 1.5,
+            wheelMultiplier: 1,
+            touchMultiplier: 1.8,
             infinite: false,
             autoResize: true,
-            syncTouch: true,
-            syncTouchLerp: 0.1,
+            syncTouch: false,
             prevent: (node) => {
                 return (
                     node.hasAttribute('data-lenis-prevent') ||
@@ -31,7 +30,9 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
                     node.closest('[data-radix-scroll-area-viewport]') !== null ||
                     node.closest('[role="dialog"]') !== null ||
                     node.closest('[role="menu"]') !== null ||
-                    node.closest('[data-radix-popper-content-wrapper]') !== null
+                    node.closest('[data-radix-popper-content-wrapper]') !== null ||
+                    node.closest('.overflow-y-auto') !== null ||
+                    node.classList.contains('overflow-y-auto')
                 );
             },
         });
