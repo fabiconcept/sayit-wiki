@@ -37,12 +37,17 @@ export class LikeService {
                     targetType,
                 }).session(session);
                 
-                const Model = targetType === 'note' ? Note : Comment;
-                const updated = await Model.findByIdAndUpdate(
-                    targetObjectId,
-                    { $inc: { likesCount: -1 } },
-                    { new: true, session }
-                );
+                const updated = targetType === 'note'
+                    ? await Note.findByIdAndUpdate(
+                        targetObjectId,
+                        { $inc: { likesCount: -1 } },
+                        { new: true, session }
+                    )
+                    : await Comment.findByIdAndUpdate(
+                        targetObjectId,
+                        { $inc: { likesCount: -1 } },
+                        { new: true, session }
+                    );
                 
                 if (!updated) {
                     throw new Error(`${targetType} not found`);
@@ -61,12 +66,17 @@ export class LikeService {
                     { session }
                 );
                 
-                const Model = targetType === 'note' ? Note : Comment;
-                const updated = await Model.findByIdAndUpdate(
-                    targetObjectId,
-                    { $inc: { likesCount: 1 } },
-                    { new: true, session }
-                );
+                const updated = targetType === 'note'
+                    ? await Note.findByIdAndUpdate(
+                        targetObjectId,
+                        { $inc: { likesCount: 1 } },
+                        { new: true, session }
+                    )
+                    : await Comment.findByIdAndUpdate(
+                        targetObjectId,
+                        { $inc: { likesCount: 1 } },
+                        { new: true, session }
+                    );
                 
                 if (!updated) {
                     throw new Error(`${targetType} not found`);

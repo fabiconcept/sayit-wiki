@@ -50,8 +50,9 @@ export async function GET(request: NextRequest) {
         // Fetch the actual content for each report
         const reportsWithContent = await Promise.all(
             reports.map(async (report) => {
-                const Model = report.targetType === 'note' ? Note : Comment;
-                const content = await Model.findById(report.targetId).lean();
+                const content = report.targetType === 'note'
+                    ? await Note.findById(report.targetId).lean()
+                    : await Comment.findById(report.targetId).lean();
                 
                 return {
                     id: report._id.toString(),
