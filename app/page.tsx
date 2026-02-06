@@ -11,11 +11,8 @@ import ViewNoteModal from "@/components/view-note";
 export default function HomePage() {
     
     return (
-        <div className="h-full w-full grid place-items-center sm:mt-20 mt-10 overflow-y-auto pt-4">
+        <div className="w-full grid place-items-center sm:mt-20 mt-10 pt-4">
             <NotesGrid key={"notes-grid"} />
-            <Loader>
-                <h4 className="md:text-base sm:text-sm text-xs text-black font-bold animate-bounce">Digging through notes...</h4>
-            </Loader>
             <Suspense fallback={null}>
                 <MakeANote />
             </Suspense>

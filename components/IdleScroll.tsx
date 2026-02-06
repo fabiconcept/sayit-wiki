@@ -1,9 +1,20 @@
 'use client';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import searchParamsKeys from '@/constants/search-params';
 
 export default function IdleScroll() {
     const isMobile = useIsMobile();
+    const searchParams = useSearchParams();
+    
+    // Check if any modal is open
+    const isModalOpen = 
+        searchParams.get(searchParamsKeys.CREATE_NOTE) === 'true' ||
+        searchParams.get(searchParamsKeys.NOTE) !== null ||
+        searchParams.get(searchParamsKeys.NOTE_TO_REPORT) !== null ||
+        searchParams.get(searchParamsKeys.SHARE_NOTE) !== null ||
+        searchParams.get(searchParamsKeys.PRIVACY_SETTINGS) === 'true';
     
     const IDLE_DELAY = isMobile ? 5000 : 10000;
     const INITIAL_DELAY = isMobile ? 2000 : 5000;
@@ -28,36 +39,60 @@ export default function IdleScroll() {
     const [countdown, setCountdown] = useState<number>(0);
     const [isIdle, setIsIdle] = useState(false);
 
+    // Define cleanup and control functions at component level
+    const cleanupAllTimers = () => {
+        if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+            idleTimerRef.current = null;
+        }
+        if (scrollIntervalRef.current) {
+            clearInterval(scrollIntervalRef.current);
+            scrollIntervalRef.current = null;
+        }
+        if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+        }
+        if (scrollDirectionTimeoutRef.current) {
+            clearTimeout(scrollDirectionTimeoutRef.current);
+            scrollDirectionTimeoutRef.current = null;
+        }
+        if (hideCountdownTimeoutRef.current) {
+            clearTimeout(hideCountdownTimeoutRef.current);
+            hideCountdownTimeoutRef.current = null;
+        }
+        if (autoScrollStartTimeoutRef.current) {
+            clearTimeout(autoScrollStartTimeoutRef.current);
+            autoScrollStartTimeoutRef.current = null;
+        }
+    };
+
+    const stopCountdown = () => {
+        if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+        }
+        if (hideCountdownTimeoutRef.current) {
+            clearTimeout(hideCountdownTimeoutRef.current);
+            hideCountdownTimeoutRef.current = null;
+        }
+        setIsIdle(false);
+        setCountdown(0);
+    };
+
+    const stopAutoScroll = () => {
+        if (scrollIntervalRef.current) {
+            clearInterval(scrollIntervalRef.current);
+            scrollIntervalRef.current = null;
+        }
+        if (scrollDirectionTimeoutRef.current) {
+            clearTimeout(scrollDirectionTimeoutRef.current);
+            scrollDirectionTimeoutRef.current = null;
+        }
+        isScrollingRef.current = false;
+    };
+
     useEffect(() => {
-
-        // Cleanup all timers
-        const cleanupAllTimers = () => {
-            if (idleTimerRef.current) {
-                clearTimeout(idleTimerRef.current);
-                idleTimerRef.current = null;
-            }
-            if (scrollIntervalRef.current) {
-                clearInterval(scrollIntervalRef.current);
-                scrollIntervalRef.current = null;
-            }
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current);
-                countdownIntervalRef.current = null;
-            }
-            if (scrollDirectionTimeoutRef.current) {
-                clearTimeout(scrollDirectionTimeoutRef.current);
-                scrollDirectionTimeoutRef.current = null;
-            }
-            if (hideCountdownTimeoutRef.current) {
-                clearTimeout(hideCountdownTimeoutRef.current);
-                hideCountdownTimeoutRef.current = null;
-            }
-            if (autoScrollStartTimeoutRef.current) {
-                clearTimeout(autoScrollStartTimeoutRef.current);
-                autoScrollStartTimeoutRef.current = null;
-            }
-        };
-
         const startCountdown = () => {
             idleStartTimeRef.current = Date.now();
             setIsIdle(true);
@@ -77,19 +112,6 @@ export default function IdleScroll() {
                     }, 100);
                 }
             }, 100);
-        };
-
-        const stopCountdown = () => {
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current);
-                countdownIntervalRef.current = null;
-            }
-            if (hideCountdownTimeoutRef.current) {
-                clearTimeout(hideCountdownTimeoutRef.current);
-                hideCountdownTimeoutRef.current = null;
-            }
-            setIsIdle(false);
-            setCountdown(0);
         };
 
         const startAutoScroll = () => {
@@ -127,18 +149,6 @@ export default function IdleScroll() {
             }, SCROLL_INTERVAL);
         };
 
-        const stopAutoScroll = () => {
-            if (scrollIntervalRef.current) {
-                clearInterval(scrollIntervalRef.current);
-                scrollIntervalRef.current = null;
-            }
-            if (scrollDirectionTimeoutRef.current) {
-                clearTimeout(scrollDirectionTimeoutRef.current);
-                scrollDirectionTimeoutRef.current = null;
-            }
-            isScrollingRef.current = false;
-        };
-
         const resetIdleTimer = () => {
             stopAutoScroll();
             stopCountdown();
@@ -152,10 +162,18 @@ export default function IdleScroll() {
                 autoScrollStartTimeoutRef.current = null;
             }
 
+            // Don't start idle timer if modal is open
+            if (isModalOpen) return;
+
             idleTimerRef.current = setTimeout(() => {
+                // Double check modal isn't open before starting countdown
+                if (isModalOpen) return;
+                
                 startCountdown();
                 
                 autoScrollStartTimeoutRef.current = setTimeout(() => {
+                    // Triple check modal isn't open before auto-scrolling
+                    if (isModalOpen) return;
                     startAutoScroll();
                 }, IDLE_DELAY);
             }, INITIAL_DELAY);
@@ -176,7 +194,24 @@ export default function IdleScroll() {
             cleanupAllTimers();
             isScrollingRef.current = false;
         };
-    }, [isMobile, IDLE_DELAY, INITIAL_DELAY, SCROLL_INTERVAL, COUNTDOWN_DURATION]);
+    }, [isMobile, IDLE_DELAY, INITIAL_DELAY, SCROLL_INTERVAL, COUNTDOWN_DURATION, isModalOpen]);
+
+    // Stop scrolling when modal opens
+    useEffect(() => {
+        if (isModalOpen) {
+            stopAutoScroll();
+            stopCountdown();
+            
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+                idleTimerRef.current = null;
+            }
+            if (autoScrollStartTimeoutRef.current) {
+                clearTimeout(autoScrollStartTimeoutRef.current);
+                autoScrollStartTimeoutRef.current = null;
+            }
+        }
+    }, [isModalOpen]);
 
     // Show countdown only when idle and countdown is active
     if (!isIdle || countdown === 0) return null;

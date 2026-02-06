@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
 import { XIcon } from "./animate-ui/icons/x";
-import notes from "@/constants/mock/notes";
 import NoteCard from "./ui/NoteCard";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -23,6 +22,8 @@ import { useSocialShare } from "@/hooks/use-social-share";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { LoaderCircleIcon } from "./animate-ui/icons/loader-circle";
 import { toast } from "./ui/toast";
+import { useGetNoteQuery } from "@/store/api";
+import Loader from "./Loader";
 
 const DownloadedMap = new Map<string, boolean>();
 
@@ -31,21 +32,15 @@ export default function ShareNoteModal() {
     const isMobile = useIsMobile();
     const searchParams = useSearchParams();
     const isSharingNote = useMemo(() => Boolean(searchParams.get(searchParamsKeys.SHARE_NOTE)), [searchParams]);
-    const [noteId, setNoteId] = useState<string | null>(null);
+    const noteId = useMemo(() => searchParams.get(searchParamsKeys.SHARE_NOTE) || '', [searchParams]);
 
     const { openShareWindow } = useSocialShare();
     const noteForExportRef = useRef<HTMLDivElement>(null);
     const [isDownloadingNote, setIsDownloadingNote] = useState(false);
 
-    const selectedNote = useMemo(() => {
-        return notes.find((note) => note.id === noteId);
-    }, [noteId]);
-
-    useEffect(() => {
-        const noteId = searchParams.get(searchParamsKeys.SHARE_NOTE);
-        if (!noteId) return;
-        setNoteId(noteId);
-    }, [searchParams]);
+    const { data: selectedNote, isLoading: isLoadingSelectedNote } = useGetNoteQuery(noteId || '', {
+        skip: !noteId,
+    });
 
     const isDownloaded = useMemo(() => {
         if (isDownloadingNote) return false;
@@ -78,8 +73,12 @@ export default function ShareNoteModal() {
                     description: "Your note has been downloaded to your device",
                 });
             } catch (err) {
-                console.log(err);
-            }finally {
+                console.error("Error downloading note:", err);
+                toast.error({
+                    title: "Failed to download note",
+                    description: "Please try again later",
+                });
+            } finally {
                 setIsDownloadingNote(false);
             }
         }
@@ -246,179 +245,186 @@ export default function ShareNoteModal() {
                     <div className={cn(
                         "wooden rounded-md w-full max-h-[80dvh] overflow-y-auto flex flex-col"
                     )}>
-                        {!selectedNote && <div className="flex flex-col items-center justify-center h-60 gap-2">
-                            <Lottie
-                                animationData={emptyAnimation}
-                                loop={true}
-                                className="size-40"
-                                style={{ mixBlendMode: "screen" }}
-                            />
-
-                            <p className="text-sm font-bold">No comments yet</p>
-                            <p className="text-sm -mt-2 text-white/60">Be the first to leave a comment!</p>
-                        </div>}
-                        {selectedNote && (
-                            <>
-                                <div
-                                    className="grid place-items-center p-10 max-sm:p-5 relative"
-                                    ref={noteForExportRef}
-                                    style={{
-                                        backgroundColor: getOppositeColor(selectedNote.backgroundColor, {
-                                            brightness: -5
-                                        }),
-                                    }}
-                                >
-                                    <span
-                                        className={cn(
-                                            "absolute top-3 sm:left-10 left-6  text-sm font-semibold text-black max-sm:hidden",
-                                            selectedNote.selectedFont,
-                                        )}
-                                        style={{
-                                            color: darkenHex(getOppositeColor(selectedNote.backgroundColor, {
-                                                brightness: -5
-                                            }), 70)
-                                        }}
-                                    >https://sayit.wiki</span>
-                                    <span
-                                        className={cn(
-                                            "absolute sm:bottom-3 bottom-[unset] sm:top-[unset] top-8 z-20 sm:right-10 right-10  text-sm font-semibold text-black",
-                                            selectedNote.selectedFont,
-                                        )}
-                                        style={{
-                                            color: darkenHex(getOppositeColor(selectedNote.backgroundColor, {
-                                                brightness: -5
-                                            }), 70)
-                                        }}
-                                    >https://sayit.wiki</span>
-                                    <div className="drop-shadow-[10px_20px_10px_rgba(0,0,0,0.1)]">
-                                        <NoteCard
-                                            {...selectedNote}
-                                            tilt={0}
-                                            onCommentTap={() => { }}
-                                            canReact={false}
-                                            maxWidth="100%"
-                                        />
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                        <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] mt-3" />
-
-                        <div className="p-3">
-                            <WoodenPlatform
-                                className="h-fit w-full rounded-lg drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
-                                noScrews
-                            >
-                                <div className="wooden p-1 flex border-2 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                        {isLoadingSelectedNote ? (
+                            <div className="flex items-center justify-center h-40">
+                                <Loader>
+                                    <h4 className="md:text-base sm:text-sm text-xs text-white/80 font-bold animate-bounce">
+                                        Generating note...
+                                    </h4>
+                                </Loader>
+                            </div>
+                        ) : (<>
+                            {!selectedNote && <div className="flex flex-col items-center justify-center h-60 gap-2">
+                                <Lottie
+                                    animationData={emptyAnimation}
+                                    loop={true}
+                                    className="size-40"
+                                    style={{ mixBlendMode: "screen" }}
+                                />
+                                <p className="text-sm font-bold">Note not found</p>
+                                <p className="text-sm -mt-2 text-white/60">The note you are trying to share may have been deleted or never existed.</p>
+                            </div>}
+                            {selectedNote && (
+                                <>
                                     <div
-                                        className={cn(
-                                            "rounded-sm px-4 py-2 bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex sm:items-center items-start sm:gap-2 gap-3"
-                                        )}
+                                        className="grid place-items-center p-10 max-sm:p-5 relative"
+                                        ref={noteForExportRef}
+                                        style={{
+                                            backgroundColor: getOppositeColor(selectedNote.backgroundColor, {
+                                                brightness: -5
+                                            }),
+                                        }}
                                     >
-                                        <span className={cn("text-white py-1 md:text-sm text-xs")}>
-                                            Share this note with your friends via!
-                                        </span>
+                                        <span
+                                            className={cn(
+                                                "absolute top-3 sm:left-10 left-6  text-sm font-semibold text-black max-sm:hidden",
+                                                selectedNote.selectedFont,
+                                            )}
+                                            style={{
+                                                color: darkenHex(getOppositeColor(selectedNote.backgroundColor, {
+                                                    brightness: -5
+                                                }), 70)
+                                            }}
+                                        >https://sayit.wiki</span>
+                                        <span
+                                            className={cn(
+                                                "absolute sm:bottom-3 bottom-[unset] sm:top-[unset] top-8 z-20 sm:right-10 right-10  text-sm font-semibold text-black",
+                                                selectedNote.selectedFont,
+                                            )}
+                                            style={{
+                                                color: darkenHex(getOppositeColor(selectedNote.backgroundColor, {
+                                                    brightness: -5
+                                                }), 70)
+                                            }}
+                                        >https://sayit.wiki</span>
+                                        <div className="drop-shadow-[10px_20px_10px_rgba(0,0,0,0.1)] w-full">
+                                            <NoteCard
+                                                {...selectedNote}
+                                                tilt={0}
+                                                onCommentTap={() => { }}
+                                                canReact={false}
+                                                maxWidth="100%"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </WoodenPlatform>
-                        </div>
-
-                        {selectedNote && <div className="w-full px-2">
-                            <WoodenPlatform noScrews className="w-full h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)]">
-                                <div className="px-2 py-2 flex items-center border-8 border-background/0 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
-                                    <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
-                                    {!isDownloaded && <Tooltip>
-                                        <TooltipTrigger className="flex-1" asChild>
-                                            <AnimateIcon animateOnHover={isDownloadingNote ? "undefined" : "wiggle"} className="flex-1" loop={true}>
-                                                <NeoButton
-                                                    element="div"
-                                                    className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3 w-full"
-                                                    onClick={handleDownloadNote}
-                                                    disabled={isDownloadingNote}
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        {isDownloadingNote ? <LoaderCircleIcon
-                                                            animate="path-loop"
-                                                            strokeWidth={2.5}
-                                                            speed={0.05}
-                                                            className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
-                                                        /> : <CloudDownloadIcon
-                                                            strokeWidth={2.5}
-                                                            className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
-                                                        />}
-                                                        <p className="text-black max-sm:hidden font-semibold base-font text-sm">{isDownloadingNote ? "Downloading note..." : "Download note"}</p>
-                                                    </div>
-                                                </NeoButton>
-                                            </AnimateIcon>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {isDownloadingNote ? <p>Downloading note...</p> : <p>Download note to your device</p>}
-                                        </TooltipContent>
-                                    </Tooltip>}
-                                    <Tooltip>
-                                        <TooltipTrigger className={cn("max-sm:flex-1", isDownloaded && "flex-1")} asChild>
-                                            <div className="w-fit">
-                                                <NeoButton
-                                                    element="div"
-                                                    className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                    onClick={handleShareOnFacebook}
-                                                    disabled={isDownloadingNote}
-                                                >
-                                                    <div className={cn("flex items-center gap-2", isDownloadingNote ? "animate-spin" : "")}>
-                                                        {isDownloadingNote ? <Loader2Icon className="sm:w-6 duration-1000 text-black sm:h-6 w-4 h-4 scale-125" /> : <Facebook
-                                                            strokeWidth={2.5} className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125" />}
-                                                    </div>
-                                                </NeoButton>
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {isDownloadingNote ? <p>Downloading note...</p> : <p>Share on Facebook</p>}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger className={cn("max-sm:flex-1", isDownloaded && "flex-1")} asChild>
-                                            <div className="w-fit">
-                                                <NeoButton
-                                                    element="div"
-                                                    className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                    onClick={handleShareOnTwitter}
-                                                    disabled={isDownloadingNote}
-                                                >
-                                                    <div className={cn("flex items-center gap-2", isDownloadingNote ? "animate-spin" : "")}>
-                                                        {isDownloadingNote ? <Loader2Icon className="sm:w-6 duration-1000 text-black sm:h-6 w-4 h-4 scale-125" /> : <Twitter
-                                                            strokeWidth={2.5} className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125" />}
-                                                    </div>
-                                                </NeoButton>
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {isDownloadingNote ? <p>Downloading note...</p> : <p>Share on Twitter</p>}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger className={cn("max-sm:flex-1", isDownloaded && "flex-1")} asChild>
-                                            <div className="w-fit">
-                                                <NeoButton
-                                                    element="div"
-                                                    className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                    onClick={handleShareOnLinkedIn}
-                                                    disabled={isDownloadingNote}
-                                                >
-                                                    <div className={cn("flex items-center gap-2", isDownloadingNote ? "animate-spin" : "")}>
-                                                        {isDownloadingNote ? <Loader2Icon className="sm:w-6 duration-1000 text-black sm:h-6 w-4 h-4 scale-125" /> : <Linkedin
-                                                            strokeWidth={2.5} className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125" />}
-                                                    </div>
-                                                </NeoButton>
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {isDownloadingNote ? <p>Downloading note...</p> : <p>Share on LinkedIn</p>}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </div>
-                            </WoodenPlatform>
-                            <div className="h-6 sm:hidden" />
-                        </div>}
+                                </>
+                            )}
+                            <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] mt-3" />
+                            <div className="p-3">
+                                <WoodenPlatform
+                                    className="h-fit w-full rounded-lg drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
+                                    noScrews
+                                >
+                                    <div className="wooden p-1 flex border-2 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                                        <div
+                                            className={cn(
+                                                "rounded-sm px-4 py-2 bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex sm:items-center items-start sm:gap-2 gap-3"
+                                            )}
+                                        >
+                                            <span className={cn("text-white py-1 md:text-sm text-xs")}>
+                                                Share this note with your friends via!
+                                            </span>
+                                        </div>
+                                    </div>
+                                </WoodenPlatform>
+                            </div>
+                            {selectedNote && <div className="w-full px-2">
+                                <WoodenPlatform noScrews className="w-full h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)]">
+                                    <div className="px-2 py-2 flex items-center border-8 border-background/0 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+                                        <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
+                                        {!isDownloaded && <Tooltip>
+                                            <TooltipTrigger className="flex-1" asChild>
+                                                <AnimateIcon animateOnHover={isDownloadingNote ? "undefined" : "wiggle"} className="flex-1" loop={true}>
+                                                    <NeoButton
+                                                        element="div"
+                                                        className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3 w-full"
+                                                        onClick={handleDownloadNote}
+                                                        disabled={isDownloadingNote}
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            {isDownloadingNote ? <LoaderCircleIcon
+                                                                animate="path-loop"
+                                                                strokeWidth={2.5}
+                                                                speed={0.05}
+                                                                className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
+                                                            /> : <CloudDownloadIcon
+                                                                strokeWidth={2.5}
+                                                                className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125"
+                                                            />}
+                                                            <p className="text-black max-sm:hidden font-semibold base-font text-sm">{isDownloadingNote ? "Downloading note..." : "Download note"}</p>
+                                                        </div>
+                                                    </NeoButton>
+                                                </AnimateIcon>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {isDownloadingNote ? <p>Downloading note...</p> : <p>Download note to your device</p>}
+                                            </TooltipContent>
+                                        </Tooltip>}
+                                        <Tooltip>
+                                            <TooltipTrigger className={cn("max-sm:flex-1", isDownloaded && "flex-1")} asChild>
+                                                <div className="w-fit">
+                                                    <NeoButton
+                                                        element="div"
+                                                        className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
+                                                        onClick={handleShareOnFacebook}
+                                                        disabled={isDownloadingNote}
+                                                    >
+                                                        <div className={cn("flex items-center gap-2", isDownloadingNote ? "animate-spin" : "")}>
+                                                            {isDownloadingNote ? <Loader2Icon className="sm:w-6 duration-1000 text-black sm:h-6 w-4 h-4 scale-125" /> : <Facebook
+                                                                strokeWidth={2.5} className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125" />}
+                                                        </div>
+                                                    </NeoButton>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {isDownloadingNote ? <p>Downloading note...</p> : <p>Share on Facebook</p>}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger className={cn("max-sm:flex-1", isDownloaded && "flex-1")} asChild>
+                                                <div className="w-fit">
+                                                    <NeoButton
+                                                        element="div"
+                                                        className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
+                                                        onClick={handleShareOnTwitter}
+                                                        disabled={isDownloadingNote}
+                                                    >
+                                                        <div className={cn("flex items-center gap-2", isDownloadingNote ? "animate-spin" : "")}>
+                                                            {isDownloadingNote ? <Loader2Icon className="sm:w-6 duration-1000 text-black sm:h-6 w-4 h-4 scale-125" /> : <Twitter
+                                                                strokeWidth={2.5} className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125" />}
+                                                        </div>
+                                                    </NeoButton>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {isDownloadingNote ? <p>Downloading note...</p> : <p>Share on Twitter</p>}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger className={cn("max-sm:flex-1", isDownloaded && "flex-1")} asChild>
+                                                <div className="w-fit">
+                                                    <NeoButton
+                                                        element="div"
+                                                        className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
+                                                        onClick={handleShareOnLinkedIn}
+                                                        disabled={isDownloadingNote}
+                                                    >
+                                                        <div className={cn("flex items-center gap-2", isDownloadingNote ? "animate-spin" : "")}>
+                                                            {isDownloadingNote ? <Loader2Icon className="sm:w-6 duration-1000 text-black sm:h-6 w-4 h-4 scale-125" /> : <Linkedin
+                                                                strokeWidth={2.5} className="sm:w-6 text-black sm:h-6 w-4 h-4 scale-125" />}
+                                                        </div>
+                                                    </NeoButton>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {isDownloadingNote ? <p>Downloading note...</p> : <p>Share on LinkedIn</p>}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                </WoodenPlatform>
+                                <div className="h-6 sm:hidden" />
+                            </div>}
+                        </>)}
                     </div>
                 </div>
             </WoodenPlatform>

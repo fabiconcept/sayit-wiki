@@ -254,35 +254,35 @@ export function formatSocialTime(
   withTime = false
 ): string {
   const targetDate = typeof date === "string" ? new Date(date) : date;
-  const now = new Date();
 
+  // Validate the date
+  if (!targetDate || isNaN(targetDate.getTime())) {
+    return "Invalid date";
+  }
+
+  const now = new Date();
   const time = withTime ? `, ${format(targetDate, "HH:mm aa")}` : "";
 
   // Now
   if (differenceInSeconds(now, targetDate) < 60) {
     return "just now";
   }
-
   // Minutes
   if (differenceInMinutes(now, targetDate) < 60) {
     return `${differenceInMinutes(now, targetDate)}m ago`;
   }
-
   // Hours
   if (differenceInHours(now, targetDate) < 24) {
     return `${differenceInHours(now, targetDate)}h ago`;
   }
-
   // Yesterday
   if (isYesterday(targetDate)) {
     return `Yesterday${time}`;
   }
-
   // This week (Mon, Tue, ...)
   if (isThisWeek(targetDate, { weekStartsOn: 1 })) {
     return `${format(targetDate, "EEE")}${time}`;
   }
-
   // Last week
   const lastWeekStart = startOfWeek(subWeeks(now, 1), {
     weekStartsOn: 1,
@@ -290,30 +290,25 @@ export function formatSocialTime(
   const thisWeekStart = startOfWeek(now, {
     weekStartsOn: 1,
   });
-
   if (
     targetDate >= lastWeekStart &&
     targetDate < thisWeekStart
   ) {
     return `Last week${time}`;
   }
-
   // This month (fallback → days)
   if (isThisMonth(targetDate)) {
     return `${differenceInDays(now, targetDate)}d`;
   }
-
   // Last month
   const lastMonthStart = startOfMonth(subMonths(now, 1));
   const thisMonthStart = startOfMonth(now);
-
   if (
     targetDate >= lastMonthStart &&
     targetDate < thisMonthStart
   ) {
     return `Last month${time}`;
   }
-
   // Older
   return format(
     targetDate,

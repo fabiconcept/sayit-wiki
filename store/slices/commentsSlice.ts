@@ -78,4 +78,14 @@ export const {
     clearAllComments,
 } = commentsSlice.actions;
 
+// Memoized selectors to prevent unnecessary rerenders
+export const selectCommentsByNoteId = (state: { comments: CommentsState }, noteId: string) => 
+    state.comments.commentsByNoteId[noteId] || [];
+
+export const selectIsLoadingComments = (state: { comments: CommentsState }, noteId: string) => 
+    state.comments.isLoading[noteId] || false;
+
+export const selectHasMoreComments = (state: { comments: CommentsState }, noteId: string) => 
+    state.comments.hasMore[noteId] || false;
+
 export default commentsSlice.reducer;

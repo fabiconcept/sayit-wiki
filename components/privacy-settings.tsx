@@ -285,10 +285,10 @@ export default function PrivacySettings() {
             <WoodenPlatform className="w-full h-full flex flex-col rounded-2xl overflow-hidden -mt-1" noScrews>
                 <div className="p-1 flex h-full border-4 border-background/0 gap-3 relative z-10 rounded-2xl shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
                     <div className={cn(
-                        "wooden rounded-2xl w-full max-h-[80dvh] overflow-y-auto flex flex-col"
+                        "wooden rounded-2xl w-full max-h-[80dvh] overflow-y-auto flex flex-col max-sm:flex-col-reverse"
                     )}>
                         {/* Card Content */}
-                        <div className="grid md:grid-cols-4 grid-cols-2 gap-2 px-5 py-3 mt-3">
+                        <div className="grid md:grid-cols-4 grid-cols-4 gap-2 px-5 py-3 mt-3">
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="relative w-full flex flex-col items-center gap-2">
@@ -325,7 +325,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Strict mode <KbdGroup><Kbd className="bg-black/50 text-white">S</Kbd></KbdGroup>
+                                                            Strict <span className="max-sm:hidden">mode</span> <KbdGroup className="max-sm:hidden"><Kbd className="bg-black/50 text-white">S</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -375,7 +375,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Moderate Mode <KbdGroup><Kbd className="bg-black/50 text-white">M</Kbd></KbdGroup>
+                                                            Moderate <span className="max-sm:hidden">Mode</span> <KbdGroup className="max-sm:hidden"><Kbd className="bg-black/50 text-white">M</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -424,7 +424,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Relaxed Mode <KbdGroup><Kbd className="bg-black/50 text-white">R</Kbd></KbdGroup>
+                                                            Relaxed <span className="max-sm:hidden">Mode</span> <KbdGroup className="max-sm:hidden"><Kbd className="bg-black/50 text-white">R</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -473,7 +473,7 @@ export default function PrivacySettings() {
                                                         )}
                                                     >
                                                         <span className={cn("text-white py-1 md:text-xs text-[12px] capitalize")}>
-                                                            Free For All <KbdGroup><Kbd className="bg-black/50 text-white">F</Kbd></KbdGroup>
+                                                            <span className="max-sm:hidden">Free For All</span> <span className="sm:hidden">Joker</span> <KbdGroup className="max-sm:hidden"><Kbd className="bg-black/50 text-white">F</Kbd></KbdGroup>
                                                         </span>
                                                     </div>
                                                 </div>

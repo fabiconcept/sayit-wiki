@@ -20,6 +20,11 @@ export enum NoteStyle {
     FOLDED_CORNER_BL = "folded-corner-bl",
 }
 
+export interface NoteCardResponse {
+    success: boolean;
+    data: NoteCardProps;
+}
+
 export interface NoteCardProps {
     id: string;
     clipType: ClipType;

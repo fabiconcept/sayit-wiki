@@ -1,17 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { NoteCardProps } from '@/types/note';
-import notes from '@/constants/mock/notes';
 
 interface NotesState {
     notes: NoteCardProps[];
     isLoading: boolean;
     hasMore: boolean;
+    currentPage: number;
 }
 
 const initialState: NotesState = {
-    notes: [...notes],
+    notes: [],
     isLoading: false,
     hasMore: true,
+    currentPage: 0,
 };
 
 const notesSlice = createSlice({
@@ -20,12 +21,20 @@ const notesSlice = createSlice({
     reducers: {
         setNotes: (state, action: PayloadAction<NoteCardProps[]>) => {
             state.notes = action.payload;
+            state.currentPage = 1;
         },
         addNote: (state, action: PayloadAction<NoteCardProps>) => {
-            state.notes = [action.payload, ...state.notes.map(note => ({ ...note }))];
+            // Add new note at the beginning
+            state.notes = [action.payload, ...state.notes];
         },
         addNotes: (state, action: PayloadAction<NoteCardProps[]>) => {
             state.notes.push(...action.payload);
+        },
+        removeNewFlag: (state, action: PayloadAction<string>) => {
+            const note = state.notes.find(note => note.id === action.payload);
+            if (note) {
+                note.isNew = false;
+            }
         },
         updateNote: (state, action: PayloadAction<{ id: string; updates: Partial<NoteCardProps> }>) => {
             const index = state.notes.findIndex(note => note.id === action.payload.id);
@@ -63,9 +72,13 @@ const notesSlice = createSlice({
         setHasMore: (state, action: PayloadAction<boolean>) => {
             state.hasMore = action.payload;
         },
+        setCurrentPage: (state, action: PayloadAction<number>) => {
+            state.currentPage = action.payload;
+        },
         clearNotes: (state) => {
             state.notes = [];
             state.hasMore = true;
+            state.currentPage = 0;
         },
     },
 });
@@ -81,7 +94,9 @@ export const {
     incrementViews,
     setLoading,
     setHasMore,
+    setCurrentPage,
     clearNotes,
+    removeNewFlag,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;

@@ -18,11 +18,14 @@ import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import { backgroundColors } from "@/constants/notes";
 import { XIcon } from "../animate-ui/icons/x";
 import { PinIcon } from "../animate-ui/icons/pin";
+import { LoaderCircleIcon } from "../animate-ui/icons/loader-circle";
 import { useSearchParams } from "next/navigation";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { toast } from "../ui/toast";
-import { useAppDispatch } from "@/store/hooks";
-import { addNote } from "@/store/slices/notesSlice";
+import { useCreateNoteMutation } from "@/store/api";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { addNote, removeNewFlag } from "@/store/slices/notesSlice";
+import { selectNotesLoading } from "@/store/selectors";
 
 interface NotePreset {
     font: FontFamily;
@@ -47,7 +50,7 @@ const getSavedPreset = (): NotePreset => {
     if (typeof window === 'undefined') {
         return generateRandomPreset();
     }
-    
+
     try {
         const savedPreset = localStorage.getItem(PRESET_KEY);
         if (!savedPreset) {
@@ -57,7 +60,7 @@ const getSavedPreset = (): NotePreset => {
         }
 
         const parsedPreset = JSON.parse(savedPreset) as NotePreset;
-        
+
         // Validate the preset
         const isValidFont = Object.values(FontFamily).includes(parsedPreset?.font);
         const isValidColor = backgroundColors.includes(parsedPreset?.paperColor);
@@ -83,10 +86,18 @@ const getSavedPreset = (): NotePreset => {
 
 export default function MakeANote() {
     const dispatch = useAppDispatch();
+    const isLoading = useAppSelector(selectNotesLoading);
     const searchParams = useSearchParams();
+    const [createNote, { isLoading: isCreating }] = useCreateNoteMutation();
 
     const isCreatingNote = searchParams.get("createNote") === "true";
     const [noteWasCreated, setNoteWasCreated] = useState(false);
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+    const [content, setContent] = useState<string>("");
+
+    const canPostNote = useMemo(() => {
+        return !isCreating && !isLoading && !noteWasCreated && content.trim() !== "";
+    }, [isCreating, isLoading, noteWasCreated, content]);
 
     const handleOpenChange = useCallback((open: boolean) => {
         if (open) {
@@ -105,9 +116,7 @@ export default function MakeANote() {
         }
         return "";
     }, [isCreatingNote]);
-    
-    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-    const [content, setContent] = useState<string>("");
+
 
     // Use lazy initialization with getSavedPreset
     const [selectedFont, setSelectedFont] = useState<FontFamily>(() => getSavedPreset().font);
@@ -119,16 +128,19 @@ export default function MakeANote() {
     const handlePaperColorChange = (color: string) => {
         setSelectedPaperColor(color);
     }
-    
+
     const handleFontChange = (font: FontFamily) => {
+        if (isCreating) return;
         setSelectedFont(font);
     }
 
     const handleContentChange = (newContent: string) => {
+        if (isCreating) return;
         setContent(newContent);
     }
 
-    const handleSubmitNote = useCallback(() => {
+    const handleSubmitNote = useCallback(async () => {
+        if (isCreating) return;
         if (!content.trim()) {
             toast.error({
                 title: "Empty note",
@@ -137,46 +149,57 @@ export default function MakeANote() {
             return;
         }
 
-        const newNote = {
-            id: noteId,
+        const noteData = {
             content: content.trim(),
             backgroundColor: selectedPaperColor || backgroundColors[luckyPick(0, backgroundColors.length - 1)],
             noteStyle: selectedNoteStyle || NoteStyle.SPIRAL_LEFT,
             clipType: selectedClipType || ClipType.PIN,
             tilt: selectedTilt || 0,
             selectedFont: selectedFont || FontFamily.Schoolbell,
-            timestamp: new Date().toISOString(),
-            likesCount: 0,
-            commentsCount: 0,
-            viewsCount: 0,
-            isLiked: false,
-            isCommented: false,
-            isViewed: false,
-            isNew: true,
         };
 
-        dispatch(addNote(newNote));
-        setNoteWasCreated(true);
-        setContent("");
-        handleOpenChange(false);
+        try {
+            const result = await createNote(noteData).unwrap();
 
-        toast.success({
-            title: "Note posted!",
-            description: "Your note has been pinned to the wall",
-        });
+            // Add note to Redux slice immediately with isNew flag for animation
+            dispatch(addNote({
+                ...result,
+                isNew: true,
+            }));
 
-        setTimeout(() => {
-            const newPreset = generateRandomPreset();
-            setSelectedFont(newPreset.font);
-            setSelectedPaperColor(newPreset.paperColor);
-            setSelectedTilt(newPreset.tilt);
-            setSelectedClipType(newPreset.clipType);
-            setSelectedNoteStyle(newPreset.noteStyle);
-            if (typeof window !== 'undefined') {
-                localStorage.setItem(PRESET_KEY, JSON.stringify(newPreset));
-            }
-        }, 500);
-    }, [content, noteId, selectedPaperColor, selectedNoteStyle, selectedClipType, selectedTilt, selectedFont, dispatch, handleOpenChange]);
+            // Remove isNew flag after 5 seconds
+            setTimeout(() => {
+                dispatch(removeNewFlag(result.id));
+            }, 5000);
+
+            setNoteWasCreated(true);
+            setContent("");
+            handleOpenChange(false);
+
+            toast.success({
+                title: "Note posted!",
+                description: "Your note has been pinned to the wall",
+            });
+
+            setTimeout(() => {
+                const newPreset = generateRandomPreset();
+                setSelectedFont(newPreset.font);
+                setSelectedPaperColor(newPreset.paperColor);
+                setSelectedTilt(newPreset.tilt);
+                setSelectedClipType(newPreset.clipType);
+                setSelectedNoteStyle(newPreset.noteStyle);
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem(PRESET_KEY, JSON.stringify(newPreset));
+                }
+            }, 500);
+        } catch (error: any) {
+            console.error('Error creating note:', error);
+            toast.error({
+                title: "Failed to post note",
+                description: error?.data?.error?.message || "Please try again later",
+            });
+        }
+    }, [content, selectedPaperColor, selectedNoteStyle, selectedClipType, selectedTilt, selectedFont, createNote, dispatch, handleOpenChange]);
 
     useShortcuts({
         shortcuts: [
@@ -203,6 +226,8 @@ export default function MakeANote() {
             }
         }
     }, [isCreatingNote, handleSubmitNote]);
+
+    if (isLoading) return null;
 
     return (
         <>
@@ -285,7 +310,7 @@ export default function MakeANote() {
                     {/* Writing style */}
                     <div className="grid gap-4 px-2">
                         <Popover open={isDropDownOpen} onOpenChange={setIsDropDownOpen}>
-                            <PopoverTrigger asChild>
+                            <PopoverTrigger asChild disabled={isCreating}>
                                 <div className="relative mt-2">
                                     <WoodenPlatform
                                         className="absolute -top-3 left-3 z-20 h-fit w-fit rounded-lg cursor-pointer drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
@@ -418,7 +443,7 @@ export default function MakeANote() {
                         <WoodenPlatform noScrews className="w-full h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)]">
                             <div className="px-2 py-2 flex items-center border-8 border-background/0 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                                 <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
-                                <Tooltip>
+                                {!isCreating && <Tooltip>
                                     <TooltipTrigger asChild>
                                         <AnimateIcon animateOnHover="wiggle" loop={true}>
                                             <NeoButton
@@ -436,31 +461,43 @@ export default function MakeANote() {
                                     <TooltipContent>
                                         <p>Cancel</p>
                                     </TooltipContent>
-                                </Tooltip>
+                                </Tooltip>}
                                 <Tooltip>
                                     <TooltipTrigger className="flex-1" asChild>
                                         <AnimateIcon animateOnHover="wiggle" loop={true}>
                                             <NeoButton
-                                                element="div"
-                                                className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                onClick={handleSubmitNote}
+                                                element="button"
+                                                className={cn("grid rel place-items-center md:py-3 py-2 md:px-5 px-3", !canPostNote && "cursor-not-allowed grayscale-50 opacity-40 hover:grayscale-25 hover:opacity-40")}
+                                                onClick={canPostNote ? handleSubmitNote : undefined}
+                                                disabled={!canPostNote}
                                             >
                                                 <div className="flex items-center gap-2">
-                                                    <PinIcon
-                                                        strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
-                                                    <p className="font-semibold text-black">Pin to wall</p>
+                                                    {isCreating ? (
+                                                        <LoaderCircleIcon
+                                                            animate="path-loop"
+                                                            strokeWidth={2.5}
+                                                            speed={0.05}
+                                                            className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125"
+                                                        />
+                                                    ) : (
+                                                        <PinIcon
+                                                            strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
+                                                    )}
+                                                    <p className="font-semibold text-black">
+                                                        {isCreating ? "Pinning..." : "Pin to wall"}
+                                                    </p>
                                                 </div>
                                             </NeoButton>
                                         </AnimateIcon>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Pin to wall</p>
+                                        <p>{isCreating ? "Pinning to wall..." : "Pin to wall"}</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
                         </WoodenPlatform>
                     </div>
-                    <div className="max-sm:h-2" />
+                    <div className="max-sm:h-12" />
                 </div>
             </ResponsiveModal >
         </>

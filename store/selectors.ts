@@ -4,6 +4,7 @@ import { RootState } from './store';
 export const selectAllNotes = (state: RootState) => state.notes.notes;
 export const selectNotesLoading = (state: RootState) => state.notes.isLoading;
 export const selectNotesHasMore = (state: RootState) => state.notes.hasMore;
+export const selectNotesCurrentPage = (state: RootState) => state.notes.currentPage;
 export const selectNoteById = (state: RootState, noteId: string) => 
     state.notes.notes.find(note => note.id === noteId);
 
@@ -24,3 +25,7 @@ export const selectIsViewNoteModalOpen = (state: RootState) => state.app.isViewN
 export const selectActiveNoteId = (state: RootState) => state.app.activeNoteId;
 export const selectReportingNoteId = (state: RootState) => state.app.reportingNoteId;
 export const selectSharingNoteId = (state: RootState) => state.app.sharingNoteId;
+
+// User selectors
+export const selectUserId = (state: RootState) => state.user.userId;
+export const selectUserIsInitialized = (state: RootState) => state.user.isInitialized;

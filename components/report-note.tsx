@@ -2,23 +2,59 @@
 import { cn, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { DialogClose, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
 import { XIcon } from "./animate-ui/icons/x";
-import notes from "@/constants/mock/notes";
 import NoteCard from "./ui/NoteCard";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { MessageCircleWarningIcon } from "./animate-ui/icons/message-circle-warning";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import NeoButton from "./neo-components/NeoButton";
 import { PinOffIcon } from "./animate-ui/icons/pin-off";
+import { LoaderCircleIcon } from "./animate-ui/icons/loader-circle";
 import { ResponsiveModal } from "./ui/responsive-modal";
 import searchParamsKeys from "@/constants/search-params";
+import { useGetNoteQuery, useReportContentMutation } from "@/store/api";
+import { toast } from "./ui/toast";
+import Loader from "./Loader";
 
 export default function ReportNoteModal() {
     const searchParams = useSearchParams();
-    const isReportingNote = useMemo(() => Boolean(searchParams.get(searchParamsKeys.NOTE_TO_REPORT)), [searchParams]);
+    const noteId = searchParams.get(searchParamsKeys.NOTE_TO_REPORT);
+    const isReportingNote = Boolean(noteId);
+    
+    const { data: noteData, isLoading } = useGetNoteQuery(noteId || '', { skip: !noteId });
+    const [reportContent, { isLoading: isSubmitting }] = useReportContentMutation();
+
+    const handleCloseModal = useCallback(() => {
+        removeSearchParam(searchParamsKeys.NOTE_TO_REPORT);
+    }, []);
+
+    const handleReport = useCallback(async () => {
+        if (!noteId) return;
+
+        try {
+            await reportContent({
+                targetId: noteId,
+                targetType: 'note',
+                reason: 'User reported inappropriate content'
+            }).unwrap();
+
+            toast.success({
+                title: "Report submitted",
+                description: "Thank you for helping keep our wall clean",
+            });
+
+            handleCloseModal();
+        } catch (error: any) {
+            console.error('Error reporting note:', error);
+            toast.error({
+                title: "Failed to submit report",
+                description: error?.data?.error?.message || "Please try again later",
+            });
+        }
+    }, [noteId, reportContent, handleCloseModal]);
 
     useShortcuts({
         shortcuts: [
@@ -151,13 +187,25 @@ export default function ReportNoteModal() {
                         "wooden rounded-2xl w-full max-h-[80dvh] overflow-y-auto flex flex-col"
                     )}>
                         <div className="mt-4 px-2 pr-3">
-                            <NoteCard
-                                {...notes[55]}
-                                tilt={0}
-                                onCommentTap={() => { }}
-                                canReact={false}
-                                maxWidth="100%"
-                            />
+                            {isLoading ? (
+                                <div className="flex items-center justify-center h-40">
+                                    <Loader>
+                                        <h4 className="md:text-base sm:text-sm text-xs text-white/80 font-bold animate-bounce">
+                                            Loading note...
+                                        </h4>
+                                    </Loader>
+                                </div>
+                            ) : noteData ? (
+                                <NoteCard
+                                    {...noteData}
+                                    tilt={0}
+                                    onCommentTap={() => { }}
+                                    canReact={false}
+                                    maxWidth="100%"
+                                />
+                            ) : (
+                                <div className="text-center py-8 text-red-500">Note not found</div>
+                            )}
                         </div>
                         <div className="h-2 w-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_-2px_2px_rgba(0,0,0,0.4)] mt-3" />
 
@@ -197,7 +245,7 @@ export default function ReportNoteModal() {
                                                 <NeoButton
                                                     element="div"
                                                     className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                    onClick={() => { }}
+                                                    onClick={handleCloseModal}
                                                 >
                                                     <div className="flex items-center py-1 gap-2">
                                                         <XIcon
@@ -216,18 +264,30 @@ export default function ReportNoteModal() {
                                                 <NeoButton
                                                     element="div"
                                                     className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                    onClick={() => { }}
+                                                    onClick={handleReport}
+                                                    disabled={isSubmitting}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <PinOffIcon
-                                                            strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
-                                                        <p className="font-semibold text-black">Report note</p>
+                                                        {isSubmitting ? (
+                                                            <LoaderCircleIcon
+                                                                animate="path-loop"
+                                                                strokeWidth={2.5}
+                                                                speed={0.05}
+                                                                className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125"
+                                                            />
+                                                        ) : (
+                                                            <PinOffIcon
+                                                                strokeWidth={2.5} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
+                                                        )}
+                                                        <p className="font-semibold text-black">
+                                                            {isSubmitting ? "Reporting..." : "Report note"}
+                                                        </p>
                                                     </div>
                                                 </NeoButton>
                                             </AnimateIcon>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>Report note to wall admins</p>
+                                            <p>{isSubmitting ? "Reporting note..." : "Report note to wall admins"}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </div>

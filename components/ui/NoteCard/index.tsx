@@ -87,7 +87,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
     const minHeight = "50px";
 
     const timestampText = useMemo(() => {
-        const date = new Date(timestamp);
+        const date = timestamp ? new Date(timestamp) : new Date();
         return formatSocialTime(date, true);
     }, [timestamp]);
 
@@ -381,9 +381,9 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
                     style={{
                         maxWidth: maxWidthString,
                         minHeight,
-                        backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 10),
-                        borderColor: !isDark ? backgroundColor : darkenHex(backgroundColor as `#${string}`, 70),
-                        '--selected-bg': darkenHex(backgroundColor as `#${string}`, 30),
+                        backgroundColor: noteStyle === NoteStyle.POLAROID ? "white" : isDark ? backgroundColor : darkenHex((backgroundColor || '#00000000') as `#${string}`, 10),
+                        borderColor: !isDark ? backgroundColor : darkenHex((backgroundColor || '#00000000') as `#${string}`, 70),
+                        '--selected-bg': darkenHex((backgroundColor || '#00000000') as `#${string}`, 30),
                         ...clipPathStyle as React.CSSProperties,
                     } as React.CSSProperties}
                 >
@@ -432,7 +432,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
                     >
                         <p
                             style={{
-                                backgroundColor: darkenHex(backgroundColor as `#${string}`, 5),
+                                backgroundColor: darkenHex((backgroundColor || '#00000000') as `#${string}`, 5),
                             } as React.CSSProperties}
                             className={cn(
                                 "text-xs px-3 py-1 w-fit -translate-y-3 text-black rounded-3xl dark:shadow-[inset_0px_3px_5px_rgba(0,0,0,0.5)] shadow-[inset_0px_3px_5px_rgba(255,255,255,0.75)]",

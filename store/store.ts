@@ -3,6 +3,7 @@ import { api } from './api';
 import notesReducer from './slices/notesSlice';
 import commentsReducer from './slices/commentsSlice';
 import appReducer from './slices/appSlice';
+import userReducer from './slices/userSlice';
 
 export const makeStore = () => {
     return configureStore({
@@ -11,6 +12,7 @@ export const makeStore = () => {
             notes: notesReducer,
             comments: commentsReducer,
             app: appReducer,
+            user: userReducer,
         },
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware().concat(api.middleware),

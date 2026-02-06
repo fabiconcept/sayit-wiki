@@ -9,10 +9,11 @@ import { EllipsisVerticalIcon } from "@/components/animate-ui/icons/ellipsis-ver
 import { UserRoundIcon } from "@/components/animate-ui/icons/user-round";
 import { motion, inView } from "framer-motion";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "../dropdown-menu";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import { useRouter } from "next/navigation";
 import { toast } from "../toast";
 import { FontFamily } from "@/constants/fonts";
+import { useToggleLikeMutation, useTrackViewMutation } from "@/store/api";
+import { incrementViews } from "@/store/slices/notesSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 interface ReactionStatistics {
     likes: number;
@@ -31,39 +32,50 @@ interface ReactionStatistics {
 }
 
 export default function ReactionCard({ statistics, className }: { statistics: ReactionStatistics, className: string }) {
-    const isMobile = useIsMobile();
-    const router = useRouter();
-
     const [likes, setLikes] = useState(statistics.likes);
-    const [comments, setComments] = useState(statistics.comments);
-    const [views, setViews] = useState(statistics.views);
     const [isLiked, setIsLiked] = useState(statistics.isLiked);
-    const [isCommented, setIsCommented] = useState(statistics.isCommented);
     const [isViewed, setIsViewed] = useState(statistics.isViewed);
+    const dispatch = useAppDispatch();
+
+    const [toggleLike] = useToggleLikeMutation();
+    const [trackView] = useTrackViewMutation();
 
     const ref = useRef<HTMLDivElement>(null);
 
-    const handleLike = useCallback(() => {
+    const handleLike = useCallback(async () => {
         if (!statistics.canReact) return;
-        if (isLiked) {
-            setLikes(likes - 1);
-            setIsLiked(false);
-            return;
+        
+        // Optimistic update
+        const newIsLiked = !isLiked;
+        setIsLiked(newIsLiked);
+        setLikes(newIsLiked ? likes + 1 : likes - 1);
+
+        try {
+            await toggleLike({ 
+                targetId: statistics.noteId, 
+                targetType: 'note' 
+            }).unwrap();
+        } catch (error) {
+            // Revert on error
+            setIsLiked(!newIsLiked);
+            setLikes(newIsLiked ? likes : likes + 1);
+            console.error('Error toggling like:', error);
         }
+    }, [statistics.canReact, statistics.noteId, isLiked, likes, toggleLike]);
 
-        setLikes(likes + 1);
-        setIsLiked(!isLiked);
-    }, [statistics.canReact, isLiked, likes]);
-
-    const handleView = useCallback(() => {
+    const handleView = useCallback(async () => {
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
-        setIsViewed((prev) => {
-            if (prev) return prev;
-            setViews(views + 1);
-            return true;
-        });
-    }, [statistics.canReact, statistics.noteId, views]);
+        if (isViewed) return;
+
+        setIsViewed(true);
+
+        try {
+            await trackView(statistics.noteId);
+        } catch (error) {
+            console.error('Error tracking view:', error);
+        }
+    }, [statistics.canReact, statistics.noteId, isViewed, trackView]);
 
     const handleCopy = useCallback(async () => {
         if (!statistics.canReact) return;
@@ -89,8 +101,14 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
 
     useEffect(() => {
         if (!ref.current) return;
-        inView(ref.current, handleView);
-    }, [ref, handleView]);
+        inView(ref.current, () => {
+            try {
+                handleView().catch(console.error);
+            } catch (error) {
+                console.error('Error incrementing views:', error);
+            }
+        });
+    }, [ref, handleView, dispatch, statistics.noteId, incrementViews]);
     return (
         <motion.div
             className={cn("flex items-center gap-5", className)}
@@ -137,11 +155,11 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                                 strokeWidth={2}
                                 className={cn(
                                     "sm:w-4 text-black sm:h-4 w-3 h-3 scale-125 rotate-2",
-                                    isCommented ? "stroke-blue-500" : "stroke-black"
+                                    statistics.isCommented ? "stroke-blue-500" : "stroke-black"
                                 )}
-                                fill={isCommented ? "rgb(255,255,255,0.25)" : "none"}
+                                fill={statistics.isCommented ? "rgb(255,255,255,0.25)" : "none"}
                             />
-                            <span className="text-sm font-semibold text-black">{numberShortForm(comments)}</span>
+                            <span className="text-sm font-semibold text-black">{numberShortForm(statistics.comments)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -157,11 +175,11 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                             className="flex items-center gap-1 cursor-help transition-all duration-150 ease-in-out"
                         >
                             <UserRoundIcon strokeWidth={2} className="sm:w-3.5 text-black sm:h-3.5 w-2.5 h-2.5 scale-125 opacity-75 rotate-5" />
-                            <span className="text-sm font-semibold text-black">{numberShortForm(views)}</span>
+                            <span className="text-sm font-semibold text-black">{numberShortForm(statistics.views)}</span>
                         </AnimateIcon>
                     </TooltipTrigger>
                     <TooltipContent>
-                        Viewed by {numberShortForm(views)} people
+                        Viewed by {numberShortForm(statistics.views)} people
                     </TooltipContent>
                 </Tooltip>
             </div>
