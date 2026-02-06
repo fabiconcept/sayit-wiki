@@ -32,6 +32,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 export default function NotePage({ params }: { params: Promise<{ noteId: string }> }) {
     const [noteId, setNoteId] = useState<string>('');
     const dispatch = useAppDispatch();
+
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -253,6 +254,17 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
         });
     }, [comments]);
 
+
+    // Update document title when note loads
+    useEffect(() => {
+        if (cachedNote) {
+            const title = cachedNote.content 
+                ? `"${cachedNote.content.substring(0, 60)}..." | SayIt Wiki`
+                : 'View Note | SayIt Wiki';
+            document.title = title;
+        }
+    }, [cachedNote]);
+
     const showLoading = isFetchingComments && comments.length === 0;
 
     return (
@@ -361,12 +373,12 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
                                     </Loader>
                                 </div>
                             ) : cachedNote ? (
-                                <NoteCard
+                            <NoteCard
                                     {...cachedNote}
-                                    tilt={0}
-                                    maxWidth="100%"
-                                    onCommentTap={handleCommentTap}
-                                />
+                                tilt={0}
+                                maxWidth="100%"
+                                onCommentTap={handleCommentTap}
+                            />
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-60 gap-2">
                                     <Lottie
@@ -391,17 +403,17 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
                                     </Loader>
                                 </div>
                             ) : comments.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center gap-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full mix-blend-screen">
-                                    <Lottie
-                                        animationData={emptyAnimation}
-                                        loop={true}
+                            <div className="flex flex-col items-center justify-center gap-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full mix-blend-screen">
+                                <Lottie
+                                    animationData={emptyAnimation}
+                                    loop={true}
                                         className="size-20"
-                                        style={{ mixBlendMode: "screen" }}
-                                    />
+                                    style={{ mixBlendMode: "screen" }}
+                                />
 
-                                    <p className="text-sm font-bold">No comments yet</p>
-                                    <p className="text-sm -mt-2 text-white/60">Be the first to leave a comment!</p>
-                                </div>
+                                <p className="text-sm font-bold">No comments yet</p>
+                                <p className="text-sm -mt-2 text-white/60">Be the first to leave a comment!</p>
+                            </div>
                             ) : (
                                 <>
                                     <Masonry

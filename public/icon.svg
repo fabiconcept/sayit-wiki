@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#FFE066"/>
+  
+  <!-- Sticky Note -->
+  <rect x="96" y="96" width="320" height="320" rx="24" fill="#FFF4E6" stroke="#333" stroke-width="4"/>
+  
+  <!-- Lines -->
+  <line x1="128" y1="200" x2="384" y2="200" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+  <line x1="128" y1="256" x2="320" y2="256" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+  <line x1="128" y1="312" x2="352" y2="312" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Pin/Tack -->
+  <circle cx="256" cy="128" r="16" fill="#FF6B6B"/>
+  <rect x="252" y="128" width="8" height="32" fill="#FF6B6B"/>
+</svg>
