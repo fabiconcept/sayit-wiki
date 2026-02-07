@@ -44,7 +44,6 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
 
     const handleLike = useCallback(async () => {
         clickSound.play();
-        console.log('handleLike', statistics.canReact);
         if (!statistics.canReact) return;
         // Optimistic update
         const newIsLiked = !isLiked;

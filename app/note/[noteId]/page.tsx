@@ -37,6 +37,9 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
     const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
+    const wtfSound = useSoundEffect("/sayit-wiki-sound/wtf.mp3", {
+        volume: 0.5
+    });
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -174,7 +177,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
 
     const handleTextareaChange = useCallback(
         (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            textInputHandler.handleTextareaChange(e);
+            textInputHandler.handleTextareaChange(e, () => wtfSound.play());
         },
         [textInputHandler]
     );

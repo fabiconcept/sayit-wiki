@@ -10,26 +10,14 @@ import { selectAllNotes } from '@/store/selectors';
 export default function IdleScroll() {
     const isMobile = useIsMobile();
     const searchParams = useSearchParams();
-    const renderRef = useRef(false);
     const hasUserInteractedRef = useRef(false);
     const notes = useAppSelector(selectAllNotes);
     const minNotes = useMemo(() => isMobile ? 4 : 10, [isMobile]);
 
     const bgMusic = useSoundEffect("/sayit-wiki-sound/bg-msc.mp3", {
         loop: true,
-        volume: 10,
+        volume: 1,
         preload: true,
-    });
-
-    useEffect(() => {
-        if (renderRef.current) return;
-        renderRef.current = true;
-        setTimeout(() => {
-            console.log({
-                isPlaying: bgMusic.isPlaying,
-                currentVolume: bgMusic.currentVolume,
-            });
-        }, 5000);
     });
 
     useEffect(() => {
