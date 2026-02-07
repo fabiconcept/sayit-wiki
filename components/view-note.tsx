@@ -29,12 +29,23 @@ import { FontFamily } from "@/constants/fonts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setComments, addComment, setLoading, setHasMore, selectCommentsByNoteId, selectIsLoadingComments } from "@/store/slices/commentsSlice";
 import { incrementComments, incrementViews } from "@/store/slices/notesSlice";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 export default function ViewNoteModal() {
     const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
     const noteId = searchParams.get("note");
     const isViewingNote = Boolean(noteId);
+
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
+    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.15
+    });
+    const modalClose = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.05
+    });
 
     // Track if we've already tracked the view for this note
     const [viewTracked, setViewTracked] = useState(false);
@@ -116,6 +127,7 @@ export default function ViewNoteModal() {
     // Load more comments
     const handleLoadMoreComments = useCallback(async () => {
         if (!noteId || !hasMoreComments || isLoadingMoreComments) return;
+        clickSound.play();
 
         setIsLoadingMoreComments(true);
         try {
@@ -166,11 +178,14 @@ export default function ViewNoteModal() {
     useEffect(() => {
         if (!isViewingNote) {
             setViewTracked(false);
+        }else{
+            modalOpen.play();
         }
     }, [isViewingNote]);
 
     const handleCommentTap = () => {
         if (!textareaRef.current) return;
+        clickSound.play();
         textareaRef.current.focus();
     }
 
@@ -203,6 +218,7 @@ export default function ViewNoteModal() {
 
     const handleAddComment = useCallback(async () => {
         if (!scrollAreaRef.current) return;
+        clickSound.play();
         if (!noteId) return;
         if (!newComment.trim()) return;
 
@@ -316,6 +332,7 @@ export default function ViewNoteModal() {
             open={isViewingNote}
             onOpenChange={(open) => {
                 if (!open) {
+                    modalClose.play();
                     removeSearchParam("note");
                 }
             }}
@@ -353,7 +370,9 @@ export default function ViewNoteModal() {
                                     loop={true}
                                     className="translate-y-0.5"
                                 >
-                                    <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out">
+                                    <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out" onClick={() => {
+                                        clickSound.play();
+                                    }}>
                                         <XIcon strokeWidth={4} className="size-5 text-white hover:text-destructive" />
                                     </DialogClose>
                                 </AnimateIcon>

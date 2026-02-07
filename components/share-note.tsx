@@ -24,6 +24,7 @@ import { LoaderCircleIcon } from "./animate-ui/icons/loader-circle";
 import { toast } from "./ui/toast";
 import { useGetNoteQuery } from "@/store/api";
 import Loader from "./Loader";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 const DownloadedMap = new Map<string, boolean>();
 
@@ -33,6 +34,10 @@ export default function ShareNoteModal() {
     const searchParams = useSearchParams();
     const isSharingNote = useMemo(() => Boolean(searchParams.get(searchParamsKeys.SHARE_NOTE)), [searchParams]);
     const noteId = useMemo(() => searchParams.get(searchParamsKeys.SHARE_NOTE) || '', [searchParams]);
+
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
 
     const { openShareWindow } = useSocialShare();
     const noteForExportRef = useRef<HTMLDivElement>(null);
@@ -52,6 +57,7 @@ export default function ShareNoteModal() {
         if (!noteId) return;
         if (isDownloaded) return;
         if (isDownloadingNote) return;
+        clickSound.play();
 
         setIsDownloadingNote(true);
         await new Promise(resolve => setTimeout(resolve, 6000));
@@ -87,6 +93,7 @@ export default function ShareNoteModal() {
     const handleShareOnFacebook = useCallback(async () => {
         if (isDownloadingNote) return;
         if (!selectedNote) return;
+        clickSound.play();
         await handleDownloadNote();
         openShareWindow("facebook", { text: selectedNote.content, url: window.location.href });
     }, [selectedNote, handleDownloadNote, isDownloadingNote, openShareWindow]);
@@ -94,6 +101,7 @@ export default function ShareNoteModal() {
     const handleShareOnTwitter = useCallback(async () => {
         if (isDownloadingNote) return;
         if (!selectedNote) return;
+        clickSound.play();
         await handleDownloadNote();
 
         openShareWindow("twitter", { text: selectedNote.content, url: window.location.href });
@@ -102,6 +110,7 @@ export default function ShareNoteModal() {
     const handleShareOnLinkedIn = useCallback(async () => {
         if (isDownloadingNote) return;
         if (!selectedNote) return;
+        clickSound.play();
         await handleDownloadNote();
         openShareWindow("linkedin", { text: selectedNote.content, url: window.location.href });
     }, [selectedNote, handleDownloadNote, isDownloadingNote, openShareWindow]);
@@ -165,7 +174,9 @@ export default function ShareNoteModal() {
                                         loop={true}
                                         className="translate-y-0.5"
                                     >
-                                        <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out">
+                                        <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out" onClick={() => {
+                                            clickSound.play();
+                                        }}>
                                             <XIcon strokeWidth={4} className="size-5 text-white hover:text-destructive" />
                                         </DialogClose>
                                     </AnimateIcon>

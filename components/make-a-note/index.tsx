@@ -26,6 +26,7 @@ import { useCreateNoteMutation } from "@/store/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addNote, removeNewFlag } from "@/store/slices/notesSlice";
 import { selectNotesLoading } from "@/store/selectors";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 interface NotePreset {
     font: FontFamily;
@@ -88,6 +89,9 @@ export default function MakeANote() {
     const dispatch = useAppDispatch();
     const isLoading = useAppSelector(selectNotesLoading);
     const searchParams = useSearchParams();
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
     const [createNote, { isLoading: isCreating }] = useCreateNoteMutation();
 
     const isCreatingNote = searchParams.get("createNote") === "true";
@@ -102,6 +106,7 @@ export default function MakeANote() {
     const handleOpenChange = useCallback((open: boolean) => {
         if (open) {
             updateSearchParam("createNote", "true");
+            clickSound.play();
         } else {
             removeSearchParam("createNote");
             if (noteWasCreated) {
@@ -140,6 +145,7 @@ export default function MakeANote() {
     }
 
     const handleSubmitNote = useCallback(async () => {
+        clickSound.play();
         if (isCreating) return;
         if (!content.trim()) {
             toast.error({
@@ -449,7 +455,10 @@ export default function MakeANote() {
                                             <NeoButton
                                                 element="div"
                                                 className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
-                                                onClick={() => handleOpenChange(false)}
+                                                onClick={() => {
+                                                    clickSound.play();
+                                                    handleOpenChange(false);
+                                                }}
                                             >
                                                 <div className="flex items-center py-1 gap-2">
                                                     <XIcon

@@ -14,6 +14,7 @@ import { FontFamily } from "@/constants/fonts";
 import { useToggleLikeMutation, useTrackViewMutation } from "@/store/api";
 import { incrementViews } from "@/store/slices/notesSlice";
 import { useAppDispatch } from "@/store/hooks";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 interface ReactionStatistics {
     likes: number;
@@ -36,6 +37,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     const [isLiked, setIsLiked] = useState(statistics.isLiked);
     const [isViewed, setIsViewed] = useState(statistics.isViewed);
     const dispatch = useAppDispatch();
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
 
     const [toggleLike] = useToggleLikeMutation();
     const [trackView] = useTrackViewMutation();
@@ -43,8 +47,8 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     const ref = useRef<HTMLDivElement>(null);
 
     const handleLike = useCallback(async () => {
+        clickSound.play();
         if (!statistics.canReact) return;
-        
         // Optimistic update
         const newIsLiked = !isLiked;
         setIsLiked(newIsLiked);
@@ -78,6 +82,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     }, [statistics.canReact, statistics.noteId, isViewed, trackView]);
 
     const handleCopy = useCallback(async () => {
+        clickSound.play();
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
 
@@ -92,6 +97,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     }, [statistics.canReact, statistics.noteId, statistics.content, statistics.selectedFont]);
 
     const handleReport = useCallback(() => {
+        clickSound.play();
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
 
@@ -184,7 +190,10 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 </Tooltip>
             </div>
             {statistics.canReact && <DropdownMenu
-                onOpenChange={statistics.onDropMenuOpen}
+                onOpenChange={(open)=>{
+                    open && clickSound.play();
+                    statistics.onDropMenuOpen(open);
+                }}
             >
                 <DropdownMenuTrigger>
                     <Tooltip>
@@ -200,7 +209,10 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="gap-1">
                     <DropdownMenuItem className="text-white justify-center text-sm" onClick={handleCopy}>Copy</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => statistics.shareTrigger("#f3e5ab")} className="text-white justify-center text-sm">Share</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                        clickSound.play();
+                        statistics.shareTrigger("#f3e5ab");
+                    }} className="text-white justify-center text-sm">Share</DropdownMenuItem>
                     <DropdownMenuItem
                         className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20"
                         onClick={handleReport}

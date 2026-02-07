@@ -11,6 +11,7 @@ import { updateSearchParam } from "@/lib/utils";
 import Loader from "./Loader";
 import Lottie from "lottie-react";
 import emptyAnimation from "./lottie/ghosty.json";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 export default function NotesGrid() {
     const dispatch = useAppDispatch();
@@ -24,6 +25,10 @@ export default function NotesGrid() {
     const isLoading = useAppSelector(selectNotesLoading);
     const hasMore = useAppSelector(selectNotesHasMore);
     const currentPage = useAppSelector(selectNotesCurrentPage);
+
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
 
     // Fetch initial notes
     const { data, isLoading: isFetching, error } = useGetNotesQuery({
@@ -164,7 +169,10 @@ export default function NotesGrid() {
 
     return (
         <div ref={containerRef} className="w-full">
-            <Masonry items={notes} key={"notes"} onCommentTap={handleCommentTap} />
+            <Masonry items={notes} key={"notes"} onCommentTap={(id)=>{
+                clickSound.play();
+                handleCommentTap(id);
+            }} />
 
             {/* Loading more notes */}
             {isLoading && hasMore && (

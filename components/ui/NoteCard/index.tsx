@@ -12,6 +12,7 @@ import searchParamsKeys from '@/constants/search-params';
 import { quickModerate } from '@useverse/profanity-guard';
 import { useAppSelector } from '@/store/hooks';
 import { selectModerationLevel } from '@/store/selectors';
+import useSoundEffect from '@useverse/usesoundeffect';
 
 const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }> = ({
     id,
@@ -39,6 +40,9 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
     const { theme } = useTheme();
     const isDark = theme === "dark";
     const moderationLevel = useAppSelector(selectModerationLevel);
+    const hoverSound = useSoundEffect("/sayit-wiki-sound/paper-hover.mp3", {
+        volume: 0.25
+    });
 
     const textRef = useRef<HTMLDivElement>(null);
     const noteRef = useRef<HTMLDivElement>(null);
@@ -356,6 +360,7 @@ const NoteCard: React.FC<NoteCardProps & { onCommentTap: (id: string) => void }>
                     transformOrigin: transformOrigin,
                     transition: { duration: 0.2 }
                 }}
+                onMouseEnter={(dropMenuOpen || tilt === 0) ? () => { } : () => hoverSound.play()}
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
                 style={{

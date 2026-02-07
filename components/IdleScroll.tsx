@@ -8,8 +8,12 @@ import useSoundEffect from '@useverse/usesoundeffect';
 export default function IdleScroll() {
     const isMobile = useIsMobile();
     const searchParams = useSearchParams();
-
-    const { play } = useSoundEffect("./sayit-wiki-sound/bg-msc.mp3");
+    useSoundEffect("/sayit-wiki-sound/bg-msc.mp3", {
+        autoplay: true,
+        loop: true,
+        volume: 10,
+        preload: true,
+    });
     
     // Check if any modal is open
     const isModalOpen = 

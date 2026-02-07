@@ -18,6 +18,7 @@ import searchParamsKeys from "@/constants/search-params";
 import { useGetNoteQuery, useReportContentMutation } from "@/store/api";
 import { toast } from "./ui/toast";
 import Loader from "./Loader";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 export default function ReportNoteModal() {
     const searchParams = useSearchParams();
@@ -27,13 +28,18 @@ export default function ReportNoteModal() {
     const { data: noteData, isLoading } = useGetNoteQuery(noteId || '', { skip: !noteId });
     const [reportContent, { isLoading: isSubmitting }] = useReportContentMutation();
 
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
+
     const handleCloseModal = useCallback(() => {
+        clickSound.play();
         removeSearchParam(searchParamsKeys.NOTE_TO_REPORT);
     }, []);
 
     const handleReport = useCallback(async () => {
         if (!noteId) return;
-
+        clickSound.play();
         try {
             await reportContent({
                 targetId: noteId,
@@ -235,7 +241,7 @@ export default function ReportNoteModal() {
                             </WoodenPlatform>
                         </div>
 
-                        <div className="w-full px-2">
+                        {noteData && <div className="w-full px-2">
                             <WoodenPlatform noScrews className="w-full h-fit rounded-3xl drop-shadow-[0_0_20px_rgba(0,0,0,0.0.5),0_0_5px_rgba(0,0,0,0.0.75)]">
                                 <div className="px-2 py-2 flex items-center border-8 border-background/0 gap-2 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                                     <div className="absolute wooden inset-0 rounded-full m-0 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]"></div>
@@ -293,7 +299,7 @@ export default function ReportNoteModal() {
                                 </div>
                             </WoodenPlatform>
                             <div className="h-6 sm:hidden" />
-                        </div>
+                        </div>}
                     </div>
                 </div>
             </WoodenPlatform>

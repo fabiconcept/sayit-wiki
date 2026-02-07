@@ -21,6 +21,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setModerationLevel } from "@/store/slices/appSlice";
 import { selectModerationLevel } from "@/store/selectors";
 import { Kbd, KbdGroup } from "./ui/kbd";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 export const ModerationInfo: Record<
     ModerationLevel,
@@ -146,6 +147,9 @@ export default function PrivacySettings() {
     const searchParams = useSearchParams();
     const isPrivacySettingsOpen = useMemo(() => searchParams.get(searchParamsKeys.PRIVACY_SETTINGS) === "true", [searchParams]);
     const moderationLevel = useAppSelector(selectModerationLevel);
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
 
     const lottieOffRef = useRef<LottieRefCurrentProps>(null);
     const lottieRelaxedRef = useRef<LottieRefCurrentProps>(null);
@@ -153,6 +157,7 @@ export default function PrivacySettings() {
     const lottieStrictRef = useRef<LottieRefCurrentProps>(null);
 
     const handleModerationLevelChange = (level: ModerationLevel) => {
+        clickSound.play();
         localStorage.setItem("moderation-level", level);
         dispatch(setModerationLevel(level));
     };
@@ -207,7 +212,9 @@ export default function PrivacySettings() {
                                         loop={true}
                                         className="translate-y-0.5"
                                     >
-                                        <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out">
+                                        <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out" onClick={() => {
+                                            clickSound.play();
+                                        }}>
                                             <XIcon strokeWidth={4} className="size-5 text-white hover:text-destructive" />
                                         </DialogClose>
                                     </AnimateIcon>

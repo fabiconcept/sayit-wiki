@@ -28,10 +28,15 @@ import NeoButton from "@/components/neo-components/NeoButton";
 import { SendIcon } from "@/components/animate-ui/icons/send";
 import { LoaderCircleIcon } from "@/components/animate-ui/icons/loader-circle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import useSoundEffect from "@useverse/usesoundeffect";
 
 export default function NotePage({ params }: { params: Promise<{ noteId: string }> }) {
     const [noteId, setNoteId] = useState<string>('');
     const dispatch = useAppDispatch();
+
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -155,6 +160,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
 
     const handleCommentTap = () => {
         if (!textareaRef.current) return;
+        clickSound.play();
         textareaRef.current.focus();
     };
 
@@ -182,6 +188,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
 
     const handleAddComment = useCallback(async () => {
         if (!scrollAreaRef.current) return;
+        clickSound.play();
         if (!noteId) return;
         if (!newComment.trim()) return;
 
@@ -295,7 +302,9 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
                             loop={true}
                             className="translate-y-0.5"
                         >
-                            <Link href="/" className="cursor-pointer">
+                            <Link href="/" className="cursor-pointer" onClick={() => {
+                                clickSound.play();
+                            }}>
                                 <XIcon strokeWidth={4} className="size-5 text-white hover:text-destructive" />
                             </Link>
                         </AnimateIcon>
