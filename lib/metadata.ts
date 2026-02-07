@@ -3,37 +3,83 @@ import { Metadata } from 'next';
 // Base metadata configuration
 export const baseMetadata: Metadata = {
     title: {
-        default: 'SayIt Wiki - Share Your Thoughts on the Digital Wall',
+        default: 'SayIt Wiki - Drop a note, see what sticks',
         template: '%s | SayIt Wiki',
     },
-    description: 'A collaborative digital wall where you can share notes, thoughts, and ideas with the world. Create colorful sticky notes, comment on others, and be part of a growing community.',
+    description: 'An anonymous digital wall where anyone can stick a note and say whatever\'s on their mind. No login, no BS, just thoughts.',
     keywords: [
-        'digital wall',
+        // Core brand terms
         'sayit wiki',
-        'sayit wiki digital wall',
-        'sayit wiki collaborative notes',
-        'sayit wiki share thoughts',
-        'sayit wiki community wall',
-        'sayit wiki anonymous posting',
-        'sayit wiki note sharing',
-        'sayit wiki digital bulletin board',
-        'sayit wiki sticky notes',
-        'sayit wiki collaborative notes',
-        'sayit wiki share thoughts',
-        'sayit wiki community wall',
-        'sayit wiki anonymous posting',
-        'sayit wiki note sharing',
-        'sayit wiki digital bulletin board',
-        'sayit wiki sticky notes',
-        'sayit wiki collaborative notes',
-        'sayit wiki share thoughts',
-        'sayit wiki community wall',
-        'sayit wiki anonymous posting',
-        'sayit wiki note sharing',
-        'sayit wiki wall',
-        'sayit wiki fabiconcept',
-        'sayit wiki favour ajokubi',
-        'sayit wiki favour ajokubi fabiconcept',
+        'sayit',
+        'say it wiki',
+        
+        // Primary features - anonymous/free
+        'anonymous notes',
+        'anonymous message board',
+        'anonymous thoughts',
+        'anonymous posting',
+        'no login notes',
+        'no signup message board',
+        'free anonymous posting',
+        'post anonymously',
+        'anonymous wall',
+        
+        // Digital wall variations
+        'digital wall',
+        'online wall',
+        'virtual wall',
+        'message wall',
+        'thought wall',
+        'community wall',
+        'public wall',
+        'digital bulletin board',
+        'online bulletin board',
+        
+        // Sticky notes angle
+        'sticky notes online',
+        'virtual sticky notes',
+        'digital sticky notes',
+        'online sticky notes',
+        'post it notes online',
+        'digital post it',
+        
+        // Action-based (how people search)
+        'leave a note online',
+        'post a message anonymously',
+        'share thoughts anonymously',
+        'write anonymous message',
+        'post anonymous thoughts',
+        'leave anonymous note',
+        
+        // Public/social sharing
+        'public message board',
+        'public notes',
+        'share notes publicly',
+        'public thoughts',
+        'open message board',
+        
+        // Use cases
+        'confessions',
+        'anonymous confessions',
+        'tell secrets',
+        'vent anonymously',
+        'random thoughts',
+        'shower thoughts',
+        
+        // Comparison terms (SEO competitive)
+        'like whisper app',
+        'anonymous like yik yak',
+        'free message board',
+        'simple message board',
+        
+        // Comment/interaction
+        'comment on notes',
+        'read anonymous notes',
+        'anonymous comments',
+        
+        // Creator attribution
+        'fabiconcept',
+        'favour ajokubi',
     ],
     authors: [{ name: 'Favour Ajokubi' }],
     creator: 'Fabiconcept',
@@ -46,14 +92,14 @@ export const baseMetadata: Metadata = {
         locale: 'en_US',
         url: '/',
         siteName: 'SayIt Wiki',
-        title: 'SayIt Wiki - Share Your Thoughts on the Digital Wall',
-        description: 'A collaborative digital wall where you can share notes, thoughts, and ideas with the world.',
+        title: 'SayIt Wiki - Drop a note, see what sticks',
+        description: 'Anonymous digital wall. Stick a note, read others, comment. No login needed.',
         images: [
             {
                 url: '/og-image.png',
                 width: 1200,
                 height: 630,
-                alt: 'SayIt Wiki - Digital Wall',
+                alt: 'SayIt Wiki - Anonymous Digital Wall',
             },
         ],
     },
@@ -61,8 +107,8 @@ export const baseMetadata: Metadata = {
     // Twitter Card
     twitter: {
         card: 'summary_large_image',
-        title: 'SayIt Wiki - Share Your Thoughts',
-        description: 'A collaborative digital wall for sharing notes and ideas.',
+        title: 'SayIt Wiki - Anonymous Notes',
+        description: 'Stick a note on the wall. No login, just vibes.',
         images: ['/og-image.webp', '/og-image.png', '/og-image.jpg'],
         creator: '@goat_h2o',
     },
@@ -101,8 +147,6 @@ export const baseMetadata: Metadata = {
     // Verification
     verification: {
         google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
-        // yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
-        // bing: process.env.NEXT_PUBLIC_BING_VERIFICATION,
     },
 
     // Additional metadata
@@ -124,15 +168,15 @@ export const baseMetadata: Metadata = {
 export function getNoteMetadata(noteId: string, noteContent?: string): Metadata {
     const truncatedContent = noteContent 
         ? noteContent.substring(0, 160) + (noteContent.length > 160 ? '...' : '')
-        : 'View this note on SayIt Wiki';
+        : 'Someone left this on the wall';
 
     return {
-        title: noteContent ? `"${noteContent.substring(0, 60)}..."` : 'View Note',
+        title: noteContent ? `"${noteContent.substring(0, 60)}..."` : 'Check out this note',
         description: truncatedContent,
         openGraph: {
             type: 'article',
             url: `/note/${noteId}`,
-            title: noteContent ? `"${noteContent.substring(0, 60)}..."` : 'View Note on SayIt Wiki',
+            title: noteContent ? `"${noteContent.substring(0, 60)}..."` : 'Note from the wall',
             description: truncatedContent,
             images: [
                 {
@@ -145,7 +189,7 @@ export function getNoteMetadata(noteId: string, noteContent?: string): Metadata 
         },
         twitter: {
             card: 'summary_large_image',
-            title: noteContent ? `"${noteContent.substring(0, 60)}..."` : 'View Note',
+            title: noteContent ? `"${noteContent.substring(0, 60)}..."` : 'Note from the wall',
             description: truncatedContent,
             images: ['/og-image.png'],
         },
@@ -155,14 +199,14 @@ export function getNoteMetadata(noteId: string, noteContent?: string): Metadata 
 // Metadata for sharing a note
 export function getShareNoteMetadata(noteContent?: string): Metadata {
     return {
-        title: 'Share Note',
+        title: 'Share this note',
         description: noteContent 
-            ? `Share this note: "${noteContent.substring(0, 100)}..."`
-            : 'Share this note with others',
+            ? `Check out what someone said: "${noteContent.substring(0, 100)}..."`
+            : 'Someone left this on the wall',
         openGraph: {
             type: 'website',
-            title: 'Share Note - SayIt Wiki',
-            description: 'Share this note with your friends and community',
+            title: 'Note from SayIt Wiki',
+            description: 'Check out what someone wrote',
             images: ['/og-image.png'],
         },
     };
@@ -170,47 +214,47 @@ export function getShareNoteMetadata(noteContent?: string): Metadata {
 
 // Metadata for creating a new note
 export const createNoteMetadata: Metadata = {
-    title: 'Create Note',
-    description: 'Create and share a new note on the digital wall. Express your thoughts, ideas, or messages.',
+    title: 'Write a note',
+    description: 'Got something to say? Stick it on the wall for everyone to see.',
     openGraph: {
         type: 'website',
-        title: 'Create a Note - SayIt Wiki',
-        description: 'Share your thoughts on the digital wall',
+        title: 'Write a note - SayIt Wiki',
+        description: 'Say whatever\'s on your mind',
         images: ['/og-image.png'],
     },
     twitter: {
         card: 'summary',
-        title: 'Create a Note',
-        description: 'Share your thoughts on SayIt Wiki',
+        title: 'Write a note',
+        description: 'Say it on the wall',
     },
 };
 
 // Metadata for privacy settings
 export const privacyMetadata: Metadata = {
-    title: 'Privacy Settings',
-    description: 'Manage your privacy preferences and content moderation settings on SayIt Wiki.',
+    title: 'Privacy stuff',
+    description: 'Choose what you want to see (or not see) on the wall.',
     openGraph: {
         type: 'website',
-        title: 'Privacy Settings - SayIt Wiki',
-        description: 'Control your privacy and content preferences',
+        title: 'Privacy - SayIt Wiki',
+        description: 'Control what you see',
     },
     robots: {
-        index: false, // Don't index settings pages
+        index: false,
         follow: true,
     },
 };
 
 // Metadata for admin panel
 export const adminMetadata: Metadata = {
-    title: 'Admin Panel',
-    description: 'Manage reported content and moderate the community wall.',
+    title: 'Admin',
+    description: 'Keep the wall clean.',
     openGraph: {
         type: 'website',
-        title: 'Admin Panel - SayIt Wiki',
-        description: 'Content moderation and community management',
+        title: 'Admin - SayIt Wiki',
+        description: 'Moderation stuff',
     },
     robots: {
-        index: false, // Don't index admin pages
+        index: false,
         follow: false,
     },
 };
@@ -221,18 +265,13 @@ export function getStructuredData() {
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
         name: 'SayIt Wiki',
-        description: 'A collaborative digital wall where you can share notes, thoughts, and ideas with the world.',
+        description: 'An anonymous digital wall where anyone can stick a note and say whatever\'s on their mind.',
         url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         applicationCategory: 'SocialNetworkingApplication',
         offers: {
             '@type': 'Offer',
             price: '0',
             priceCurrency: 'USD',
-        },
-        aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: '4.8',
-            ratingCount: '1000',
         },
     };
 }
@@ -246,7 +285,7 @@ export function getNoteStructuredData(noteId: string, noteContent: string, times
         datePublished: timestamp,
         author: {
             '@type': 'Person',
-            name: 'Anonymous User',
+            name: 'Anonymous',
         },
         publisher: {
             '@type': 'Organization',
