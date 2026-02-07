@@ -3,10 +3,13 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import searchParamsKeys from '@/constants/search-params';
+import useSoundEffect from '@useverse/usesoundeffect';
 
 export default function IdleScroll() {
     const isMobile = useIsMobile();
     const searchParams = useSearchParams();
+
+    const { play } = useSoundEffect("./sayit-wiki-sound/bg-msc.mp3");
     
     // Check if any modal is open
     const isModalOpen = 
