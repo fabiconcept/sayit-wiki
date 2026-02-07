@@ -24,7 +24,7 @@ export default function NotFound() {
     return (
         <div className="min-h-dvh w-full flex flex-col items-center justify-center p-4">
             <WoodenPlatform
-                className="w-fit max-w-2xl rounded-3xl drop-shadow-[0_0_10px_rgba(0,0,0,0.7)] animate-ping"
+                className="w-fit max-w-2xl rounded-3xl drop-shadow-[0_0_10px_rgba(0,0,0,0.7)]"
                 noScrews
             >
                 <div className="md:px-12 px-6 md:py-16 py-10 flex flex-col items-center gap-8 border-8 border-background/0 relative z-10 rounded-3xl shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]">
@@ -32,7 +32,7 @@ export default function NotFound() {
                     <div className="absolute wooden inset-0 rounded-3xl not-dark:opacity-70 opacity-100 shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5)]" />
 
                     {/* Loader Animation */}
-                    <div id="loader" className="loader mix-blend-screen max-sm:scale-75" />
+                    <div id="loader" className="loader mix-blend-screen max-sm:scale-75 animate-bounce" />
 
                     {/* 404 Message */}
                     <div className="relative z-10 text-center space-y-4">
