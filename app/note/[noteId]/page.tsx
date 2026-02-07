@@ -270,7 +270,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
     return (
         <div className="p-2 h-[calc(100dvh)] max-w-[100vw] relative flex flex-col max-sm:overflow-x-hidden">
             <WoodenPlatform
-                className="h-fit w-full mx-auto rounded-lg drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)] group-hover:translate-x-2"
+                className="h-fit w-full mx-auto rounded-lg drop-shadow-[0px_0px_10px_rgba(0,0,0,0.0.5),0px_0px_1px_rgba(0,0,0,0.0.75)] group-hover:translate-x-2"
                 style={{ transition: "all 0.3s ease-in-out" }}
                 noScrews
             >
@@ -358,10 +358,10 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
             </div>
 
             {/* Note Content */}
-            <WoodenPlatform className="w-full flex-1 mt-3 flex flex-col rounded-2xl overflow-hidden" noScrews>
-                <div className="p-1 flex h-full border-4 border-background/0 gap-3 relative z-10 rounded-2xl shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
+            <WoodenPlatform className="w-full flex-1 mt-3 flex flex-col rounded-2xl overflow-hidden drop-shadow-[0px_0px_10px_rgba(0,0,0,0.0.75),0px_0px_1px_rgba(0,0,0,0.0.75)]" noScrews>
+                <div className="p-1 flex h-full border-4 border-background/0 gap-3 relative z-10 rounded-2xl shadow-[inset_2px_2px_10px_rgba(0,0,0,0.75),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)] overflow-hidden">
                     <div className={cn(
-                        "wooden rounded-2xl w-full flex flex-col"
+                        "wooden rounded-2xl w-full flex flex-col shadow-[inset_2px_2px_10px_rgba(0,0,0,0.75),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]"
                     )}>
                         <div className="mt-4 px-2 pr-3" ref={containerRef}>
                             {isNoteLoading && !cachedNote ? (
