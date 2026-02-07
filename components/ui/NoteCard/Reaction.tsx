@@ -12,8 +12,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuIte
 import { toast } from "../toast";
 import { FontFamily } from "@/constants/fonts";
 import { useToggleLikeMutation, useTrackViewMutation } from "@/store/api";
-import { incrementViews } from "@/store/slices/notesSlice";
-import { useAppDispatch } from "@/store/hooks";
 import useSoundEffect from "@useverse/usesoundeffect";
 
 interface ReactionStatistics {
@@ -36,10 +34,8 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     const [likes, setLikes] = useState(statistics.likes);
     const [isLiked, setIsLiked] = useState(statistics.isLiked);
     const [isViewed, setIsViewed] = useState(statistics.isViewed);
-    const dispatch = useAppDispatch();
-    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
-        volume: 0.5
-    });
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", { volume: 0.5 });
+    const hoverSound = useSoundEffect("/sayit-wiki-sound/hover.mp3", { volume: 0.025 });
 
     const [toggleLike] = useToggleLikeMutation();
     const [trackView] = useTrackViewMutation();
@@ -48,6 +44,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
 
     const handleLike = useCallback(async () => {
         clickSound.play();
+        console.log('handleLike', statistics.canReact);
         if (!statistics.canReact) return;
         // Optimistic update
         const newIsLiked = !isLiked;
@@ -55,9 +52,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
         setLikes(newIsLiked ? likes + 1 : likes - 1);
 
         try {
-            await toggleLike({ 
-                targetId: statistics.noteId, 
-                targetType: 'note' 
+            await toggleLike({
+                targetId: statistics.noteId,
+                targetType: 'note'
             }).unwrap();
         } catch (error) {
             // Revert on error
@@ -65,7 +62,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
             setLikes(newIsLiked ? likes : likes + 1);
             console.error('Error toggling like:', error);
         }
-    }, [statistics.canReact, statistics.noteId, isLiked, likes, toggleLike]);
+    }, [statistics.canReact, statistics.noteId, isLiked, likes, toggleLike, clickSound]);
 
     const handleView = useCallback(async () => {
         if (!statistics.canReact) return;
@@ -82,9 +79,9 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
     }, [statistics.canReact, statistics.noteId, isViewed, trackView]);
 
     const handleCopy = useCallback(async () => {
-        clickSound.play();
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
+        clickSound.play();
 
         if (await copyToClipboard(statistics.content)) {
             toast.success({
@@ -94,19 +91,20 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 selectedFont: statistics.selectedFont,
             });
         }
-    }, [statistics.canReact, statistics.noteId, statistics.content, statistics.selectedFont]);
+    }, [statistics.canReact, statistics.noteId, statistics.content, statistics.selectedFont, clickSound]);
 
     const handleReport = useCallback(() => {
-        clickSound.play();
         if (!statistics.canReact) return;
         if (!statistics.noteId) return;
+        clickSound.play();
 
         removeSearchParam("note");
         updateSearchParam("note-to-report", statistics.noteId);
-    }, [statistics.canReact, statistics.noteId]);
+    }, [statistics.canReact, statistics.noteId, clickSound]);
 
     useEffect(() => {
         if (!ref.current) return;
+
         inView(ref.current, () => {
             try {
                 handleView().catch(console.error);
@@ -114,7 +112,8 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 console.error('Error incrementing views:', error);
             }
         });
-    }, [ref, handleView, dispatch, statistics.noteId, incrementViews]);
+    }, [ref, handleView]);
+    
     return (
         <motion.div
             className={cn("flex items-center gap-5", className)}
@@ -126,7 +125,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
         >
             <div className="flex items-center gap-5 flex-1">
                 <Tooltip>
-                    <TooltipTrigger disabled={!statistics.canReact} asChild className="cursor-pointer">
+                    <TooltipTrigger onMouseEnter={() => hoverSound.play()} disabled={!statistics.canReact} asChild className="cursor-pointer">
                         <AnimateIcon
                             animateOnTap={statistics.canReact ? isLiked ? undefined : "fill" : undefined}
                             animateOnHover={statistics.canReact ? isLiked ? undefined : "path" : undefined}
@@ -150,7 +149,7 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 </Tooltip>
 
                 <Tooltip>
-                    <TooltipTrigger asChild className="cursor-pointer">
+                    <TooltipTrigger onMouseEnter={() => hoverSound.play()} asChild className="cursor-pointer">
                         <AnimateIcon
                             animateOnTap={statistics.canReact ? "fill" : undefined}
                             animateOnHover={statistics.canReact ? "path" : undefined}
@@ -190,14 +189,14 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                 </Tooltip>
             </div>
             {statistics.canReact && <DropdownMenu
-                onOpenChange={(open)=>{
+                onOpenChange={(open) => {
                     open && clickSound.play();
                     statistics.onDropMenuOpen(open);
                 }}
             >
                 <DropdownMenuTrigger>
                     <Tooltip>
-                        <TooltipTrigger asChild className="cursor-pointer">
+                        <TooltipTrigger onMouseEnter={() => hoverSound.play()} asChild className="cursor-pointer">
                             <AnimateIcon animateOnTap="default" animateOnHover="horizontal" className="flex items-center gap-2 cursor-pointer -rotate-2 active:scale-95 transition-all duration-150 ease-in-out">
                                 <EllipsisVerticalIcon strokeWidth={2} className="sm:w-4 text-black sm:h-4 w-3 h-3 scale-125" />
                             </AnimateIcon>
@@ -208,12 +207,13 @@ export default function ReactionCard({ statistics, className }: { statistics: Re
                     </Tooltip>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="gap-1">
-                    <DropdownMenuItem className="text-white justify-center text-sm" onClick={handleCopy}>Copy</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
+                    <DropdownMenuItem onMouseEnter={() => hoverSound.play()} className="text-white justify-center text-sm" onClick={handleCopy}>Copy</DropdownMenuItem>
+                    <DropdownMenuItem onMouseEnter={() => hoverSound.play()} onClick={() => {
                         clickSound.play();
                         statistics.shareTrigger("#f3e5ab");
                     }} className="text-white justify-center text-sm">Share</DropdownMenuItem>
                     <DropdownMenuItem
+                        onMouseEnter={() => hoverSound.play()}
                         className="text-red-200 justify-center text-sm hover:text-destructive dark:hover:text-red-100 border border-destructive/50 bg-red-900/10 hover:bg-red-900/20"
                         onClick={handleReport}
                     >Report</DropdownMenuItem>

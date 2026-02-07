@@ -2,7 +2,7 @@
 import { cn, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { DialogClose, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
 import { XIcon } from "./animate-ui/icons/x";
@@ -70,6 +70,9 @@ function LottieCard({
     playOnce = false
 }: LottieCardProps) {
     const [isActive, setIsActive] = useState(false);
+    const hoverSound = useSoundEffect("/sayit-wiki-sound/hover.mp3", {
+        volume: 0.05
+    });
 
     const handleInteractionStart = () => {
         if (!lottieRef.current) return;
@@ -81,7 +84,6 @@ function LottieCard({
 
     const handleInteractionEnd = () => {
         if (!lottieRef.current || playOnce || !reverseOnExit) return;
-
         setIsActive(false);
         lottieRef.current.setDirection(-1);
         lottieRef.current.play();
@@ -121,7 +123,7 @@ function LottieCard({
             {...finalProps}
             noScrews
         >
-            <div className="wooden h-full p-1 flex border-2 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
+            <div onMouseEnter={() => hoverSound.play()} className="wooden h-full p-1 flex border-2 border-background/0 gap-3 relative z-10 rounded-full shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                 <div
                     className={cn(
                         "rounded-full p-1 bg-black/50 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex sm:items-center items-start sm:gap-2 gap-3 overflow-hidden"
@@ -150,6 +152,15 @@ export default function PrivacySettings() {
     const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
+    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.15
+    });
+    const modalClose = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.05
+    });
+    const hoverSound = useSoundEffect("/sayit-wiki-sound/hover.mp3", {
+        volume: 0.15
+    });
 
     const lottieOffRef = useRef<LottieRefCurrentProps>(null);
     const lottieRelaxedRef = useRef<LottieRefCurrentProps>(null);
@@ -161,6 +172,12 @@ export default function PrivacySettings() {
         localStorage.setItem("moderation-level", level);
         dispatch(setModerationLevel(level));
     };
+
+    useEffect(() => {
+        if (isPrivacySettingsOpen) {
+            modalOpen.play();
+        }
+    }, [isPrivacySettingsOpen]);
 
     useShortcuts({
         shortcuts: [
@@ -212,7 +229,7 @@ export default function PrivacySettings() {
                                         loop={true}
                                         className="translate-y-0.5"
                                     >
-                                        <DialogClose className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out" onClick={() => {
+                                        <DialogClose onMouseEnter={() => hoverSound.play()} className="cursor-pointer active:scale-95 transition-all duration-150 ease-in-out" onClick={() => {
                                             clickSound.play();
                                         }}>
                                             <XIcon strokeWidth={4} className="size-5 text-white hover:text-destructive" />
@@ -283,6 +300,7 @@ export default function PrivacySettings() {
             open={isPrivacySettingsOpen}
             onOpenChange={(open) => {
                 if (!open) {
+                    modalClose.play();
                     removeSearchParam(searchParamsKeys.PRIVACY_SETTINGS);
                 }
             }}

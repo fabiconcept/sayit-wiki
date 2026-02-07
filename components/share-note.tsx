@@ -38,6 +38,12 @@ export default function ShareNoteModal() {
     const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
+    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal-v2.mp3", {
+        volume: 0.15
+    });
+    const modalClose = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.05
+    });
 
     const { openShareWindow } = useSocialShare();
     const noteForExportRef = useRef<HTMLDivElement>(null);
@@ -141,6 +147,19 @@ export default function ShareNoteModal() {
         }
     }, [isSharingNote, handleDownloadNote]);
 
+    useEffect(() => {
+        if (isSharingNote) {
+            modalOpen.play();
+        }
+    }, [isSharingNote]);
+
+    const handleOpenChange = useCallback((open: boolean) => {
+        if (!open) {
+            modalClose.play();
+            removeSearchParam(searchParamsKeys.SHARE_NOTE);
+        }
+    }, []);
+
     return (
         <ResponsiveModal
             desktopModalType="dialog"
@@ -243,11 +262,7 @@ export default function ShareNoteModal() {
                 </>
             }
             open={isSharingNote}
-            onOpenChange={(open) => {
-                if (!open) {
-                    removeSearchParam(searchParamsKeys.SHARE_NOTE);
-                }
-            }}
+            onOpenChange={handleOpenChange}
             className="max-h-[90dvh] sm:w-[90dvw] text-white group"
         >
             {/* Note Content */}

@@ -27,7 +27,7 @@ import { useGetNoteQuery, useGetCommentsQuery, useCreateCommentMutation, useTrac
 import { ClipType } from "./ui/Clip";
 import { FontFamily } from "@/constants/fonts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setComments, addComment, setLoading, setHasMore, selectCommentsByNoteId, selectIsLoadingComments } from "@/store/slices/commentsSlice";
+import { setComments, addComment, setHasMore, selectCommentsByNoteId, selectIsLoadingComments } from "@/store/slices/commentsSlice";
 import { incrementComments, incrementViews } from "@/store/slices/notesSlice";
 import useSoundEffect from "@useverse/usesoundeffect";
 
@@ -40,11 +40,14 @@ export default function ViewNoteModal() {
     const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
-    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal-v2.mp3", {
         volume: 0.15
     });
     const modalClose = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
         volume: 0.05
+    });
+    const wtfSound = useSoundEffect("/sayit-wiki-sound/wtf.mp3", {
+        volume: 0.5
     });
 
     // Track if we've already tracked the view for this note
@@ -204,7 +207,7 @@ export default function ViewNoteModal() {
 
     const handleTextareaChange = useCallback(
         (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            textInputHandler.handleTextareaChange(e);
+            textInputHandler.handleTextareaChange(e, () => wtfSound.play());
         },
         [textInputHandler]
     );

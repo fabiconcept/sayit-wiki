@@ -7,6 +7,7 @@ import { NoteStyle } from '@/types/note';
 import { useTheme } from 'next-themes';
 import { FontFamily } from '@/constants/fonts';
 import { TextInputHandler } from './actions';
+import useSoundEffect from '@useverse/usesoundeffect';
 
 interface NewNoteCardProps {
     id: string;
@@ -39,6 +40,10 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
     const minHeight = "50px";
     const maxChars = 500; // Maximum characters allowed
 
+    const wtfSound = useSoundEffect("/sayit-wiki-sound/wtf.mp3", {
+        volume: 0.5
+    });
+
     const textInputHandler = useMemo(
         () => new TextInputHandler(maxChars, onContentChange),
         [maxChars, onContentChange]
@@ -46,7 +51,7 @@ const NewNoteCard: React.FC<NewNoteCardProps> = ({
 
     const handleTextareaChange = useCallback(
         (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            textInputHandler.handleTextareaChange(e);
+            textInputHandler.handleTextareaChange(e, () => wtfSound.play()); 
         },
         [textInputHandler]
     );

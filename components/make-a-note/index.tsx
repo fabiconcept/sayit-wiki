@@ -92,6 +92,25 @@ export default function MakeANote() {
     const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
+    const hoverSound = useSoundEffect("/sayit-wiki-sound/hover.mp3", {
+        volume: 0.15
+    });
+    const tinyHoverSound = useSoundEffect("/sayit-wiki-sound/hover.mp3", {
+        volume: 0.05
+    });
+    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal-v2.mp3", {
+        volume: 0.15
+    });
+    const modalClose = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.05
+    });
+    const successSound = useSoundEffect("/sayit-wiki-sound/success.mp3", {
+        volume: 0.5
+    });
+    const failSound = useSoundEffect("/sayit-wiki-sound/fail.mp3", {
+        volume: 0.5
+    });
+
     const [createNote, { isLoading: isCreating }] = useCreateNoteMutation();
 
     const isCreatingNote = searchParams.get("createNote") === "true";
@@ -100,18 +119,19 @@ export default function MakeANote() {
     const [content, setContent] = useState<string>("");
 
     const canPostNote = useMemo(() => {
-        return !isCreating && !isLoading && !noteWasCreated && content.trim() !== "";
-    }, [isCreating, isLoading, noteWasCreated, content]);
+        return !isCreating && !isLoading && content.trim() !== "";
+    }, [isCreating, isLoading, content]);
 
     const handleOpenChange = useCallback((open: boolean) => {
         if (open) {
             updateSearchParam("createNote", "true");
-            clickSound.play();
+            modalOpen.play();
         } else {
             removeSearchParam("createNote");
             if (noteWasCreated) {
                 setNoteWasCreated(false);
             }
+            modalClose.play();
         }
     }, [noteWasCreated]);
 
@@ -131,11 +151,13 @@ export default function MakeANote() {
     const [selectedNoteStyle, setSelectedNoteStyle] = useState<NoteStyle>(() => getSavedPreset().noteStyle);
 
     const handlePaperColorChange = (color: string) => {
+        clickSound.play();
         setSelectedPaperColor(color);
     }
 
     const handleFontChange = (font: FontFamily) => {
         if (isCreating) return;
+        clickSound.play();
         setSelectedFont(font);
     }
 
@@ -145,7 +167,6 @@ export default function MakeANote() {
     }
 
     const handleSubmitNote = useCallback(async () => {
-        clickSound.play();
         if (isCreating) return;
         if (!content.trim()) {
             toast.error({
@@ -160,7 +181,7 @@ export default function MakeANote() {
             backgroundColor: selectedPaperColor || backgroundColors[luckyPick(0, backgroundColors.length - 1)],
             noteStyle: selectedNoteStyle || NoteStyle.SPIRAL_LEFT,
             clipType: selectedClipType || ClipType.PIN,
-            tilt: selectedTilt || 0,
+            tilt: selectedTilt || luckyPick(-4, 4),
             selectedFont: selectedFont || FontFamily.Schoolbell,
         };
 
@@ -182,6 +203,8 @@ export default function MakeANote() {
             setContent("");
             handleOpenChange(false);
 
+            successSound.play();
+
             toast.success({
                 title: "Note posted!",
                 description: "Your note has been pinned to the wall",
@@ -200,6 +223,7 @@ export default function MakeANote() {
             }, 500);
         } catch (error: any) {
             console.error('Error creating note:', error);
+            failSound.play();
             toast.error({
                 title: "Failed to post note",
                 description: error?.data?.error?.message || "Please try again later",
@@ -316,7 +340,9 @@ export default function MakeANote() {
                     {/* Writing style */}
                     <div className="grid gap-4 px-2">
                         <Popover open={isDropDownOpen} onOpenChange={setIsDropDownOpen}>
-                            <PopoverTrigger asChild disabled={isCreating}>
+                            <PopoverTrigger onMouseEnter={() => hoverSound.play()} onClick={() => {
+                                clickSound.play();
+                            }} asChild disabled={isCreating}>
                                 <div className="relative mt-2">
                                     <WoodenPlatform
                                         className="absolute -top-3 left-3 z-20 h-fit w-fit rounded-lg cursor-pointer drop-shadow-[-10px_-10px_5px_rgba(0,0,0,0.0.25),0_0_1px_rgba(0,0,0,0.0.5)]"
@@ -364,7 +390,10 @@ export default function MakeANote() {
                                             Object.values(FontFamily).map((font) => (
                                                 <PopoverClose key={font} asChild>
                                                     <NoteItemHolder.Radio
-                                                        tapAction={() => setIsDropDownOpen(false)}
+                                                        tapAction={() => {
+                                                            clickSound.play();
+                                                            setIsDropDownOpen(false);
+                                                        }}
                                                         className={cn(
                                                             "text-black text-sm hover:backdrop-saturate-200 backdrop-saturate-100",
                                                             font,
@@ -407,7 +436,7 @@ export default function MakeANote() {
                             <div className="wooden p-1 flex border-4 border-background/0 gap-3 relative z-10 rounded-lg shadow-[inset_2px_2px_10px_rgba(0,0,0,0.25),inset_-2px_-2px_10px_rgba(0,0,0,0.5),0_0_4px_rgba(0,0,0,0.25)]">
                                 <div
                                     className={cn(
-                                        "rounded-sm px-2 pt-5 pb-2 bg-black/30 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex flex-wrap gap-1"
+                                        "rounded-sm px-2 pt-5 pb-2 bg-black/30 h-full w-full m-0 shadow-[inset_2px_2px_2px_rgba(0,0,0,0.25),inset_-2px_-2px_2px_rgba(0,0,0,0.5)] flex flex-wrap gap-1 justify-center"
                                     )}
                                 >
                                     {backgroundColors.map((bg) => (
@@ -415,6 +444,9 @@ export default function MakeANote() {
                                             <TooltipTrigger asChild>
                                                 <div
                                                     onClick={() => handlePaperColorChange(bg)}
+                                                    onMouseEnter={() => {
+                                                        tinyHoverSound.play()
+                                                    }}
                                                 >
                                                     <WoodenPlatform
                                                         className="h-fit w-fit rounded-lg cursor-pointer drop-shadow-[0_0_1px_rgba(0,0,0,0.0.5)]"
@@ -456,7 +488,6 @@ export default function MakeANote() {
                                                 element="div"
                                                 className="grid rel place-items-center md:py-3 py-2 md:px-5 px-3"
                                                 onClick={() => {
-                                                    clickSound.play();
                                                     handleOpenChange(false);
                                                 }}
                                             >

@@ -2,7 +2,7 @@
 import { cn, removeSearchParam } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { DialogClose, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import WoodenPlatform from "./WoodenPlatform";
 import { AnimateIcon } from "./animate-ui/icons/icon";
 import { XIcon } from "./animate-ui/icons/x";
@@ -31,9 +31,22 @@ export default function ReportNoteModal() {
     const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
+    const modalOpen = useSoundEffect("/sayit-wiki-sound/modal-v2.mp3", {
+        volume: 0.15
+    });
+    const modalClose = useSoundEffect("/sayit-wiki-sound/modal.mp3", {
+        volume: 0.05
+    });
+
+    useEffect(() => {
+        if (isReportingNote) {
+            modalOpen.play();
+        }
+    }, [isReportingNote]);
 
     const handleCloseModal = useCallback(() => {
         clickSound.play();
+        modalClose.play();
         removeSearchParam(searchParamsKeys.NOTE_TO_REPORT);
     }, []);
 

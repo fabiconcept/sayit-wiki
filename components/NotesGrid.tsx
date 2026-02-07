@@ -26,7 +26,7 @@ export default function NotesGrid() {
     const hasMore = useAppSelector(selectNotesHasMore);
     const currentPage = useAppSelector(selectNotesCurrentPage);
 
-    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+    const { play } = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
         volume: 0.5
     });
 
@@ -169,8 +169,9 @@ export default function NotesGrid() {
 
     return (
         <div ref={containerRef} className="w-full">
-            <Masonry items={notes} key={"notes"} onCommentTap={(id)=>{
-                clickSound.play();
+            <Masonry items={notes} key={"notes"} onCommentTap={(id) => {
+                if (!id) return;
+                play();
                 handleCommentTap(id);
             }} />
 

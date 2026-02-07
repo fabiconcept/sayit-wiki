@@ -61,7 +61,7 @@ class TextInputHandler {
     /**
      * Handles textarea change events with word and character limiting
      */
-    public handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
+    public handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>, triggerWtf: () => void): void => {
         const target = e.target;
         const cursorPosition = target.selectionStart;
         let newText = target.value;
@@ -71,6 +71,7 @@ class TextInputHandler {
             const moderationResult = quickModerate(newText, this.moderationLevel);
             
             if (moderationResult.severity === WordSeverity.WTF) {
+                triggerWtf();
                 toast.error({
                     title: "What's wrong with you?",
                     description: "You can't say that here, or to anyone else for that matter!",

@@ -1,3 +1,5 @@
+"use client";
+import useSoundEffect from "@useverse/usesoundeffect";
 import { cn } from "@/lib/utils"
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -31,6 +33,13 @@ type NeoButtonProps = ButtonProps | LinkProps | DivProps;
 
 
 export default function NeoButton({ children, ...props }: NeoButtonProps) {
+    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
+        volume: 0.5
+    });
+    const hoverSound = useSoundEffect("/sayit-wiki-sound/hover.mp3", {
+        volume: 0.15
+    });
+
     const content = (
         <>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-full overflow-hidden z-0 rounded-full">
@@ -92,7 +101,11 @@ export default function NeoButton({ children, ...props }: NeoButtonProps) {
     if (props.element === "button") {
         return (
             <button
-                onClick={props.onClick}
+                onMouseEnter={() => hoverSound.play()}
+                onClick={() => {
+                    clickSound.play();
+                    props.onClick?.();
+                }}
                 disabled={props.disabled}
                 className={baseClassName}
             >
@@ -103,14 +116,19 @@ export default function NeoButton({ children, ...props }: NeoButtonProps) {
 
     if (props.element === "a") {
         return (
-            <Link href={props.href} className={baseClassName}>
+            <Link onMouseEnter={() => hoverSound.play()} onClick={() => {
+                clickSound.play();
+            }} href={props.href} className={baseClassName}>
                 {content}
             </Link>
         );
     }
 
     return (
-        <div onClick={props.onClick} className={baseClassName}>
+        <div onMouseEnter={() => hoverSound.play()} onClick={() => {
+            clickSound.play();
+            props.onClick?.();
+        }} className={baseClassName}>
             {content}
         </div>
     );

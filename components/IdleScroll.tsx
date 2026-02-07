@@ -1,34 +1,71 @@
 'use client';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import searchParamsKeys from '@/constants/search-params';
 import useSoundEffect from '@useverse/usesoundeffect';
+import { useAppSelector } from '@/store/hooks';
+import { selectAllNotes } from '@/store/selectors';
 
 export default function IdleScroll() {
     const isMobile = useIsMobile();
     const searchParams = useSearchParams();
-    useSoundEffect("/sayit-wiki-sound/bg-msc.mp3", {
-        autoplay: true,
+    const renderRef = useRef(false);
+    const hasUserInteractedRef = useRef(false);
+    const notes = useAppSelector(selectAllNotes);
+    const minNotes = useMemo(() => isMobile ? 4 : 10, [isMobile]);
+
+    const bgMusic = useSoundEffect("/sayit-wiki-sound/bg-msc.mp3", {
         loop: true,
         volume: 10,
         preload: true,
     });
-    
-    // Check if any modal is open
-    const isModalOpen = 
+
+    useEffect(() => {
+        if (renderRef.current) return;
+        renderRef.current = true;
+        setTimeout(() => {
+            console.log({
+                isPlaying: bgMusic.isPlaying,
+                currentVolume: bgMusic.currentVolume,
+            });
+        }, 5000);
+    });
+
+    useEffect(() => {
+        const handleFirstInteraction = () => {
+            if (!hasUserInteractedRef.current) {
+                hasUserInteractedRef.current = true;
+                bgMusic.play();
+            }
+        };
+
+        const interactionEvents = ['mousedown', 'touchstart', 'keypress', 'click'] as const;
+
+        interactionEvents.forEach(event => {
+            document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
+        });
+
+        return () => {
+            interactionEvents.forEach(event => {
+                document.removeEventListener(event, handleFirstInteraction);
+            });
+        };
+    }, [bgMusic]);
+
+    const isModalOpen =
         searchParams.get(searchParamsKeys.CREATE_NOTE) === 'true' ||
         searchParams.get(searchParamsKeys.NOTE) !== null ||
         searchParams.get(searchParamsKeys.NOTE_TO_REPORT) !== null ||
         searchParams.get(searchParamsKeys.SHARE_NOTE) !== null ||
         searchParams.get(searchParamsKeys.PRIVACY_SETTINGS) === 'true';
-    
+
     const IDLE_DELAY = isMobile ? 5000 : 10000;
     const INITIAL_DELAY = isMobile ? 2000 : 5000;
     const SCROLL_INTERVAL = isMobile ? 2000 : 5000;
     const COUNTDOWN_DURATION = IDLE_DELAY + (isMobile ? 7000 : 4000);
-    const MAX_COUNTDOWN = COUNTDOWN_DURATION / 1000; 
-    
+    const MAX_COUNTDOWN = COUNTDOWN_DURATION / 1000;
+
     // Refs for timers and state
     const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
     const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,7 +73,7 @@ export default function IdleScroll() {
     const scrollDirectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const hideCountdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const autoScrollStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    
+
     // Refs for scroll state
     const isScrollingRef = useRef(false);
     const directionRef = useRef<'down' | 'up'>('down');
@@ -100,6 +137,8 @@ export default function IdleScroll() {
     };
 
     useEffect(() => {
+        if (notes.length < minNotes) return;
+
         const startCountdown = () => {
             idleStartTimeRef.current = Date.now();
             setIsIdle(true);
@@ -175,9 +214,9 @@ export default function IdleScroll() {
             idleTimerRef.current = setTimeout(() => {
                 // Double check modal isn't open before starting countdown
                 if (isModalOpen) return;
-                
+
                 startCountdown();
-                
+
                 autoScrollStartTimeoutRef.current = setTimeout(() => {
                     // Triple check modal isn't open before auto-scrolling
                     if (isModalOpen) return;
@@ -187,7 +226,7 @@ export default function IdleScroll() {
         };
 
         const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'] as const;
-        
+
         events.forEach(event => {
             document.addEventListener(event, resetIdleTimer, { passive: true });
         });
@@ -201,14 +240,15 @@ export default function IdleScroll() {
             cleanupAllTimers();
             isScrollingRef.current = false;
         };
-    }, [isMobile, IDLE_DELAY, INITIAL_DELAY, SCROLL_INTERVAL, COUNTDOWN_DURATION, isModalOpen]);
+    }, [isMobile, IDLE_DELAY, INITIAL_DELAY, SCROLL_INTERVAL, COUNTDOWN_DURATION, isModalOpen, notes, minNotes]);
 
     // Stop scrolling when modal opens
     useEffect(() => {
+        if (notes.length < minNotes) return;
         if (isModalOpen) {
             stopAutoScroll();
             stopCountdown();
-            
+
             if (idleTimerRef.current) {
                 clearTimeout(idleTimerRef.current);
                 idleTimerRef.current = null;
@@ -218,7 +258,7 @@ export default function IdleScroll() {
                 autoScrollStartTimeoutRef.current = null;
             }
         }
-    }, [isModalOpen]);
+    }, [isModalOpen, notes, minNotes]);
 
     // Show countdown only when idle and countdown is active
     if (!isIdle || countdown === 0) return null;

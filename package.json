@@ -16,7 +16,7 @@
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@reduxjs/toolkit": "^2.11.2",
-    "@useverse/profanity-guard": "^1.0.0",
+    "@useverse/profanity-guard": "^1.1.1",
     "@useverse/useshortcuts": "^4.0.0",
     "@useverse/usesoundeffect": "^1.2.2",
     "class-variance-authority": "^0.7.1",

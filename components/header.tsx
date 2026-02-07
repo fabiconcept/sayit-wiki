@@ -13,16 +13,12 @@ import searchParamsKeys from "@/constants/search-params";
 import useShortcuts, { KeyboardKey } from "@useverse/useshortcuts";
 import { toPng } from "html-to-image"
 import { toast } from "./ui/toast";
-import useSoundEffect from "@useverse/usesoundeffect";
 
 
 export default function Header() {
     const searchParams = useSearchParams();
     const isSharingNote = useMemo(() => Boolean(searchParams.get(searchParamsKeys.SHARE_NOTE)), [searchParams]);
     const pathname = usePathname();
-    const clickSound = useSoundEffect("/sayit-wiki-sound/click-v1.mp3", {
-        volume: 0.5
-    });
 
     const [hideHeader, setHideHeader] = useState(false);
 
@@ -159,11 +155,10 @@ export default function Header() {
                                 <AnimateIcon className="max-sm:flex-1" key={PageName.name} animateOnHover="wiggle" loop={true} >
                                     <NeoButton
                                         element="button"
-                                        className={cn("grid rel place-items-center md:py-3 py-2 md:px-5 px-3", isPrivacySettings && PageName.name === "Privacy Settings" && "selected active")}
                                         onClick={() => {
-                                            clickSound.play();
                                             PageName.action?.();
                                         }}
+                                        className={cn("grid rel place-items-center md:py-3 py-2 md:px-5 px-3", isPrivacySettings && PageName.name === "Privacy Settings" && "selected active")}
                                     >
                                         <div className="flex items-center gap-2">
                                             <PageName.icon strokeWidth={2.5} className="md:w-6 text-black sm:h-6 w-5 h-5 max-sm:hidden" />

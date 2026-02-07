@@ -32,11 +32,11 @@ export default function RootLayout({
                 className={`${fingerPaint.variable} antialiased min-h-dvh dotted wooden`}
             >
                 <LenisProvider>
-                    <Suspense fallback={null}>
-                        <IdleScroll />
-                    </Suspense>
                     <StoreProvider>
                         <ThemeProvider>
+                            <Suspense fallback={null}>
+                                <IdleScroll />
+                            </Suspense>
                             <ToastProvider>
                                 <Toaster />
                                 <Suspense fallback={null}>

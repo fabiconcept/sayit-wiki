@@ -247,6 +247,10 @@ const CommentNoteCard: React.FC<commentNoteCardProps> = ({
                         <br />
                         <br />
                         {moderatedCommunityNote && <p className='font-medium'>Community note: <span className='text-red-500'>{moderatedCommunityNote}</span></p>}
+                        {moderatedCommunityNote && <>
+                            <br />
+                            <br />
+                        </>}
                     </article>
                 </div>
 

@@ -1,22 +1,22 @@
 {
-  "name": "SayIt Wiki - Digital Wall",
+  "name": "SayIt Wiki - Drop a note, see what sticks",
   "short_name": "SayIt Wiki",
-  "description": "A collaborative digital wall where you can share notes, thoughts, and ideas with the world.",
+  "description": "An anonymous digital wall where anyone can stick a note and say whatever's on their mind. No login, no BS, just thoughts.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#ffffff",
   "orientation": "portrait-primary",
-  "categories": ["social", "productivity"],
+  "categories": ["social", "productivity", "notes", "anonymous", "digital wall", "online wall", "virtual wall", "message wall", "thought wall", "community wall", "public wall", "digital bulletin board", "online bulletin board"],
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/favicon/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/favicon/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -44,7 +44,7 @@
       "url": "/?createNote=true",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "/favicon/android-chrome-192x192.png",
           "sizes": "192x192"
         }
       ]
