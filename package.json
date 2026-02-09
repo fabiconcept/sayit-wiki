@@ -19,6 +19,7 @@
     "@useverse/profanity-guard": "^1.1.1",
     "@useverse/useshortcuts": "^4.0.0",
     "@useverse/usesoundeffect": "^1.2.2",
+    "@vercel/analytics": "^1.6.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

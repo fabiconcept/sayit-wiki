@@ -12,6 +12,7 @@ import StoreProvider from "@/store/provider";
 import IdleScroll from "@/components/IdleScroll";
 import LenisProvider from "@/components/LenisProvider";
 import { baseMetadata } from "@/lib/metadata";
+import { Analytics } from "@vercel/analytics/next";
 
 const fingerPaint = Finger_Paint({
     variable: "--font-finger-paint",
@@ -31,6 +32,7 @@ export default function RootLayout({
             <body
                 className={`${fingerPaint.variable} antialiased min-h-dvh dotted wooden`}
             >
+                <Analytics />
                 <LenisProvider>
                     <StoreProvider>
                         <ThemeProvider>
