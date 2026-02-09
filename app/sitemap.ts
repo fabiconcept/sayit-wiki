@@ -10,12 +10,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
       changeFrequency: 'always',
       priority: 1,
-    },
-    {
-      url: `${baseUrl}/admin`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.3,
-    },
+    }
   ];
 }
