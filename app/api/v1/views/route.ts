@@ -14,6 +14,8 @@ export async function POST(request: NextRequest) {
         const userIdResult = validateAndExtractUserId(request);
         const userId = userIdResult.userId;
 
+        console.log({ userId });
+
         if (!userId) {
             return NextResponse.json(
                 {
@@ -99,9 +101,9 @@ export async function POST(request: NextRequest) {
                     viewsCount: note?.viewsCount || 1,
                 },
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Duplicate view - user already viewed this note
-            if (error.code === 11000) {
+            if ((error as { code: number }).code === 11000) {
                 const note = await Note.findById(noteId);
                 return NextResponse.json({
                     success: true,
