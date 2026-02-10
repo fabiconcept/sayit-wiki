@@ -11,15 +11,11 @@ const ViewSchema = new Schema<IView>(
         userId: {
             type: String,
             required: true,
-            unique: true,
-            index: true,
         },
         noteId: {
             type: Schema.Types.ObjectId,
             ref: 'Note',
             required: true,
-            unique: true,
-            index: true,
         },
     },
     {
@@ -27,7 +23,7 @@ const ViewSchema = new Schema<IView>(
     }
 );
 
-// Compound unique index to prevent duplicate views
+// Compound unique index to prevent duplicate views (userId + noteId combination must be unique)
 ViewSchema.index({ userId: 1, noteId: 1 }, { unique: true });
 
 const View: Model<IView> = mongoose.models.View || mongoose.model<IView>('View', ViewSchema);
