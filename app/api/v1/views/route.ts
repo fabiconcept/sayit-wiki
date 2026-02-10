@@ -14,7 +14,14 @@ export async function POST(request: NextRequest) {
         const userIdResult = validateAndExtractUserId(request);
         const userId = userIdResult.userId;
 
-        console.log({ userId });
+        console.log('[DEBUG] Extracted userId from request:', { 
+            userId, 
+            userIdResult,
+            headers: {
+                authorization: request.headers.get('authorization') ? 'present' : 'missing',
+                'x-user-id': request.headers.get('x-user-id')
+            }
+        });
 
         if (!userId) {
             return NextResponse.json(
@@ -44,7 +51,10 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { noteId } = body;
 
+        console.log('[DEBUG] Request body:', { noteId, userId });
+
         if (!noteId) {
+            console.log('[DEBUG] Missing noteId - returning 400');
             return NextResponse.json(
                 {
                     success: false,
@@ -59,6 +69,7 @@ export async function POST(request: NextRequest) {
 
         // Validate noteId is a valid MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(noteId)) {
+            console.log('[DEBUG] Invalid noteId format:', noteId);
             return NextResponse.json(
                 {
                     success: false,
@@ -74,7 +85,15 @@ export async function POST(request: NextRequest) {
         // Check if view already exists (use unique index to prevent duplicates)
         try {
             const view = await View.findOne({ userId, noteId });
+            console.log('[DEBUG] Checking for existing view:', { userId, noteId, found: !!view });
+            
             if (view) {
+                console.log('[DEBUG] View already exists - returning alreadyViewed:', { 
+                    viewId: view._id, 
+                    userId, 
+                    noteId,
+                    createdAt: view.createdAt 
+                });
                 return NextResponse.json({
                     success: true,
                     data: {
@@ -83,6 +102,7 @@ export async function POST(request: NextRequest) {
                 });
             }
 
+            console.log('[DEBUG] Creating new view:', { userId, noteId });
             await View.create({
                 userId,
                 noteId,
@@ -95,6 +115,12 @@ export async function POST(request: NextRequest) {
                 { new: true }
             );
 
+            console.log('[DEBUG] View created successfully - new viewsCount:', { 
+                noteId, 
+                viewsCount: note?.viewsCount,
+                userId 
+            });
+
             return NextResponse.json({
                 success: true,
                 data: {
@@ -104,6 +130,11 @@ export async function POST(request: NextRequest) {
         } catch (error: unknown) {
             // Duplicate view - user already viewed this note
             if ((error as { code: number }).code === 11000) {
+                console.log('[DEBUG] Duplicate key error (11000) - view already exists:', { 
+                    userId, 
+                    noteId,
+                    error: (error as Error).message 
+                });
                 const note = await Note.findById(noteId);
                 return NextResponse.json({
                     success: true,
@@ -113,10 +144,15 @@ export async function POST(request: NextRequest) {
                     },
                 });
             }
+            console.log('[DEBUG] Unexpected error in view creation:', error);
             throw error;
         }
     } catch (error) {
-        console.error('Error tracking view:', error);
+        console.error('[DEBUG] Error tracking view:', {
+            error,
+            message: (error as Error).message,
+            stack: (error as Error).stack
+        });
         return NextResponse.json(
             {
                 success: false,
