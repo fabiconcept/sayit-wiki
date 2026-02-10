@@ -76,7 +76,7 @@ const ScrewX2 = ({ className, init = 0, noteStyle }: { className?: string, init?
                 <TooltipTrigger asChild>
                     <div className={cn(
                         "group-hover:opacity-100 opacity-0 absolute left-1.5 z-20",
-                        noteStyle === NoteStyle.CURVED_TOP ? init === 0 ? "opacity-100" : "opacity-0" : init === 1 ? "opacity-100" : "opacity-0",
+                        noteStyle === NoteStyle.CURVED_TOP ? init === 1 ? "opacity-100" : "opacity-0" : init === 0 ? "opacity-100" : "opacity-0",
                         noteStyle === NoteStyle.CURVED_TOP ? "bottom-2" : "top-2",
                         (noteStyle === NoteStyle.FOLDED_CORNER_TL || noteStyle === NoteStyle.TORN_TOP || noteStyle === NoteStyle.TORN_LEFT) ? "opacity-100" : ""
                     )}>

@@ -179,7 +179,7 @@ export default function NotesGrid() {
             {isLoading && hasMore && (
                 <div className="text-center py-12">
                     <Loader>
-                        <h4 className="md:text-base sm:text-sm text-xs text-black font-bold animate-bounce">
+                        <h4 className="md:text-base sm:text-sm text-xs text-white/80 font-bold animate-bounce">
                             Digging through the wall...
                         </h4>
                     </Loader>
