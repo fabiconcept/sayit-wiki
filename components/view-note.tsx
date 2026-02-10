@@ -164,10 +164,22 @@ export default function ViewNoteModal() {
         if (noteId && isViewingNote && !viewTracked && cachedNote) {
             trackView(noteId)
                 .unwrap()
-                .then(() => {
-                    // Update local note state
-                    dispatch(incrementViews(noteId));
-                    setCachedNote(prev => prev ? { ...prev, viewsCount: prev.viewsCount + 1 } : prev);
+                .then((response) => {
+                    // Only update Redux store if it's a new view
+                    if (!response.alreadyViewed) {
+                        dispatch(incrementViews(noteId));
+                    }
+                    
+                    // Always update cached note with actual view count from API
+                    if (response.viewsCount !== undefined) {
+                        const newViewsCount = response.viewsCount;
+                        setCachedNote(prev => prev ? { 
+                            ...prev, 
+                            viewsCount: newViewsCount,
+                            isViewed: true 
+                        } : prev);
+                    }
+                    
                     setViewTracked(true);
                 })
                 .catch((error) => {

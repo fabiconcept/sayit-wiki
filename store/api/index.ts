@@ -107,13 +107,13 @@ export const api = createApi({
             ],
         }),
         
-        trackView: builder.mutation<{ viewsCount: number }, string>({
+        trackView: builder.mutation<{ viewsCount?: number; alreadyViewed?: boolean }, string>({
             query: (noteId) => ({
                 url: '/views',
                 method: 'POST',
                 body: { noteId },
             }),
-            transformResponse: (response: { success: boolean; data: { viewsCount: number } }) => response.data,
+            transformResponse: (response: { success: boolean; data: { viewsCount?: number; alreadyViewed?: boolean } }) => response.data,
         }),
         
         reportContent: builder.mutation<{ reportId: string }, { targetId: string; targetType: 'note' | 'comment'; reason?: string }>({
