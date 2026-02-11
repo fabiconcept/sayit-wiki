@@ -4,7 +4,7 @@ import Report from '@/lib/db/models/Report';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { reportId: string } }
+    { params }: { params: Promise<{ reportId: string }> }
 ) {
     try {
         // Only allow in development mode
@@ -23,7 +23,7 @@ export async function POST(
 
         await connectDB();
 
-        const { reportId } = params;
+        const { reportId } = await params;
 
         // Update report status back to pending
         const report = await Report.findByIdAndUpdate(
