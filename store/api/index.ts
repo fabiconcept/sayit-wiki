@@ -163,6 +163,14 @@ export const api = createApi({
             }),
             invalidatesTags: ['Reports'],
         }),
+        
+        reinstateReport: builder.mutation<{ success: boolean }, string>({
+            query: (reportId) => ({
+                url: `/admin/reports/${reportId}/reinstate`,
+                method: 'POST',
+            }),
+            invalidatesTags: ['Reports'],
+        }),
     }),
 });
 
@@ -179,4 +187,5 @@ export const {
     useGetReportsQuery,
     useIgnoreReportMutation,
     useTakedownReportMutation,
+    useReinstateReportMutation,
 } = api;
