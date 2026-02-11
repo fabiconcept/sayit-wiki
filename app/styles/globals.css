@@ -180,6 +180,71 @@ body {
   background-position: -6rem 0;
 }
 
+/* Mobile optimizations - use CSS patterns instead of images */
+@media (max-width: 768px) {
+  .wooden {
+    background-color: #BA8C63;
+    background-image: 
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        #BA8C63,
+        #BA8C63 10px,
+        #B8895F 10px,
+        #B8895F 20px,
+        #BA8D64 20px,
+        #BA8D64 30px,
+        #B6875E 30px,
+        #B6875E 40px
+      ),
+      linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.02) 0%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+    background-size: 100% 100%, 100% 100%, 100% 100%;
+    background-attachment: scroll;
+    will-change: auto;
+  }
+
+  .wooden-heavy {
+    background-color: #8B6F47;
+    background-image: 
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.05) 2px,
+        rgba(0, 0, 0, 0.05) 4px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        #8B6F47,
+        #8B6F47 10px,
+        #896D45 10px,
+        #896D45 20px,
+        #8D7149 20px,
+        #8D7149 30px,
+        #876B43 30px,
+        #876B43 40px
+      ),
+      linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.05) 0%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.03) 100%
+      );
+    background-size: 100% 100%, 100% 100%, 100% 100%;
+  }
+}
+
 .loader {
   position: relative;
   width: 108px;
