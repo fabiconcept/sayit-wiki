@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useCallback } from "react";
+import { useMemo, useRef, useState, useCallback, Suspense } from "react";
 import { cn, updateSearchParam, removeSearchParam } from "@/lib/utils";
 import NoteCard from "@/components/ui/NoteCard";
 import { toast } from "@/components/ui/toast";
@@ -119,7 +119,7 @@ const ReportCard = (props: any) => {
     );
 };
 
-export default function AdminPage() {
+function AdminPageContent() {
     const searchParams = useSearchParams();
     const filter = (searchParams.get('tab') || 'pending') as 'all' | 'pending' | 'resolved';
     const containerRef = useRef<HTMLDivElement>(null);
@@ -227,10 +227,6 @@ export default function AdminPage() {
             onReinstate: () => handleReinstate(report.id),
         }));
     }, [reports, processingId, handleIgnore, handleTakedown, handleReinstate]);
-
-    if (process.env.NODE_ENV !== 'development') {
-        return null;
-    }
 
     // Loading State
     if (isLoading) {
@@ -460,5 +456,28 @@ export default function AdminPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Suspense wrapper component
+export default function AdminPage() {
+    if (process.env.NODE_ENV !== 'development') {
+        return null;
+    }
+
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen w-full flex items-center justify-center">
+                    <Loader>
+                        <h4 className="md:text-base sm:text-sm text-xs text-white/80 font-bold animate-bounce">
+                            Loading reports...
+                        </h4>
+                    </Loader>
+                </div>
+            }
+        >
+            <AdminPageContent />
+        </Suspense>
     );
 }

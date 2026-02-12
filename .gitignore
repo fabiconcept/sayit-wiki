@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 FEATURES.md
 *.md
+
+# hidden pages
+*agg-prox
