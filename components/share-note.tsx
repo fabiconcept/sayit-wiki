@@ -70,8 +70,8 @@ export default function ShareNoteModal() {
         if (noteForExportRef.current) {
             try {
                 const dataUrl = await toPng(noteForExportRef.current, {
-                    canvasHeight: noteForExportRef.current.scrollHeight + (isMobile ? 600 : 1000),
-                    canvasWidth: noteForExportRef.current.scrollWidth + (isMobile ? 1400 : 1900),
+                    canvasHeight: noteForExportRef.current.scrollHeight * (isMobile ? 3 : 5),
+                    canvasWidth: noteForExportRef.current.scrollWidth * (isMobile ? 3 : 5),
                     cacheBust: true,
                 });
                 const link = document.createElement('a')
